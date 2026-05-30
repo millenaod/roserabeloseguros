@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { buscarClientes, criarCliente } from '@/services/clientes'
 import { listarSeguradoras } from '@/services/seguradoras'
 import { inserirParcela } from '@/services/parcelas'
@@ -19,14 +20,15 @@ export function useNovaParcela() {
   const [form, setForm] = useState(camposVazios)
   const [erros, setErros] = useState({})
   const [salvando, setSalvando] = useState(false)
-  const [seguradoras, setSeguradoras] = useState([])
   const [resultadosCliente, setResultadosCliente] = useState([])
   const [buscandoCliente, setBuscandoCliente] = useState(false)
   const [modoNovoCliente, setModoNovoCliente] = useState(false)
 
-  useEffect(() => {
-    listarSeguradoras().then(({ data }) => setSeguradoras(data ?? []))
-  }, [])
+  const { data: seguradoras = [] } = useQuery({
+    queryKey: ['seguradoras'],
+    queryFn: () => listarSeguradoras().then(r => r.data ?? []),
+    staleTime: 1000 * 60 * 10,
+  })
 
   const buscarClienteDebounced = useCallback(async (query) => {
     if (query.length < 2) { setResultadosCliente([]); return }
@@ -63,7 +65,7 @@ export function useNovaParcela() {
     if (modoNovoCliente) {
       const { data, error } = await criarCliente({
         nome: form.novoClienteNome.trim(),
-        whatsapp: form.novoClienteWhatsapp.trim() || null,
+        telefone: form.novoClienteWhatsapp.trim() || null,
       })
       if (error) { setSalvando(false); return { sucesso: false, erro: error } }
       cliente_id = data.id
@@ -76,7 +78,6 @@ export function useNovaParcela() {
       numero_parcela: Number(form.numero_parcela),
       valor: Number(form.valor),
       data_vencimento: form.data_vencimento,
-      observacao: form.observacao.trim() || null,
     })
 
     setSalvando(false)
