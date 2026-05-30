@@ -10,45 +10,40 @@ export function useAuth() {
   useEffect(() => {
     let ativo = true
 
-    // Timeout de segurança — se Supabase não responder em 5s, libera o carregando
-    const timeout = setTimeout(() => {
-      if (ativo) { setUsuario(null); setCarregando(false) }
-    }, 5000)
-
     supabase.auth.getSession()
       .then(async ({ data: { session } }) => {
         if (!ativo) return
-        clearTimeout(timeout)
+
         if (session?.user) {
           setUsuario(session.user)
+          setCarregando(false) // libera a tela imediatamente
           const { data } = await buscarPerfil(session.user.id)
           if (ativo) setPerfil(data)
         } else {
           setUsuario(null)
+          setCarregando(false)
         }
-        setCarregando(false)
       })
       .catch(() => {
         if (ativo) { setUsuario(null); setCarregando(false) }
-        clearTimeout(timeout)
       })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!ativo) return
       if (session?.user) {
         setUsuario(session.user)
+        setCarregando(false)
         const { data } = await buscarPerfil(session.user.id)
         if (ativo) setPerfil(data)
       } else {
         setUsuario(null)
         setPerfil(null)
+        setCarregando(false)
       }
-      setCarregando(false)
     })
 
     return () => {
       ativo = false
-      clearTimeout(timeout)
       subscription.unsubscribe()
     }
   }, [])
