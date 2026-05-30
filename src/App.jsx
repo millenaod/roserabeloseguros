@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/AppLayout'
+import RotaProtegida from '@/components/RotaProtegida'
 import Dashboard from '@/pages/Dashboard'
 import NovaParcela from '@/pages/NovaParcela'
 import DetalheParcela from '@/pages/DetalheParcela'
@@ -15,14 +16,20 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/nova-parcela" element={<NovaParcela />} />
-          <Route path="/parcelas/:id" element={<DetalheParcela />} />
-          <Route path="/dashboard-rose" element={<DashboardRose />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/aprovacoes" element={<Aprovacoes />} />
-          <Route path="/carteira" element={<CarteiraVendedor />} />
+        <Route element={<RotaProtegida />}>
+          <Route element={<AppLayout />}>
+            <Route path="/"                element={<Dashboard />} />
+            <Route path="/nova-parcela"    element={<NovaParcela />} />
+            <Route path="/parcelas/:id"    element={<DetalheParcela />} />
+            <Route path="/carteira"        element={<CarteiraVendedor />} />
+
+            {/* Só Rose */}
+            <Route element={<RotaProtegida perfisPermitidos={['rose']} />}>
+              <Route path="/dashboard-rose" element={<DashboardRose />} />
+              <Route path="/relatorios"     element={<Relatorios />} />
+              <Route path="/aprovacoes"     element={<Aprovacoes />} />
+            </Route>
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
