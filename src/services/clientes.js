@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 export async function buscarClientes(query) {
   const { data, error } = await supabase
     .from('clientes')
-    .select('id, nome, whatsapp')
+    .select('id, nome, telefone')
     .ilike('nome', `%${query}%`)
     .limit(10)
 
@@ -15,7 +15,7 @@ export async function criarCliente(dados) {
   const { data, error } = await supabase
     .from('clientes')
     .insert(dados)
-    .select('id, nome, whatsapp')
+    .select('id, nome, telefone')
     .single()
 
   if (error) console.error('criarCliente:', error)

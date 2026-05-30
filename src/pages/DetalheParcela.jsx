@@ -96,9 +96,9 @@ export default function DetalheParcela() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="font-display font-semibold text-xl text-[var(--text-primary)]">{parcela.nome_cliente}</h1>
+          <h1 className="font-display font-semibold text-xl text-[var(--text-primary)]">{parcela.cliente_nome}</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-sm text-[var(--text-secondary)]">{parcela.seguradora}</span>
+            <span className="text-sm text-[var(--text-secondary)]">{parcela.seguradora_nome}</span>
             <StatusBadge status={parcela.status} />
           </div>
         </div>
@@ -114,8 +114,8 @@ export default function DetalheParcela() {
             <CardContent className="p-5">
               <h2 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Dados da parcela</h2>
               <Separator className="mb-3" />
-              <InfoLinha label="Apólice" valor={parcela.numero_apolice} />
-              <InfoLinha label="Parcela" valor={parcela.numero ? `Nº ${parcela.numero}` : null} />
+              <InfoLinha label="Apólice" valor={parcela.numero_parcela_apolice} />
+              <InfoLinha label="Parcela" valor={parcela.numero_parcela ? `Nº ${parcela.numero_parcela}` : null} />
               <InfoLinha label="Valor" valor={formatarMoeda(parcela.valor)} />
               <InfoLinha label="Vencimento" valor={formatarData(parcela.data_vencimento)} />
               <InfoLinha label="Dias em atraso" valor={parcela.dias_atraso != null ? `${parcela.dias_atraso} dias` : null} />

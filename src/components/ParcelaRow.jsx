@@ -7,11 +7,11 @@ import { CheckCircle, CalendarClock, ArrowUpCircle } from 'lucide-react'
 
 export default function ParcelaRow({ parcela, onPagar, onRemarcar, onEscalar, onClick }) {
   const {
-    nome_cliente,
-    seguradora,
+    cliente_nome,
+    seguradora_nome,
     valor,
     data_vencimento,
-    tentativas,
+    total_contatos,
     status,
   } = parcela
 
@@ -19,10 +19,10 @@ export default function ParcelaRow({ parcela, onPagar, onRemarcar, onEscalar, on
     <TooltipProvider delayDuration={300}>
       <TableRow className="hover:bg-[var(--surface-raised)] transition-colors cursor-pointer" onClick={onClick}>
         <TableCell className="font-medium text-[var(--text-primary)]">
-          {nome_cliente}
+          {cliente_nome}
         </TableCell>
         <TableCell className="text-[var(--text-secondary)]">
-          {seguradora}
+          {seguradora_nome}
         </TableCell>
         <TableCell className="text-[var(--text-primary)] font-medium">
           {formatarMoeda(valor)}
@@ -31,7 +31,7 @@ export default function ParcelaRow({ parcela, onPagar, onRemarcar, onEscalar, on
           {formatarData(data_vencimento)}
         </TableCell>
         <TableCell className="text-[var(--text-secondary)] text-center">
-          {tentativas ?? 0}
+          {total_contatos ?? 0}
         </TableCell>
         <TableCell>
           <StatusBadge status={status} />

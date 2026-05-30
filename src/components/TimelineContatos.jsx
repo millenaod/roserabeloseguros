@@ -52,26 +52,22 @@ export default function TimelineContatos({ contatos = [] }) {
             {/* Conteúdo */}
             <div className={cn('pb-5 flex-1', isUltimo && 'pb-0')}>
               <p className="text-sm font-medium text-[var(--text-primary)] leading-snug">
-                {contato.descricao}
+                {contato.mensagem_enviada || contato.tipo}
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                {formatarData(contato.data_contato)}
-                {contato.hora && <> às {contato.hora}</>}
+                {formatarData(contato.enviado_em)}
+                {contato.enviado_em && <> às {formatarHora(contato.enviado_em)}</>}
               </p>
-              {(contato.hora_entrega || contato.hora_leitura) && (
+              {contato.respondido && (
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  {contato.hora_entrega && <>Entregue às {contato.hora_entrega}</>}
-                  {contato.hora_entrega && contato.hora_leitura && ' · '}
-                  {contato.hora_leitura
-                    ? <>Lida às {contato.hora_leitura}</>
-                    : contato.hora_entrega
-                      ? '· Sem leitura'
-                      : null}
+                  {contato.respondido_em
+                    ? <>Respondido às {formatarHora(contato.respondido_em)}</>
+                    : 'Respondido'}
                 </p>
               )}
-              {contato.observacao && (
+              {contato.gtchat_observacao && (
                 <p className="text-xs text-[var(--text-secondary)] mt-1 italic">
-                  {contato.observacao}
+                  {contato.gtchat_observacao}
                 </p>
               )}
             </div>

@@ -48,9 +48,10 @@ export function useDetalheParcela(id) {
   async function enviarMensagem(texto) {
     const { error } = await supabase.from('contatos').insert({
       parcela_id: id,
-      tipo: 'mensagem',
-      descricao: texto,
-      data_contato: new Date().toISOString(),
+      tipo: 'manual',
+      canal: 'manual',
+      mensagem_enviada: texto,
+      enviado_em: new Date().toISOString(),
     })
     if (!error) queryClient.invalidateQueries({ queryKey: ['contatos', id] })
     return { error }

@@ -4,7 +4,7 @@ import StatusBadge from '@/components/StatusBadge'
 import { formatarMoeda, formatarDataCurta } from '@/utils/format'
 
 export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar }) {
-  const { nome_cliente, seguradora, numero_apolice, valor, data_vencimento, status } = parcela
+  const { cliente_nome, seguradora_nome, numero_apolice, valor, data_vencimento, status } = parcela
 
   return (
     <Card className="bg-[var(--surface)] border-[var(--border)]">
@@ -13,14 +13,14 @@ export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar })
         {/* Linha 1: nome + badge */}
         <div className="flex items-start justify-between gap-2">
           <span className="font-semibold text-sm text-[var(--text-primary)] leading-snug">
-            {nome_cliente}
+            {cliente_nome}
           </span>
           <StatusBadge status={status} />
         </div>
 
         {/* Linha 2: seguradora + apólice */}
         <span className="text-xs text-[var(--text-secondary)]">
-          {seguradora}
+          {seguradora_nome}
           {numero_apolice && <> · Apólice {numero_apolice}</>}
         </span>
 

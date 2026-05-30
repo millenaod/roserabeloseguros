@@ -17,11 +17,11 @@ export function useCarteiraVendedor() {
   // Agrupa por cliente
   const clientes = Object.values(
     parcelas.reduce((acc, p) => {
-      const id = p.cliente_id ?? p.nome_cliente
+      const id = p.cliente_id ?? p.cliente_nome
       if (!acc[id]) {
         acc[id] = {
           cliente_id: p.cliente_id,
-          nome: p.nome_cliente ?? '—',
+          nome: p.cliente_nome ?? '—',
           whatsapp: p.whatsapp,
           valorAberto: 0,
           diasAtrasoMax: 0,
@@ -51,7 +51,7 @@ export function useCarteiraVendedor() {
     setSalvandoObs(true)
     const { error } = await supabase
       .from('clientes')
-      .update({ observacao: texto })
+      .update({ observacoes: texto })
       .eq('id', cliente_id)
     setSalvandoObs(false)
     if (!error) queryClient.invalidateQueries({ queryKey: ['carteira-vendedor'] })

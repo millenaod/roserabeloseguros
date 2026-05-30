@@ -104,7 +104,7 @@ export default function DashboardRose() {
               </div>
               <div className="flex flex-col gap-2">
                 {escaladas.slice(0, 5).map(p => (
-                  <button key={p.id} onClick={() => navigate(`/parcelas/${p.id}`)}
+                  <button key={p.id} onClick={() => navigate(`/parcelas/${p.parcela_id}`)}
                     className="flex items-center justify-between text-sm py-2 px-3 rounded-md hover:bg-[var(--surface-raised)] transition-colors text-left w-full">
                     <span className="font-medium text-[var(--text-primary)]">{p.nome_cliente}</span>
                     <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export default function DashboardRose() {
               </TableHeader>
               <TableBody>
                 {parcelas.map(p => (
-                  <ParcelaRow key={p.id} parcela={p} onClick={() => navigate(`/parcelas/${p.id}`)} />
+                  <ParcelaRow key={p.id} parcela={p} onClick={() => navigate(`/parcelas/${p.parcela_id}`)} />
                 ))}
               </TableBody>
             </Table>
