@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
 export async function buscarParcelas(filtros = {}) {
-  let query = supabase.from('v_parcelas_acao').select('*')
+  let query = supabase.from('v_parcelas_ui').select('*')
 
   if (filtros.seguradora_id)  query = query.eq('seguradora_id', filtros.seguradora_id)
   if (filtros.status)         query = query.eq('status', filtros.status)
@@ -16,7 +16,7 @@ export async function buscarParcelas(filtros = {}) {
 
 export async function buscarParcelaPorId(id) {
   const { data, error } = await supabase
-    .from('v_parcelas_acao')
+    .from('v_parcelas_ui')
     .select('*')
     .eq('parcela_id', id)
     .single()

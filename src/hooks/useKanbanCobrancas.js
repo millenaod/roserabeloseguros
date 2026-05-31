@@ -8,7 +8,7 @@ async function fetchColunas() {
 }
 
 async function fetchParcelas() {
-  const { data } = await supabase.from('v_parcelas_acao').select('*').order('dias_atraso', { ascending: false })
+  const { data } = await supabase.from('v_parcelas_ui').select('*').order('dias_atraso', { ascending: false })
   return data ?? []
 }
 

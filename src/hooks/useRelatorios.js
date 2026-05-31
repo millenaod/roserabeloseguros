@@ -12,7 +12,7 @@ export function useRelatorios() {
     queryKey: ['relatorio', aplicados],
     queryFn: async () => {
       if (!aplicados) return []
-      let q = supabase.from('v_parcelas_acao').select('*')
+      let q = supabase.from('v_parcelas_ui').select('*')
       if (aplicados.data_inicio)    q = q.gte('data_vencimento', aplicados.data_inicio)
       if (aplicados.data_fim)       q = q.lte('data_vencimento', aplicados.data_fim)
       if (aplicados.seguradora_id)  q = q.eq('seguradora_id', aplicados.seguradora_id)
