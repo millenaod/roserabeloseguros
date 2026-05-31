@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { buscarClientes, criarCliente } from '@/services/clientes'
 import { listarSeguradoras } from '@/services/seguradoras'
-import { inserirParcela } from '@/services/parcelas'
+import { salvarParcelaComCliente } from '@/services/parcelas'
 
 const camposVazios = {
   cliente: null,
@@ -71,7 +71,7 @@ export function useNovaParcela() {
       cliente_id = data.id
     }
 
-    const { error } = await inserirParcela({
+    const { error } = await salvarParcelaComCliente({
       cliente_id,
       seguradora_id: form.seguradora_id,
       numero_apolice: form.numero_apolice.trim(),

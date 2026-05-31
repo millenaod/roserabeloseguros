@@ -5,7 +5,7 @@ import RotaProtegida from '@/components/RotaProtegida'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const Login            = lazy(() => import('@/pages/Login'))
-const Dashboard        = lazy(() => import('@/pages/KanbanCobrancas'))
+const Dashboard        = lazy(() => import('@/pages/Parcelas'))
 const NovaParcela      = lazy(() => import('@/pages/NovaParcela'))
 const DetalheParcela   = lazy(() => import('@/pages/DetalheParcela'))
 const DashboardRose    = lazy(() => import('@/pages/DashboardRose'))

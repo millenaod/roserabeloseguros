@@ -2,9 +2,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import StatusBadge from '@/components/StatusBadge'
 import { formatarMoeda, formatarDataCurta } from '@/utils/format'
+import { Eye } from 'lucide-react'
 
-export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar }) {
-  const { cliente_nome, seguradora_nome, numero_apolice, valor, data_vencimento, status } = parcela
+export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar, onVerDetalhe }) {
+  const { cliente_nome, seguradora_nome, numero_apolice, valor, data_vencimento, status, dias_atraso } = parcela
 
   return (
     <Card className="bg-[var(--surface)] border-[var(--border)]">
@@ -24,26 +25,40 @@ export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar })
           {numero_apolice && <> · Apólice {numero_apolice}</>}
         </span>
 
-        {/* Linha 3: valor + vencimento */}
+        {/* Linha 3: valor + vencimento + atraso */}
         <div className="flex items-center justify-between">
           <span className="font-semibold text-sm text-[var(--text-primary)]">
             {formatarMoeda(valor)}
           </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            Venc. {formatarDataCurta(data_vencimento)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[var(--text-secondary)]">
+              Venc. {formatarDataCurta(data_vencimento)}
+            </span>
+            {dias_atraso > 0 && (
+              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                dias_atraso <= 15 ? 'text-yellow-700 bg-yellow-50' :
+                dias_atraso <= 30 ? 'text-orange-700 bg-orange-50' :
+                'text-red-700 bg-red-50'
+              }`}>
+                {dias_atraso}d
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Linha 4: ações */}
-        <div className="flex gap-2 pt-1">
-          <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={onPagar}>
-            Pagar
+        <div className="flex gap-1.5 pt-1 flex-wrap">
+          <Button size="sm" variant="outline" className="flex-1 text-xs min-w-0" onClick={onPagar}>
+            ✓ Pago
           </Button>
-          <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={onRemarcar}>
-            Remarcar
+          <Button size="sm" variant="outline" className="flex-1 text-xs min-w-0" onClick={onRemarcar}>
+            ↷ Remarcar
           </Button>
-          <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={onEscalar}>
-            Escalar
+          <Button size="sm" variant="outline" className="flex-1 text-xs min-w-0" onClick={onEscalar}>
+            ↑ Escalar
+          </Button>
+          <Button size="sm" variant="outline" className="px-2" onClick={onVerDetalhe}>
+            <Eye className="w-3.5 h-3.5" />
           </Button>
         </div>
 

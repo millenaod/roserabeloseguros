@@ -48,6 +48,7 @@
     /* Status semânticos */
     --status-pending:       #D97706;
     --status-sent:          #2563EB;
+    --status-waiting:       #0D9488;
     --status-paid:          #16A34A;
     --status-error:         #DC2626;
     --status-escalated:     #7C3AED;
@@ -56,6 +57,7 @@
     /* Fundos de status (versão clara para badges) */
     --status-pending-bg:    #FEF3C7;
     --status-sent-bg:       #DBEAFE;
+    --status-waiting-bg:    #CCFBF1;
     --status-paid-bg:       #DCFCE7;
     --status-error-bg:      #FEE2E2;
     --status-escalated-bg:  #EDE9FE;

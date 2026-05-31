@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { buscarParcelas, atualizarStatus } from '@/services/parcelas'
+import { buscarParcelas, atualizarStatus, salvarParcelaComCliente } from '@/services/parcelas'
 import { supabase } from '@/lib/supabase'
 
 export function useParcelas() {
   const queryClient = useQueryClient()
-  const [filtros, setFiltros] = useState({ seguradora_id: '', status: '', vencimento_ate: '' })
+  const [filtros, setFiltros] = useState({ status: '', seguradora_id: '', vencimento_ate: '' })
 
   const { data: parcelas = [], isLoading } = useQuery({
     queryKey: ['parcelas', filtros],
@@ -16,14 +16,11 @@ export function useParcelas() {
   const mesAtual = new Date().toISOString().slice(0, 7)
 
   const kpis = {
-    totalAberto: parcelas
-      .filter(p => p.status !== 'pago')
-      .reduce((acc, p) => acc + (p.valor || 0), 0),
-    enviados: parcelas.filter(p => p.status === 'enviado').length,
-    aguardandoRetorno: parcelas.filter(p => p.status === 'enviado').length,
-    pagosMes: parcelas
-      .filter(p => p.status === 'pago' && p.data_vencimento?.startsWith(mesAtual))
-      .reduce((acc, p) => acc + (p.valor || 0), 0),
+    totalAberto:      parcelas.filter(p => p.status !== 'pago').reduce((acc, p) => acc + (p.valor || 0), 0),
+    enviados:         parcelas.filter(p => p.status === 'enviado').length,
+    aguardandoRetorno:parcelas.filter(p => p.status === 'aguardando_retorno').length,
+    pagosMes:         parcelas.filter(p => p.status === 'pago' && p.data_vencimento?.startsWith(mesAtual))
+                              .reduce((acc, p) => acc + (p.valor || 0), 0),
   }
 
   const { mutateAsync: executarAcao, isPending: executando } = useMutation({
@@ -31,7 +28,12 @@ export function useParcelas() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['parcelas'] }),
   })
 
-  async function remarcarParcela(id, novaData) {
+  const { mutateAsync: salvar, isPending: salvando } = useMutation({
+    mutationFn: (dados) => salvarParcelaComCliente(dados),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['parcelas'] }),
+  })
+
+  async function remarcar(id, novaData) {
     const { error } = await supabase
       .from('parcelas')
       .update({ data_vencimento: novaData, status: 'remarcado' })
@@ -45,14 +47,14 @@ export function useParcelas() {
   }
 
   function limparFiltros() {
-    setFiltros({ seguradora_id: '', status: '', vencimento_ate: '' })
+    setFiltros({ status: '', seguradora_id: '', vencimento_ate: '' })
   }
 
   return {
-    parcelas, isLoading, filtros, kpis, executando,
-    aplicarFiltros, limparFiltros,
-    pagar: id => executarAcao({ id, status: 'pago' }),
+    parcelas, isLoading, filtros, kpis, executando, salvando,
+    aplicarFiltros, limparFiltros, salvar,
+    pagar:   id => executarAcao({ id, status: 'pago' }),
     escalar: id => executarAcao({ id, status: 'escalado' }),
-    remarcar: remarcarParcela,
+    remarcar,
   }
 }
