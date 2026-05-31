@@ -18,6 +18,7 @@ import NovaParcelaInline from '@/components/NovaParcelaInline'
 import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import PainelKanban from '@/components/PainelKanban'
 import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban } from 'lucide-react'
 
 const STATUS_OPCOES = [
@@ -41,7 +42,7 @@ export default function Parcelas() {
   const [remarcarId, setRemarcarId]       = useState(null)
   const [novaData, setNovaData]           = useState('')
 
-  const { parcelas, isLoading, filtros, executando, salvando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar } = useParcelas()
+  const { parcelas, isLoading, filtros, executando, salvando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
 
   async function handleSalvar(dados) {
@@ -206,9 +207,9 @@ export default function Parcelas() {
             </div>
           )
         ) : (
-          <div className="flex items-center justify-center h-48 text-[var(--text-muted)] text-sm">
-            Kanban em breve (P6)
-          </div>
+          isLoading
+            ? <div className="flex gap-4">{[...Array(4)].map((_, i) => <div key={i} className="w-60 shrink-0"><Skeleton className="h-6 w-32 mb-2" /><Skeleton className="h-28 w-full" /></div>)}</div>
+            : <PainelKanban parcelas={parcelas} onMoverCard={moverKanban} />
         )}
       </div>
 

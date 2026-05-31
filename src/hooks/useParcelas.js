@@ -53,8 +53,9 @@ export function useParcelas() {
   return {
     parcelas, isLoading, filtros, kpis, executando, salvando,
     aplicarFiltros, limparFiltros, salvar,
-    pagar:   id => executarAcao({ id, status: 'pago' }),
-    escalar: id => executarAcao({ id, status: 'escalado' }),
+    pagar:         id => executarAcao({ id, status: 'pago' }),
+    escalar:       id => executarAcao({ id, status: 'escalado' }),
+    moverKanban:   (id, novoStatus) => executarAcao({ id, status: novoStatus }),
     remarcar,
   }
 }
