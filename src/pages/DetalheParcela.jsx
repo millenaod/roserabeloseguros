@@ -114,12 +114,16 @@ export default function DetalheParcela() {
             <CardContent className="p-5">
               <h2 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Dados da parcela</h2>
               <Separator className="mb-3" />
-              <InfoLinha label="Apólice" valor={parcela.numero_parcela_apolice} />
-              <InfoLinha label="Parcela" valor={parcela.numero_parcela ? `Nº ${parcela.numero_parcela}` : null} />
-              <InfoLinha label="Valor" valor={formatarMoeda(parcela.valor)} />
-              <InfoLinha label="Vencimento" valor={formatarData(parcela.data_vencimento)} />
+              <InfoLinha label="Apólice"        valor={parcela.numero_apolice} />
+              <InfoLinha label="Parcela"        valor={parcela.numero_parcela ? `Nº ${parcela.numero_parcela}` : null} />
+              <InfoLinha label="Tipo de seguro" valor={parcela.tipo_seguro} />
+              <InfoLinha label="Valor"          valor={formatarMoeda(parcela.valor)} />
+              <InfoLinha label="Vencimento"     valor={formatarData(parcela.data_vencimento)} />
               <InfoLinha label="Dias em atraso" valor={parcela.dias_atraso != null ? `${parcela.dias_atraso} dias` : null} />
-              {parcela.observacao && <InfoLinha label="Observação" valor={parcela.observacao} />}
+              <InfoLinha label="Telefone"       valor={parcela.cliente_telefone} />
+              <InfoLinha label="CPF/CNPJ"       valor={parcela.cliente_cpf} />
+              {parcela.eh_primeira_parcela && <InfoLinha label="Observação" valor="Primeira parcela da apólice" />}
+              {parcela.cobertura_em_risco   && <InfoLinha label="⚠️ Cobertura" valor="Em risco (+15 dias de atraso)" />}
             </CardContent>
           </Card>
 
