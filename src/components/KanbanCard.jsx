@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { ShieldAlert, Crown, MessageCircle, Clock } from 'lucide-react'
+import { ShieldAlert, Crown, MessageCircle } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import TimelineContatos from '@/components/TimelineContatos'

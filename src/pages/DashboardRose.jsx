@@ -6,16 +6,14 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import KPICard from '@/components/KPICard'
 import ParcelaRow from '@/components/ParcelaRow'
 import StatusBadge from '@/components/StatusBadge'
-import { formatarMoeda, formatarData } from '@/utils/format'
+import { formatarMoeda } from '@/utils/format'
+import { Toaster } from '@/components/ui/toaster'
 import { AlertTriangle } from 'lucide-react'
 import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 
-function LabelValor({ value }) {
-  return <span className="text-xs fill-[var(--text-muted)]">{formatarMoeda(value)}</span>
-}
 
 export default function DashboardRose() {
   const navigate = useNavigate()
@@ -38,6 +36,7 @@ export default function DashboardRose() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-8">
+      <Toaster />
 
       {/* Cabeçalho */}
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">

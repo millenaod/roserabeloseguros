@@ -42,7 +42,7 @@ export default function Parcelas() {
   const [remarcarId, setRemarcarId]       = useState(null)
   const [novaData, setNovaData]           = useState('')
 
-  const { parcelas, isLoading, filtros, executando, salvando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
+  const { parcelas, isLoading, filtros, executando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
 
   async function handleSalvar(dados) {

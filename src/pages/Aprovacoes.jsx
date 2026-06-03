@@ -64,11 +64,14 @@ export default function Aprovacoes() {
 
   async function confirmar() {
     const fn = dialog.acao === 'aprovar' ? aprovar : bloquear
-    await fn(dialog.id, motivo)
+    const { error } = await fn(dialog.id, motivo)
+    const acaoLabel = dialog.acao === 'aprovar' ? 'Lote aprovado!' : 'Lote bloqueado.'
     setDialog(null)
-    toast({
-      title: dialog.acao === 'aprovar' ? 'Lote aprovado!' : 'Lote bloqueado.',
-    })
+    if (error) {
+      toast({ title: 'Erro ao processar', description: 'Tente novamente.', variant: 'destructive' })
+    } else {
+      toast({ title: acaoLabel })
+    }
   }
 
   return (

@@ -62,7 +62,11 @@ export default function CarteiraVendedor() {
 
   async function handleSalvarObservacao() {
     const { error } = await salvarObservacao(clienteSelecionado.cliente_id, observacao)
-    if (!error) toast({ title: 'Observação salva!' })
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: 'Tente novamente.', variant: 'destructive' })
+    } else {
+      toast({ title: 'Observação salva!' })
+    }
   }
 
   return (

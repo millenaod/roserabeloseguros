@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, PlusCircle, Briefcase, UserCircle, LogOut, ChevronUp } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Briefcase, UserCircle, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'

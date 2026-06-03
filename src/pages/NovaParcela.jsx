@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useNovaParcela } from '@/hooks/useNovaParcela'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
@@ -22,7 +21,6 @@ function CampoErro({ mensagem }) {
 }
 
 export default function NovaParcela() {
-  const navigate = useNavigate()
   const { toast } = useToast()
   const [clienteAberto, setClienteAberto] = useState(false)
   const [queryCliente, setQueryCliente] = useState('')

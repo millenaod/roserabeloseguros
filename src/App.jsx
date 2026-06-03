@@ -5,6 +5,7 @@ import RotaProtegida from '@/components/RotaProtegida'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const Login            = lazy(() => import('@/pages/Login'))
+const RedefinirSenha   = lazy(() => import('@/pages/RedefinirSenha'))
 const Dashboard        = lazy(() => import('@/pages/Parcelas'))
 const NovaParcela      = lazy(() => import('@/pages/NovaParcela'))
 const DetalheParcela   = lazy(() => import('@/pages/DetalheParcela'))
@@ -29,6 +30,7 @@ export default function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
           <Route element={<RotaProtegida />}>
             <Route element={<AppLayout />}>

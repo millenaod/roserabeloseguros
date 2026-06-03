@@ -12,7 +12,6 @@ export function useParcelas() {
     queryFn: () => buscarParcelas(filtros).then(r => r.data ?? []),
   })
 
-  const hoje = new Date().toISOString().slice(0, 10)
   const mesAtual = new Date().toISOString().slice(0, 7)
 
   const kpis = {

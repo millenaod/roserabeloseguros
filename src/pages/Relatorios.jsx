@@ -2,6 +2,7 @@ import { useRelatorios } from '@/hooks/useRelatorios'
 import { useQuery } from '@tanstack/react-query'
 import { listarSeguradoras } from '@/services/seguradoras'
 import { exportarCsv } from '@/utils/exportarCsv'
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,16 +14,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import StatusBadge from '@/components/StatusBadge'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
+import { Toaster } from '@/components/ui/toaster'
 import { Search, Download, BarChart2 } from 'lucide-react'
 
 const STATUS_OPCOES = ['pendente', 'enviado', 'pago', 'erro', 'escalado', 'remarcado']
 
 export default function Relatorios() {
+  const { toast } = useToast()
   const { filtros, parcelas, totais, isLoading, aplicados, atualizar, aplicar, limpar } = useRelatorios()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
 
+  function handleExportar() {
+    exportarCsv(parcelas, 'relatorio-cobranca')
+    toast({ title: `${parcelas.length} registro${parcelas.length !== 1 ? 's' : ''} exportado${parcelas.length !== 1 ? 's' : ''}!` })
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      <Toaster />
 
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
         <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Relatórios</h1>
@@ -104,7 +113,7 @@ export default function Relatorios() {
             {/* Cabeçalho da tabela + exportar */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-[var(--text-secondary)]">{parcelas.length} resultado{parcelas.length !== 1 ? 's' : ''}</p>
-              <Button variant="outline" size="sm" onClick={() => exportarCsv(parcelas, 'relatorio-cobranca')}>
+              <Button variant="outline" size="sm" onClick={handleExportar}>
                 <Download className="w-4 h-4 mr-2" /> Exportar CSV
               </Button>
             </div>

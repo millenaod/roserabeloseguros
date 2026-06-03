@@ -62,6 +62,8 @@ export default function NovaParcelaInline({ seguradoras, onSalvar, onCancelar })
     return `h-8 text-xs ${erros[campo] ? 'border-red-400 focus-visible:ring-red-300' : ''}`
   }
 
+  // Ordem alinhada às colunas da tabela:
+  // Cliente | Seguradora | Valor | Vencimento | Contatos(Apólice) | Status(Nº) | Ações
   return (
     <TableRow className="bg-[var(--brand-light)]" onKeyDown={handleKeyDown}>
       <TableCell className="p-1.5">
@@ -69,7 +71,6 @@ export default function NovaParcelaInline({ seguradoras, onSalvar, onCancelar })
           onChange={e => set('cliente_nome', e.target.value)} className={inputClass('cliente_nome')} />
       </TableCell>
       <TableCell className="p-1.5">
-        <Input placeholder="Seguradora*" className="hidden" />
         <Select value={form.seguradora_id} onValueChange={v => set('seguradora_id', v)}>
           <SelectTrigger className={`h-8 text-xs ${erros.seguradora_id ? 'border-red-400' : ''}`}>
             <SelectValue placeholder="Seguradora*" />
@@ -82,6 +83,14 @@ export default function NovaParcelaInline({ seguradoras, onSalvar, onCancelar })
         </Select>
       </TableCell>
       <TableCell className="p-1.5">
+        <Input type="number" min="0" step="0.01" placeholder="R$*" value={form.valor}
+          onChange={e => set('valor', e.target.value)} className={inputClass('valor')} />
+      </TableCell>
+      <TableCell className="p-1.5">
+        <Input type="date" value={form.data_vencimento}
+          onChange={e => set('data_vencimento', e.target.value)} className={inputClass('data_vencimento')} />
+      </TableCell>
+      <TableCell className="p-1.5">
         <Input placeholder="Apólice*" value={form.numero_apolice}
           onChange={e => set('numero_apolice', e.target.value)} className={inputClass('numero_apolice')} />
       </TableCell>
@@ -90,14 +99,6 @@ export default function NovaParcelaInline({ seguradoras, onSalvar, onCancelar })
           onChange={e => set('numero_parcela', e.target.value)} className={inputClass('numero_parcela')} />
       </TableCell>
       <TableCell className="p-1.5">
-        <Input type="number" min="0" step="0.01" placeholder="R$*" value={form.valor}
-          onChange={e => set('valor', e.target.value)} className={inputClass('valor')} />
-      </TableCell>
-      <TableCell className="p-1.5">
-        <Input type="date" value={form.data_vencimento}
-          onChange={e => set('data_vencimento', e.target.value)} className={inputClass('data_vencimento')} />
-      </TableCell>
-      <TableCell className="p-1.5" colSpan={2}>
         <div className="flex items-center gap-1">
           <Button size="sm" className="h-8 px-2 text-xs gap-1" disabled={salvando}
             style={{ backgroundColor: 'var(--brand)', color: 'white' }} onClick={handleSalvar}>

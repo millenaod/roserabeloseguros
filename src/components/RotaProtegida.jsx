@@ -2,12 +2,6 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Skeleton } from '@/components/ui/skeleton'
 
-const ROTAS_PERMITIDAS = {
-  rose:     ['/', '/nova-parcela', '/parcelas/:id', '/dashboard-rose', '/relatorios', '/aprovacoes', '/carteira'],
-  thaina:   ['/', '/nova-parcela', '/parcelas/:id'],
-  vendedor: ['/carteira'],
-}
-
 export default function RotaProtegida({ perfisPermitidos }) {
   const { usuario, perfil, carregando } = useAuth()
 

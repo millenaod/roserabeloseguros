@@ -6,6 +6,20 @@ export async function login(email, senha) {
   return { data, error }
 }
 
+export async function resetarSenha(email) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/redefinir-senha`,
+  })
+  if (error) console.error('resetarSenha:', error)
+  return { data, error }
+}
+
+export async function atualizarSenha(novaSenha) {
+  const { data, error } = await supabase.auth.updateUser({ password: novaSenha })
+  if (error) console.error('atualizarSenha:', error)
+  return { data, error }
+}
+
 export async function logout() {
   const { error } = await supabase.auth.signOut()
   if (error) console.error('logout:', error)
