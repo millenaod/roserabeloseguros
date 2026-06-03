@@ -57,7 +57,7 @@ export default function NovaParcela() {
       <div className="px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl">
 
         {/* Formulário — 2/3 da tela no desktop */}
-        <div className="lg:col-span-2 flex flex-col gap-5">
+        <div className="lg:col-span-2 flex flex-col gap-5 h-fit bg-[var(--surface)] border border-[var(--border)] rounded-lg p-5 md:p-6">
 
           {/* Cliente */}
           <div className="flex flex-col gap-1.5">

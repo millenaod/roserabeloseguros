@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useCarteiraVendedor } from '@/hooks/useCarteiraVendedor'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
-import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -14,33 +14,6 @@ import TimelineContatos from '@/components/TimelineContatos'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { Briefcase, AlertTriangle } from 'lucide-react'
-
-function ClienteCard({ cliente, onClick }) {
-  const urgente = cliente.diasAtrasoMax > 30
-
-  return (
-    <Card
-      className="border-[var(--border)] cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => onClick(cliente)}
-    >
-      <CardContent className="p-4 flex flex-col gap-2">
-        <div className="flex items-start justify-between gap-2">
-          <p className="font-semibold text-sm text-[var(--text-primary)] leading-snug">{cliente.nome}</p>
-          {urgente && <AlertTriangle className="w-4 h-4 text-[var(--status-error)] shrink-0 mt-0.5" />}
-        </div>
-        <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-          <span>{cliente.parcelas.length} parcela{cliente.parcelas.length !== 1 ? 's' : ''} em aberto</span>
-          <span className={urgente ? 'text-[var(--status-error)] font-medium' : ''}>
-            {cliente.diasAtrasoMax}d de atraso
-          </span>
-        </div>
-        <p className="font-display font-bold text-xl text-[var(--text-primary)]">
-          {formatarMoeda(cliente.valorAberto)}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function CarteiraVendedor() {
   const { toast } = useToast()
@@ -80,10 +53,10 @@ export default function CarteiraVendedor() {
         </p>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="px-4 md:px-6 py-6">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32" />)}
+          <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
+            {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : clientes.length === 0 ? (
           <EmptyState
@@ -92,10 +65,45 @@ export default function CarteiraVendedor() {
             descricao="Sua carteira está em dia."
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {clientes.map(c => (
-              <ClienteCard key={c.cliente_id ?? c.nome} cliente={c} onClick={abrirDetalhe} />
-            ))}
+          <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-[var(--surface-raised)]">
+                  <TableHead>Cliente</TableHead>
+                  <TableHead className="hidden md:table-cell text-center">Parcelas em aberto</TableHead>
+                  <TableHead className="hidden md:table-cell text-center">Maior atraso</TableHead>
+                  <TableHead className="text-right">Valor em aberto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {clientes.map(c => {
+                  const urgente = c.diasAtrasoMax > 30
+                  return (
+                    <TableRow
+                      key={c.cliente_id ?? c.nome}
+                      className="cursor-pointer"
+                      onClick={() => abrirDetalhe(c)}
+                    >
+                      <TableCell className="font-medium text-[var(--text-primary)]">
+                        <div className="flex items-center gap-2">
+                          {urgente && <AlertTriangle className="w-4 h-4 text-[var(--status-error)] shrink-0" />}
+                          {c.nome}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-center text-[var(--text-secondary)]">
+                        {c.parcelas.length}
+                      </TableCell>
+                      <TableCell className={`hidden md:table-cell text-center ${urgente ? 'text-[var(--status-error)] font-medium' : 'text-[var(--text-secondary)]'}`}>
+                        {c.diasAtrasoMax}d
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-[var(--text-primary)]">
+                        {formatarMoeda(c.valorAberto)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

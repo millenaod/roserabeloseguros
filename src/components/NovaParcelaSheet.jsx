@@ -68,7 +68,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
 
   return (
     <Sheet open={aberto} onOpenChange={v => { if (!v) { setForm(vazio); setErros({}); onFechar() } }}>
-      <SheetContent side="bottom" className="rounded-t-xl max-h-[90dvh] overflow-y-auto pb-safe">
+      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-4">
           <SheetTitle className="font-display text-lg">Nova Parcela</SheetTitle>
         </SheetHeader>

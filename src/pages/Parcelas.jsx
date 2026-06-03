@@ -14,7 +14,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import ParcelaRow from '@/components/ParcelaRow'
-import NovaParcelaInline from '@/components/NovaParcelaInline'
 import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -35,7 +34,6 @@ export default function Parcelas() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [visao, setVisao] = useState('tabela')
-  const [adicionandoInline, setAdicionandoInline] = useState(false)
   const [sheetAberto, setSheetAberto] = useState(false)
   const [confirmPagar, setConfirmPagar]   = useState(null)
   const [confirmEscalar, setConfirmEscalar] = useState(null)
@@ -49,7 +47,6 @@ export default function Parcelas() {
     const { error } = await salvar(dados)
     if (!error) {
       toast({ title: 'Parcela cadastrada!' })
-      setAdicionandoInline(false)
       setSheetAberto(false)
     } else {
       toast({ title: 'Erro ao salvar', variant: 'destructive' })
@@ -79,14 +76,14 @@ export default function Parcelas() {
               <LayoutList className="w-3.5 h-3.5" /> Tabela
             </button>
             <button onClick={() => setVisao('kanban')} className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-l border-[var(--border)] ${visao === 'kanban' ? 'bg-[var(--brand)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}>
-              <Kanban className="w-3.5 h-3.5" /> Kanban
+              <Kanban className="w-3.5 h-3.5" /> Por status
             </button>
           </div>
           {/* Nova parcela — desktop abre inline, mobile abre sheet */}
           <Button
             className="hidden md:flex"
             style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-            onClick={() => setAdicionandoInline(true)}
+            onClick={() => setSheetAberto(true)}
           >
             <PlusCircle className="w-4 h-4 mr-2" /> Nova Parcela
           </Button>
@@ -170,14 +167,7 @@ export default function Parcelas() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {adicionandoInline && (
-                    <NovaParcelaInline
-                      seguradoras={seguradoras}
-                      onSalvar={handleSalvar}
-                      onCancelar={() => setAdicionandoInline(false)}
-                    />
-                  )}
-                  {parcelas.length === 0 && !adicionandoInline ? (
+                  {parcelas.length === 0 ? (
                     <TableRow>
                       <td colSpan={7}>
                         <EmptyState
@@ -185,7 +175,7 @@ export default function Parcelas() {
                           titulo="Nenhuma parcela encontrada"
                           descricao="Cadastre a primeira parcela para começar."
                           acaoLabel="+ Nova Parcela"
-                          onAcao={() => setAdicionandoInline(true)}
+                          onAcao={() => setSheetAberto(true)}
                         />
                       </td>
                     </TableRow>
