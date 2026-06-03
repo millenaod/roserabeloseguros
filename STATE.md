@@ -19,11 +19,16 @@ React + Supabase + shadcn/ui + React Query + Vite, deploy na Vercel.
 
 Telas e recursos prontos:
 - **Login** com perfis (`rose` vs vendedor/funcionária) + **reset de senha** (recém-feito)
-- **Parcelas** — lista + Kanban por status
-- **Nova Parcela** e **Detalhe da Parcela**
-- **Dashboard da Rose**, **Relatórios**, **Aprovações**, **Carteira do Vendedor**
+- **Parcelas** — lista (tabela) + visão **"Por status"** (antigo "Kanban"); botão **Nova Parcela**
+  abre um **drawer lateral** (vale desktop e mobile)
+- **Nova Parcela** e **Detalhe da Parcela** — formulário em painel branco (inputs com contraste)
+- **Dashboard da Rose**, **Relatórios**, **Aprovações**, **Carteira do Vendedor** (em **tabela**)
 - View `v_parcelas_ui` no Supabase, índices, code-splitting
 - Suíte de testes Playwright (autenticação, parcelas, mobile) — pronta, **ainda não rodada**
+
+**Padrão de UI:** shadcn/ui sobre Tailwind (NÃO é DaisyUI, apesar de a skill de design dizer).
+Fundo da página = creme `--background` #F7F4EF; superfícies (cards, drawer, painéis) = branco
+`--surface` #FFFFFF. Inputs precisam de uma superfície branca atrás pra terem contraste.
 
 ### 2. Motor de envio (n8n + Evolution + WhatsApp) — **separado / pendente** ⏳
 Vive isolado, lendo o Supabase direto. Descrito no contexto do projeto (skills).
@@ -53,13 +58,25 @@ envio, chamada à Evolution nem trigger pro n8n. A funcionária ainda muda statu
 
 ## O que foi feito nesta sessão (2026-06-03)
 
-Commit **`bf2f529`** no `master` — `chore: limpeza de lint + reset de senha + suíte Playwright`:
+**Commit `bf2f529`** — `chore: limpeza de lint + reset de senha + suíte Playwright`:
 - **Lint zerado**: removidas 17 sobras (imports/variáveis não usados) em 13 arquivos
 - **eslint config**: globals Node nos arquivos de config + regra `react-refresh` desativada
   na pasta `components/ui` (padrão shadcn)
 - **Reset de senha**: serviço (`resetarSenha`/`atualizarSenha`), página `RedefinirSenha` e rota
 - **Testes Playwright** + scripts no `package.json`
-- Build OK ✅ e lint limpo (exit 0) ✅
+
+**Commit `179a0f5`** — `docs: STATE.md`.
+
+**Commit `78a61c6`** — `feat: ajustes de UX nas telas de parcelas, carteira e cadastro`
+(a partir de feedback da Millena):
+- Nova Parcela agora abre em **drawer lateral** (desktop + mobile) — corrige o botão que **não
+  funcionava na visão por status** (antes o form era uma linha dentro da tabela, que sumia no Kanban)
+- **"Kanban" → "Por status"** (linguagem da usuária; ela não reconhecia "Kanban")
+- removido `NovaParcelaInline.jsx` (substituído pelo drawer)
+- formulário da Nova Parcela em **painel branco** (inputs creme sobre página creme não tinham contraste)
+- Carteira do vendedor: cards → **tabela** (responsiva no mobile)
+
+Build OK ✅ e lint limpo (exit 0) ✅ em todos os commits.
 
 ---
 
