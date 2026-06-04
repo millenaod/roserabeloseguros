@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/useAuth'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { to: '/',              icon: LayoutDashboard, label: 'Parcelas' },
@@ -76,6 +77,10 @@ export default function Sidebar() {
             {perfil?.nome ?? '—'}
           </span>
         </div>
+        <ThemeToggle
+          className="flex items-center gap-3 rounded-md px-2 py-2 font-body text-sm font-medium text-neutral-400 hover:bg-brand-primary/10 hover:text-brand-primary transition-colors w-full"
+          labelClassName="hidden lg:block"
+        />
         <button onClick={sair} className="flex items-center gap-3 rounded-md px-2 py-2 font-body text-sm font-medium text-neutral-400 hover:bg-brand-primary/10 hover:text-brand-primary transition-colors w-full">
           <LogOut className="w-5 h-5 shrink-0" />
           <span className="hidden lg:block">Sair</span>

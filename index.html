@@ -5,6 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rose Rabelo Seguros</title>
+    <script>
+      (function () {
+        try {
+          var k = 'rose-theme', s = localStorage.getItem(k);
+          var escuro = s ? s === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+          if (escuro) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://wjbcbiwfmlsfbgbxlief.supabase.co" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

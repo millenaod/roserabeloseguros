@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { to: '/',             icon: LayoutDashboard, label: 'Parcelas' },
@@ -65,6 +66,7 @@ export default function BottomNav() {
           <Separator className="mb-4" />
 
           <div className="flex flex-col gap-1">
+            <ThemeToggle className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors" />
             <button
               onClick={() => { sair(); setPerfilAberto(false) }}
               className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--status-error)] hover:bg-[var(--status-error-bg)] transition-colors"
