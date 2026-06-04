@@ -14,7 +14,7 @@
     --popover:            0 0% 100%;
     --popover-foreground: 20 10% 10%;
 
-    --primary:            8 100% 50%;    /* #FF1A00 — brand-primary */
+    --primary:            6 100% 40%;    /* #CC1500 — brand-primary */
     --primary-foreground: 0 0% 100%;
 
     --secondary:          36 20% 88%;    /* #E8E2D9 — borda suave */
@@ -24,14 +24,14 @@
     --muted-foreground:   20 5% 45%;     /* #78716C */
 
     --accent:             8 100% 97%;    /* #FFEAE6 — brand tint claro */
-    --accent-foreground:  8 100% 50%;    /* #FF1A00 */
+    --accent-foreground:  6 100% 40%;    /* #CC1500 */
 
     --destructive:        0 72% 51%;     /* #DC2626 */
     --destructive-foreground: 0 0% 100%;
 
     --border:             36 20% 88%;    /* #E8E2D9 */
     --input:              36 20% 88%;
-    --ring:               8 100% 50%;     /* #FF1A00 — brand-primary */
+    --ring:               6 100% 40%;     /* #CC1500 — brand-primary */
 
     --radius: 0.5rem;
 
@@ -41,8 +41,8 @@
     --text-primary:   #1C1917;
     --text-secondary: #78716C;
     --text-muted:     #A8A29E;
-    --brand:          #FF1A00;
-    --brand-hover:    #CC1500;
+    --brand:          #CC1500;
+    --brand-hover:    #A11000;
     --brand-light:    #FFEAE6;
 
     /* Status semânticos */
@@ -69,9 +69,9 @@
     --radius-lg: 12px;
 
     /* --- Design System Rose Rabelo (T01) --- */
-    --brand-primary: #FF1A00;
-    --brand-hover:   #CC1500;
-    --brand-tint:    rgba(255, 26, 0, 0.09);
+    --brand-primary: #CC1500;
+    --brand-hover:   #A11000;
+    --brand-tint:    rgba(204, 21, 0, 0.09);
 
     --semantic-success: #1A7A4A;
     --semantic-warning: #D97706;
@@ -86,7 +86,7 @@
     --neutral-100: #F2F2F2;
     --neutral-50:  #FFFFFF;
 
-    --shadow-focus: 0 0 0 3px rgba(255, 26, 0, 0.25);
+    --shadow-focus: 0 0 0 3px rgba(204, 21, 0, 0.25);
 
     --font-display: 'Barlow Condensed', sans-serif;
     --font-body:    'Inter', sans-serif;
@@ -103,7 +103,7 @@
     --popover:            0 0% 10%;
     --popover-foreground: 0 0% 100%;
 
-    --primary:            8 100% 50%;  /* #FF1A00 — brand-primary */
+    --primary:            6 100% 40%;  /* #CC1500 — brand-primary */
     --primary-foreground: 0 0% 100%;
 
     --secondary:          0 0% 17%;    /* #2C2C2C — neutral-700 */
@@ -120,7 +120,7 @@
 
     --border:             0 0% 17%;    /* #2C2C2C — neutral-700 */
     --input:              0 0% 17%;
-    --ring:               8 100% 50%;  /* #FF1A00 */
+    --ring:               6 100% 40%;  /* #CC1500 */
 
     /* Tokens de projeto — tema escuro */
     --surface:        #1A1A1A;
@@ -128,7 +128,7 @@
     --text-primary:   #FFFFFF;
     --text-secondary: #999999;
     --text-muted:     #555555;
-    --brand-tint:     rgba(255, 26, 0, 0.16);
+    --brand-tint:     rgba(204, 21, 0, 0.16);
   }
 }
 

@@ -51,9 +51,9 @@ export default {
 
         /* --- Design System Rose Rabelo --- */
         brand: {
-          primary: '#FF1A00',
-          hover: '#CC1500',
-          tint: 'rgba(255, 26, 0, 0.09)',
+          primary: '#CC1500',
+          hover: '#A11000',
+          tint: 'rgba(204, 21, 0, 0.09)',
         },
         semantic: {
           success: '#1A7A4A',
@@ -79,7 +79,7 @@ export default {
         card: '12px',
       },
       boxShadow: {
-        focus: '0 0 0 3px rgba(255, 26, 0, 0.25)',
+        focus: '0 0 0 3px rgba(204, 21, 0, 0.25)',
       },
       fontFamily: {
         display: ['Barlow Condensed', 'sans-serif'],
