@@ -4,7 +4,7 @@ import BottomNav from '@/components/BottomNav'
 
 export default function AppLayout() {
   return (
-    <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+    <div className="flex h-screen bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto pb-16 md:pb-0">

@@ -18,7 +18,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[var(--border)] flex h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 flex h-16">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -26,8 +26,8 @@ export default function BottomNav() {
             end={to === '/'}
             className={({ isActive }) =>
               cn(
-                'flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors',
-                isActive ? 'text-[var(--brand)]' : 'text-[var(--text-muted)]'
+                'flex-1 flex flex-col items-center justify-center gap-0.5 font-body text-[11px] font-medium transition-colors',
+                isActive ? 'text-brand-primary' : 'text-neutral-400'
               )
             }
           >
@@ -43,7 +43,7 @@ export default function BottomNav() {
         {/* Botão perfil */}
         <button
           onClick={() => setPerfilAberto(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-medium text-[var(--text-muted)]"
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 font-body text-[11px] font-medium text-neutral-400"
         >
           <UserCircle className="w-5 h-5" />
           <span>Perfil</span>
@@ -54,7 +54,7 @@ export default function BottomNav() {
       <Sheet open={perfilAberto} onOpenChange={setPerfilAberto}>
         <SheetContent side="bottom" className="rounded-t-xl pb-8">
           <SheetHeader className="mb-4">
-            <SheetTitle className="font-display text-base">
+            <SheetTitle className="font-display text-xl font-bold">
               {perfil?.nome ?? 'Meu perfil'}
             </SheetTitle>
             <p className="text-sm text-[var(--text-secondary)] -mt-1">

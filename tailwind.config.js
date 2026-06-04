@@ -48,16 +48,43 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+
+        /* --- Design System Rose Rabelo --- */
+        brand: {
+          primary: '#FF1A00',
+          hover: '#CC1500',
+          tint: 'rgba(255, 26, 0, 0.09)',
+        },
+        semantic: {
+          success: '#1A7A4A',
+          warning: '#D97706',
+          danger: '#CC1500',
+        },
+        neutral: {
+          900: '#0D0D0D',
+          800: '#1A1A1A',
+          700: '#2C2C2C',
+          500: '#555555',
+          400: '#999999',
+          200: '#D4D4D4',
+          100: '#F2F2F2',
+          50: '#FFFFFF',
+        },
+        'support-blue': '#1B3A6B',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        card: '12px',
+      },
+      boxShadow: {
+        focus: '0 0 0 3px rgba(255, 26, 0, 0.25)',
       },
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['DM Sans', 'sans-serif'],
-        sans: ['DM Sans', 'sans-serif'],
+        display: ['Barlow Condensed', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {

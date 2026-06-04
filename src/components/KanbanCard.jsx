@@ -48,8 +48,8 @@ export default function KanbanCard({ parcela, onBuscarContatos }) {
         {...listeners}
         {...attributes}
         className={cn(
-          'bg-white rounded-lg border p-3 flex flex-col gap-2 shadow-sm select-none',
-          parcela.cliente_vip ? 'border-l-4 border-l-yellow-400 border-[var(--border)]' : 'border-[var(--border)]',
+          'bg-[var(--surface)] rounded-card border border-[var(--border)] p-3 flex flex-col gap-2 shadow-sm select-none',
+          parcela.cliente_vip && 'border-l-4 border-l-yellow-400',
           parcela.cobertura_em_risco && 'ring-1 ring-red-300'
         )}
       >
@@ -72,7 +72,7 @@ export default function KanbanCard({ parcela, onBuscarContatos }) {
 
         {/* Linha 3: valor + dias */}
         <div className="flex items-center justify-between">
-          <span className="font-bold text-sm text-[var(--text-primary)]">
+          <span className="font-display font-bold text-base tabular-nums text-[var(--text-primary)]">
             {formatarMoeda(parcela.valor)}
           </span>
           <span className={cn('text-xs font-semibold px-1.5 py-0.5 rounded', corDias(parcela.dias_atraso))}>

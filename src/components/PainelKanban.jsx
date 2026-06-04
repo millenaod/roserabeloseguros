@@ -20,7 +20,7 @@ function Coluna({ status, label, cor, parcelas }) {
     <div className="flex flex-col w-60 shrink-0">
       <div className="flex items-center gap-2 mb-2 px-1">
         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cor }} />
-        <h3 className="font-semibold text-sm text-[var(--text-primary)] truncate flex-1">{label}</h3>
+        <h3 className="font-display font-bold text-base text-[var(--text-primary)] truncate flex-1">{label}</h3>
         <span className="text-xs font-semibold text-[var(--text-muted)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-full">
           {parcelas.length}
         </span>

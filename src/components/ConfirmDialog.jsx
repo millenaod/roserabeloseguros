@@ -23,7 +23,7 @@ export default function ConfirmDialog({
     <Dialog open={aberto} onOpenChange={onFechar}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg text-[var(--text-primary)]">
+          <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)]">
             {titulo}
           </DialogTitle>
           {descricao && (
@@ -33,14 +33,13 @@ export default function ConfirmDialog({
           )}
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={onFechar} disabled={carregando}>
+          <Button variant="ghost" onClick={onFechar} disabled={carregando}>
             {labelCancelar}
           </Button>
           <Button
-            variant={variante}
+            variant={variante === 'destructive' ? 'destructive' : 'primary'}
             onClick={onConfirmar}
             disabled={carregando}
-            style={variante === 'default' ? { backgroundColor: 'var(--brand)', color: 'white' } : {}}
           >
             {carregando ? 'Aguarde…' : labelConfirmar}
           </Button>

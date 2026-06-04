@@ -7,8 +7,13 @@ import { Eye } from 'lucide-react'
 export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar, onVerDetalhe }) {
   const { cliente_nome, seguradora_nome, numero_apolice, valor, data_vencimento, status, dias_atraso } = parcela
 
+  const valorColor =
+    status === 'pago'   ? 'text-semantic-success' :
+    dias_atraso > 0     ? 'text-brand-primary' :
+                          'text-[var(--text-primary)]'
+
   return (
-    <Card className="bg-[var(--surface)] border-[var(--border)]">
+    <Card variant={dias_atraso > 30 ? 'urgent' : undefined}>
       <CardContent className="p-4 flex flex-col gap-3">
 
         {/* Linha 1: nome + badge */}
@@ -27,7 +32,7 @@ export default function ParcelaCard({ parcela, onPagar, onRemarcar, onEscalar, o
 
         {/* Linha 3: valor + vencimento + atraso */}
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-sm text-[var(--text-primary)]">
+          <span className={`font-display font-bold text-base tabular-nums ${valorColor}`}>
             {formatarMoeda(valor)}
           </span>
           <div className="flex items-center gap-2">

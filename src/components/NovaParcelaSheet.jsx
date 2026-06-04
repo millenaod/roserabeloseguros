@@ -70,7 +70,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     <Sheet open={aberto} onOpenChange={v => { if (!v) { setForm(vazio); setErros({}); onFechar() } }}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-4">
-          <SheetTitle className="font-display text-lg">Nova Parcela</SheetTitle>
+          <SheetTitle className="font-display text-xl font-bold">Nova Parcela</SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col gap-3">
@@ -125,9 +125,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
         </div>
 
         {/* Botão fixo no rodapé */}
-        <div className="sticky bottom-0 pt-4 pb-2 bg-white mt-4">
-          <Button className="w-full" disabled={salvando}
-            style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+        <div className="sticky bottom-0 pt-4 pb-2 bg-[var(--surface)] mt-4">
+          <Button variant="primary" className="w-full" disabled={salvando}
             onClick={handleSalvar}>
             {salvando ? 'Salvando…' : 'Salvar Parcela'}
           </Button>

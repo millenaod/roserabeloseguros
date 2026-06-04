@@ -8,13 +8,13 @@ export default function EmptyState({ icone: Icone = InboxIcon, titulo, descricao
         <Icone className="w-7 h-7 text-[var(--brand)]" />
       </div>
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold text-[var(--text-primary)]">{titulo}</p>
+        <p className="font-display text-lg font-bold text-[var(--text-primary)]">{titulo}</p>
         {descricao && (
-          <p className="text-sm text-[var(--text-muted)] max-w-xs">{descricao}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs">{descricao}</p>
         )}
       </div>
       {acaoLabel && onAcao && (
-        <Button onClick={onAcao} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+        <Button variant="primary" onClick={onAcao}>
           {acaoLabel}
         </Button>
       )}

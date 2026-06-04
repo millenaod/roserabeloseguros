@@ -13,7 +13,7 @@ export default function StatusBadge({ status }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide whitespace-nowrap"
+      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-body text-[11px] font-medium uppercase tracking-wide whitespace-nowrap"
       style={{ color, backgroundColor: bg }}
     >
       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />

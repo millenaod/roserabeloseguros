@@ -18,7 +18,7 @@ export default function KanbanCardStatus({ parcela }) {
       {...attributes}
       onClick={() => navigate(`/parcelas/${parcela.parcela_id}`)}
       className={cn(
-        'bg-white rounded-md border border-[var(--border)] p-3 flex flex-col gap-1.5',
+        'bg-[var(--surface)] rounded-card border border-[var(--border)] p-3 flex flex-col gap-1.5',
         'shadow-sm select-none cursor-grab active:cursor-grabbing',
         'hover:shadow-md transition-shadow',
         isDragging && 'cursor-grabbing'
@@ -29,7 +29,7 @@ export default function KanbanCardStatus({ parcela }) {
       </p>
       <p className="text-xs text-[var(--text-secondary)]">{parcela.seguradora_nome}</p>
       <div className="flex items-center justify-between pt-0.5">
-        <span className="font-bold text-sm text-[var(--text-primary)]">
+        <span className="font-display font-bold text-base tabular-nums text-[var(--text-primary)]">
           {formatarMoeda(parcela.valor)}
         </span>
         <span className="text-xs text-[var(--text-muted)]">

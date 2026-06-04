@@ -20,7 +20,7 @@ export default function ParcelaRow({ parcela, onPagar, onRemarcar, onEscalar, on
       >
         <TableCell className="font-medium text-[var(--text-primary)]">{cliente_nome}</TableCell>
         <TableCell className="text-[var(--text-secondary)]">{seguradora_nome}</TableCell>
-        <TableCell className="text-[var(--text-primary)] font-medium">{formatarMoeda(valor)}</TableCell>
+        <TableCell money className={status === 'pago' ? 'text-semantic-success' : status === 'erro' ? 'text-brand-primary' : ''}>{formatarMoeda(valor)}</TableCell>
         <TableCell className="text-[var(--text-secondary)]">{formatarData(data_vencimento)}</TableCell>
         <TableCell className="text-[var(--text-secondary)] text-center">{total_contatos ?? 0}</TableCell>
         <TableCell><StatusBadge status={status} /></TableCell>

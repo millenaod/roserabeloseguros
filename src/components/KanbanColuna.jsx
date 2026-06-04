@@ -41,7 +41,7 @@ export default function KanbanColuna({ coluna, parcelas, onRenomear, onDeletar, 
           <h3
             onDoubleClick={() => setEditando(true)}
             title="Duplo clique para renomear"
-            className="font-semibold text-sm text-[var(--text-primary)] truncate cursor-default select-none flex-1"
+            className="font-display font-bold text-base text-[var(--text-primary)] truncate cursor-default select-none flex-1"
           >
             {coluna.nome}
           </h3>

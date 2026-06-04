@@ -3,17 +3,22 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-body text-[11px] font-medium transition-colors focus:outline-none focus-visible:shadow-focus",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        default: "border-transparent bg-brand-primary text-white",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-secondary text-secondary-foreground",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+          "border-transparent bg-semantic-danger text-white",
         outline: "text-foreground",
+        // Design System Rose Rabelo — status
+        success: "border-transparent bg-semantic-success/10 text-semantic-success",
+        warning: "border-transparent bg-semantic-warning/10 text-semantic-warning",
+        danger: "border-transparent bg-semantic-danger/10 text-semantic-danger",
+        neutral:
+          "border-neutral-200 text-neutral-500 dark:border-neutral-700 dark:text-neutral-400",
       },
     },
     defaultVariants: {
@@ -25,9 +30,16 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant,
+  dot = false,
+  children,
   ...props
 }) {
-  return (<div className={cn(badgeVariants({ variant }), className)} {...props} />);
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props}>
+      {dot && <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+      {children}
+    </div>
+  );
 }
 
 export { Badge, badgeVariants }
