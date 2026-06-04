@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNovaParcela } from '@/hooks/useNovaParcela'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
@@ -9,11 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Check, ChevronsUpDown, UserPlus } from 'lucide-react'
 import { formatarMoeda, formatarData } from '@/utils/format'
-import { cn } from '@/lib/utils'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
@@ -22,15 +17,8 @@ function CampoErro({ mensagem }) {
 
 export default function NovaParcela() {
   const { toast } = useToast()
-  const [clienteAberto, setClienteAberto] = useState(false)
-  const [queryCliente, setQueryCliente] = useState('')
 
-  const {
-    form, erros, salvando, seguradoras,
-    resultadosCliente, buscandoCliente,
-    modoNovoCliente, setModoNovoCliente,
-    atualizar, buscarClienteDebounced, salvar,
-  } = useNovaParcela()
+  const { form, erros, salvando, seguradoras, atualizar, salvar } = useNovaParcela()
 
   async function handleSalvar() {
     const resultado = await salvar()
@@ -41,7 +29,6 @@ export default function NovaParcela() {
     }
   }
 
-  const nomeClienteSelecionado = form.cliente?.nome ?? ''
   const valorNumerico = parseFloat(form.valor) || 0
 
   return (
@@ -61,68 +48,22 @@ export default function NovaParcela() {
 
           {/* Cliente */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-                Cliente
-              </Label>
-              <button
-                type="button"
-                onClick={() => { setModoNovoCliente(!modoNovoCliente); atualizar('cliente', null) }}
-                className="flex items-center gap-1 text-xs text-[var(--brand)] hover:underline"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                {modoNovoCliente ? 'Buscar existente' : 'Novo cliente'}
-              </button>
-            </div>
-
-            {modoNovoCliente ? (
-              <div className="flex flex-col gap-2">
-                <Input
-                  placeholder="Nome completo"
-                  value={form.novoClienteNome}
-                  onChange={e => atualizar('novoClienteNome', e.target.value)}
-                  autoFocus
-                />
-                <CampoErro mensagem={erros.novoClienteNome} />
-                <Input
-                  placeholder="WhatsApp (com DDD)"
-                  value={form.novoClienteWhatsapp}
-                  onChange={e => atualizar('novoClienteWhatsapp', e.target.value)}
-                />
-              </div>
-            ) : (
-              <>
-                <Popover open={clienteAberto} onOpenChange={setClienteAberto}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" className={cn('justify-between font-normal', !form.cliente && 'text-[var(--text-muted)]')}>
-                      {nomeClienteSelecionado || 'Buscar cliente…'}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-0 w-[--radix-popover-trigger-width]">
-                    <Command>
-                      <CommandInput
-                        placeholder="Digite o nome…"
-                        value={queryCliente}
-                        onValueChange={v => { setQueryCliente(v); buscarClienteDebounced(v) }}
-                      />
-                      <CommandList>
-                        <CommandEmpty>{buscandoCliente ? 'Buscando…' : 'Nenhum cliente encontrado'}</CommandEmpty>
-                        <CommandGroup>
-                          {resultadosCliente.map(c => (
-                            <CommandItem key={c.id} value={c.nome} onSelect={() => { atualizar('cliente', c); setClienteAberto(false) }}>
-                              <Check className={cn('mr-2 h-4 w-4', form.cliente?.id === c.id ? 'opacity-100' : 'opacity-0')} />
-                              {c.nome}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <CampoErro mensagem={erros.cliente} />
-              </>
-            )}
+            <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+              Cliente
+            </Label>
+            <Input
+              placeholder="Nome completo"
+              value={form.clienteNome}
+              onChange={e => atualizar('clienteNome', e.target.value)}
+              autoFocus
+            />
+            <CampoErro mensagem={erros.clienteNome} />
+            <Input
+              placeholder="WhatsApp com DDD"
+              value={form.clienteWhatsapp}
+              onChange={e => atualizar('clienteWhatsapp', e.target.value)}
+            />
+            <CampoErro mensagem={erros.clienteWhatsapp} />
           </div>
 
           {/* Seguradora */}
@@ -203,7 +144,7 @@ export default function NovaParcela() {
                 <div className="flex justify-between">
                   <dt className="text-[var(--text-secondary)]">Cliente</dt>
                   <dd className="font-medium text-right text-[var(--text-primary)] max-w-[60%] truncate">
-                    {modoNovoCliente ? (form.novoClienteNome || '—') : (nomeClienteSelecionado || '—')}
+                    {form.clienteNome || '—'}
                   </dd>
                 </div>
                 <div className="flex justify-between">

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const vazio = {
-  cliente_nome: '', cpf_cnpj: '', telefone: '',
+  cliente_nome: '', telefone: '',
   seguradora_id: '', numero_apolice: '', numero_parcela: '',
   valor: '', data_vencimento: '',
 }
@@ -36,7 +36,6 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
   function validar() {
     const e = {}
     if (!form.cliente_nome.trim())   e.cliente_nome   = true
-    if (!form.cpf_cnpj.trim())       e.cpf_cnpj       = true
     if (!form.telefone.trim())       e.telefone       = true
     if (!form.seguradora_id)         e.seguradora_id  = true
     if (!form.numero_apolice.trim()) e.numero_apolice = true
@@ -52,7 +51,6 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     setSalvando(true)
     await onSalvar({
       cliente_nome:    form.cliente_nome.trim(),
-      cpf_cnpj:        form.cpf_cnpj.trim(),
       telefone:        form.telefone.trim(),
       seguradora_id:   form.seguradora_id,
       numero_apolice:  form.numero_apolice.trim(),
@@ -79,16 +77,10 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
               onChange={e => set('cliente_nome', e.target.value)} autoFocus />
           </Campo>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Campo label="CPF / CNPJ" erro={erros.cpf_cnpj}>
-              <Input placeholder="000.000.000-00" value={form.cpf_cnpj}
-                onChange={e => set('cpf_cnpj', e.target.value)} />
-            </Campo>
-            <Campo label="WhatsApp" erro={erros.telefone}>
-              <Input placeholder="(31) 99999-9999" value={form.telefone}
-                onChange={e => set('telefone', e.target.value)} />
-            </Campo>
-          </div>
+          <Campo label="WhatsApp" erro={erros.telefone}>
+            <Input placeholder="(31) 99999-9999" value={form.telefone}
+              onChange={e => set('telefone', e.target.value)} />
+          </Campo>
 
           <Campo label="Seguradora" erro={erros.seguradora_id}>
             <Select value={form.seguradora_id} onValueChange={v => set('seguradora_id', v)}>

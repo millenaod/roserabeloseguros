@@ -25,28 +25,29 @@ export async function buscarParcelaPorId(id) {
   return { data, error }
 }
 
-export async function salvarParcelaComCliente({ cliente_nome, cpf_cnpj, telefone, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
-  // 1. Busca ou cria cliente pelo CPF/CNPJ
-  let cliente_id
-  const { data: clienteExistente } = await supabase
+export async function salvarParcelaComCliente({ cliente_nome, telefone, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
+  // Cria o cliente na hora. O que importa no fluxo de cobrança é nome + WhatsApp:
+  // o telefone é por onde a mensagem é enviada, o nome é como ela é personalizada.
+  const { data: cliente, error: erroCliente } = await supabase
     .from('clientes')
+    .insert({ nome: cliente_nome, telefone, whatsapp_valido: true })
     .select('id')
-    .eq('cpf_cnpj', cpf_cnpj)
-    .maybeSingle()
+    .single()
+  if (erroCliente) { console.error('salvarParcelaComCliente (cliente):', erroCliente); return { error: erroCliente } }
 
-  if (clienteExistente) {
-    cliente_id = clienteExistente.id
-  } else {
-    const { data: novoCliente, error } = await supabase
-      .from('clientes')
-      .insert({ nome: cliente_nome, cpf_cnpj, telefone, whatsapp_valido: true })
-      .select('id')
-      .single()
-    if (error) { console.error('salvarParcelaComCliente (cliente):', error); return { error } }
-    cliente_id = novoCliente.id
-  }
+  return criarApoliceEParcela({
+    cliente_id: cliente.id,
+    seguradora_id,
+    numero_apolice,
+    numero_parcela,
+    valor,
+    data_vencimento,
+  })
+}
 
-  // 2. Busca ou cria apólice
+// Cria (ou reaproveita) a apólice e insere a parcela a partir de um cliente já existente.
+// Usado pelo cadastro simples, onde o cliente é criado na hora pelo nome.
+export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
   let apolice_id
   const { data: apoliceExistente } = await supabase
     .from('apolices')
@@ -64,18 +65,17 @@ export async function salvarParcelaComCliente({ cliente_nome, cpf_cnpj, telefone
       .insert({ cliente_id, seguradora_id, numero_apolice })
       .select('id')
       .single()
-    if (error) { console.error('salvarParcelaComCliente (apolice):', error); return { error } }
+    if (error) { console.error('criarApoliceEParcela (apolice):', error); return { error } }
     apolice_id = novaApolice.id
   }
 
-  // 3. Insere parcela
   const { data, error } = await supabase
     .from('parcelas')
     .insert({ apolice_id, numero_parcela, valor, data_vencimento, status: 'pendente' })
     .select('id')
     .single()
 
-  if (error) console.error('salvarParcelaComCliente (parcela):', error)
+  if (error) console.error('criarApoliceEParcela (parcela):', error)
   return { data, error }
 }
 
