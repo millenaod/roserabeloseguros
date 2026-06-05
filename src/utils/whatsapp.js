@@ -1,5 +1,3 @@
-import { formatarMoeda, formatarData } from '@/utils/format'
-
 // Número no formato internacional, só dígitos, garantindo o 55 do Brasil.
 export function numeroWhatsApp(telefone) {
   let d = String(telefone || '').replace(/\D/g, '')
@@ -8,39 +6,43 @@ export function numeroWhatsApp(telefone) {
   return d
 }
 
-// Trecho de abertura específico por tipo de pagamento. Define o "modelo de mensagem".
-function corpoPorTipoPagamento(tipo, ref) {
+// Nome da atendente que assina as mensagens.
+// Preenche a variável {{usuario}}/{{nome_usuario}} dos templates oficiais.
+const ATENDENTE = 'Thainá'
+
+// Reproduz o texto EXATO dos templates já aprovados na WhatsApp Business API,
+// por tipo de pagamento (ver utils/pagamento.js para os nomes oficiais).
+// Mantém paridade entre o envio manual (wa.me) e o disparo oficial via n8n.
+function corpoTemplate(tipo, nome) {
+  const saud = nome ? `Olá, ${nome}!` : 'Olá!'
   switch (tipo) {
-    case 'debito_automatico':
-      return `Identificamos que o débito automático da parcela ${ref} não foi efetuado. ` +
-        `Para regularizar, é só pagar pelo boleto abaixo. 🙏`
-    case 'cartao_credito':
-      return `A cobrança no seu cartão referente à parcela ${ref} não foi aprovada. ` +
-        `Para regularizar, é só pagar pelo boleto abaixo. 🙏`
-    case 'boleto':
+    case 'debito_automatico': // FIN/DÉBITO EM CONTA (API OFICIAL)
+      return `${saud} Tudo bem?\n\n` +
+        `Aqui é ${ATENDENTE}, da Rose Rabelo Seguros.\n\n` +
+        `Ao verificar em sistema, identificamos que o débito programado referente à parcela do seguro não foi concluído. Para regularização, a seguradora disponibilizou um boleto com novo vencimento.\n\n` +
+        `Na sequência, envio o boleto para sua conferência.\nRose Rabelo Seguros`
+    case 'cartao_credito': // fin/envio de boleto recusa cartao (API OFICIAL) - Modelo
+      return `${saud} Tudo bem?\n\n` +
+        `Aqui é ${ATENDENTE}, da Rose Seguros.\n\n` +
+        `Ao verificar em sistema, identificamos que a parcela do seu seguro não foi autorizada pela operadora do cartão de crédito. Para evitar qualquer interrupção, a seguradora disponibilizou um boleto para regularização.\n\n` +
+        `Na sequência, envio o boleto para sua conferência.\nRose Rabelo Seguros`
+    case 'boleto': // FIN/COBRANCA COM BOLETO (API OFICIAL)
     default:
-      return `Passando para lembrar da parcela ${ref}. Segue o boleto para pagamento. 🙏`
+      return `${saud}\n` +
+        `Aqui é ${ATENDENTE}, da Rose Rabelo Seguros. Tudo bem?\n\n` +
+        `Identificamos em nosso sistema que a parcela do seu seguro consta como em aberto. Poderia, por gentileza, nos confirmar se o pagamento já foi realizado?\n` +
+        `Caso tenha sido pago gentileza desconsiderar esse anexo.`
   }
 }
 
-// Mensagem de cobrança padrão, personalizada — pronta para revisar e enviar.
-// Identifica a corretora (Thainá), cita a apólice, varia o texto pelo tipo de
-// pagamento, sempre encaminha o boleto, dá saída pra quem já pagou e abre canal
-// de retorno (diretrizes da operação).
+// Mensagem pronta para revisar e enviar. Usa o texto oficial aprovado conforme o
+// tipo de pagamento. No envio manual não dá para anexar arquivo, então o link do
+// boleto é acrescentado no fim quando existir.
 export function mensagemCobrancaPadrao(parcela) {
-  const primeiroNome = (parcela.cliente_nome || '').replace(' (TESTE)', '').trim().split(' ')[0]
-  const saudacao = primeiroNome ? `Oi ${primeiroNome}` : 'Oi'
-  const valor = formatarMoeda(parcela.valor)
-  const venc = formatarData(parcela.data_vencimento)
-  const ref = `${parcela.numero_parcela} da sua apólice ${parcela.numero_apolice} (${parcela.seguradora_nome}), ` +
-    `no valor de ${valor}, com vencimento em ${venc}`
-
-  const corpo = corpoPorTipoPagamento(parcela.tipo_pagamento, ref)
+  const nome = (parcela.cliente_nome || '').replace(' (TESTE)', '').trim().split(' ')[0]
+  const corpo = corpoTemplate(parcela.tipo_pagamento, nome)
   const boleto = parcela.boleto_url ? `\n\nBoleto: ${parcela.boleto_url}` : ''
-
-  return `${saudacao}, aqui é a Thainá da Rose Rabelo Seguros! 😊\n\n` +
-    `${corpo}${boleto}\n\n` +
-    `Se já efetuou o pagamento, pode desconsiderar. Qualquer dúvida, é só me responder por aqui!`
+  return corpo + boleto
 }
 
 // Link wa.me que abre o WhatsApp Web/App na conversa do cliente com a mensagem pronta.
