@@ -184,6 +184,7 @@ export default function Dashboard() {
                       key={p.id}
                       parcela={p}
                       onClick={() => navigate(`/parcelas/${p.parcela_id}`)}
+                      onVerDetalhe={() => navigate(`/parcelas/${p.parcela_id}`)}
                       onPagar={() => setConfirmPagar(p.parcela_id)}
                       onRemarcar={() => { setRemarcarId(p.parcela_id); setNovaData('') }}
                       onEscalar={() => setConfirmEscalar(p.parcela_id)}
@@ -199,6 +200,7 @@ export default function Dashboard() {
                 <ParcelaCard
                   key={p.id}
                   parcela={p}
+                  onVerDetalhe={() => navigate(`/parcelas/${p.parcela_id}`)}
                   onPagar={() => setConfirmPagar(p.parcela_id)}
                   onRemarcar={() => { setRemarcarId(p.parcela_id); setNovaData('') }}
                   onEscalar={() => setConfirmEscalar(p.parcela_id)}
