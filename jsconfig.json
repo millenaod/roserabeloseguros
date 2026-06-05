@@ -1,4 +1,7 @@
-{
+{o nome dos modelos de mensagem no gtchat são: 
+FIN/ENVIO DE BOLETO RECUSA CARTAO (API OFICIAL)
+FIN/DÉBITO EM CONTA (API OFICIAL)
+FIN/COBRANÇA COM BOLETO (API OFICIAL)
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

@@ -25,6 +25,9 @@ dist-ssr
 
 .vercel
 .env*
+# Exceção: config pública do cliente Supabase (anon key é pública por design,
+# protegida por RLS) — versionada para o build de produção da Vercel ser autossuficiente.
+!.env.production
 
 # Playwright
 playwright-report/
