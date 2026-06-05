@@ -5,11 +5,14 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero } from '@/utils/mascaras'
+import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
+import { Paperclip } from 'lucide-react'
 
 const vazio = {
   cliente_nome: '', telefone: '',
   seguradora_id: '', numero_apolice: '', numero_parcela: '',
   valor: '', data_vencimento: '',
+  tipo_pagamento: '', boletoFile: null,
 }
 
 function Campo({ label, erro, children }) {
@@ -43,6 +46,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     if (!form.numero_parcela)        e.numero_parcela = true
     if (!form.valor)                 e.valor          = true
     if (!form.data_vencimento)       e.data_vencimento= true
+    if (!form.tipo_pagamento)        e.tipo_pagamento = true
+    if (!form.boletoFile)            e.boletoFile     = true
     setErros(e)
     return Object.keys(e).length === 0
   }
@@ -58,6 +63,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
       numero_parcela:  Number(form.numero_parcela),
       valor:           moedaParaNumero(form.valor),
       data_vencimento: form.data_vencimento,
+      tipo_pagamento:  form.tipo_pagamento,
+      boletoFile:      form.boletoFile,
     })
     setSalvando(false)
     setForm(vazio)
@@ -121,6 +128,28 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
                 onChange={e => set('data_vencimento', e.target.value)} />
             </Campo>
           </div>
+
+          <Campo label="Tipo de pagamento" erro={erros.tipo_pagamento}>
+            <Select value={form.tipo_pagamento} onValueChange={v => set('tipo_pagamento', v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
+              <SelectContent>
+                {TIPOS_PAGAMENTO.map(t => (
+                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Campo>
+
+          <Campo label="Boleto (PDF ou imagem)" erro={erros.boletoFile}>
+            <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface-raised)] cursor-pointer hover:border-[var(--brand)] transition-colors">
+              <Paperclip className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
+              <span className="text-sm text-[var(--text-secondary)] truncate">
+                {form.boletoFile ? form.boletoFile.name : 'Selecionar arquivo…'}
+              </span>
+              <input type="file" accept="application/pdf,image/*" className="hidden"
+                onChange={e => set('boletoFile', e.target.files?.[0] ?? null)} />
+            </label>
+          </Campo>
         </div>
 
         {/* Botão fixo no rodapé */}

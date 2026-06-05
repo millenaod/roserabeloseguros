@@ -25,12 +25,32 @@ export async function buscarParcelaPorId(id) {
   return { data, error }
 }
 
-export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
-  // Cria o cliente na hora. Nome + WhatsApp personalizam e enviam a mensagem;
-  // o CPF é necessário para a funcionária buscar o boleto na seguradora.
+// Sobe o anexo do boleto (PDF/imagem) para o bucket `boletos` e devolve a URL pública.
+export async function uploadBoleto(file) {
+  const ext = (file.name?.split('.').pop() || 'pdf').toLowerCase()
+  const caminho = `${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage
+    .from('boletos')
+    .upload(caminho, file, { contentType: file.type || undefined, upsert: false })
+  if (error) { console.error('uploadBoleto:', error); return { error } }
+
+  const { data } = supabase.storage.from('boletos').getPublicUrl(caminho)
+  return { url: data.publicUrl }
+}
+
+export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boletoFile }) {
+  // Sobe o boleto primeiro: se falhar, não cria cliente órfão.
+  let boleto_url = null
+  if (boletoFile) {
+    const { url, error } = await uploadBoleto(boletoFile)
+    if (error) return { error }
+    boleto_url = url
+  }
+
+  // Cria o cliente na hora. Nome + WhatsApp personalizam e enviam a mensagem.
   const { data: cliente, error: erroCliente } = await supabase
     .from('clientes')
-    .insert({ nome: cliente_nome, telefone, cpf_cnpj: cpf, whatsapp_valido: true })
+    .insert({ nome: cliente_nome, telefone, cpf_cnpj: cpf || null, whatsapp_valido: true })
     .select('id')
     .single()
   if (erroCliente) { console.error('salvarParcelaComCliente (cliente):', erroCliente); return { error: erroCliente } }
@@ -42,12 +62,14 @@ export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seg
     numero_parcela,
     valor,
     data_vencimento,
+    tipo_pagamento,
+    boleto_url,
   })
 }
 
 // Cria (ou reaproveita) a apólice e insere a parcela a partir de um cliente já existente.
 // Usado pelo cadastro simples, onde o cliente é criado na hora pelo nome.
-export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
+export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boleto_url }) {
   let apolice_id
   const { data: apoliceExistente } = await supabase
     .from('apolices')
@@ -71,7 +93,11 @@ export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_a
 
   const { data, error } = await supabase
     .from('parcelas')
-    .insert({ apolice_id, numero_parcela, valor, data_vencimento, status: 'pendente' })
+    .insert({
+      apolice_id, numero_parcela, valor, data_vencimento, status: 'pendente',
+      tipo_pagamento: tipo_pagamento || null,
+      boleto_url: boleto_url || null,
+    })
     .select('id')
     .single()
 

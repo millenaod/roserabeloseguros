@@ -10,6 +10,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { mascararTelefone, mascararMoeda, moedaParaNumero } from '@/utils/mascaras'
+import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
+import { Paperclip } from 'lucide-react'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
@@ -117,6 +119,40 @@ export default function NovaParcela() {
               <Input type="date" value={form.data_vencimento} onChange={e => atualizar('data_vencimento', e.target.value)} />
               <CampoErro mensagem={erros.data_vencimento} />
             </div>
+          </div>
+
+          {/* Tipo de pagamento */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Tipo de pagamento</Label>
+            <Select value={form.tipo_pagamento} onValueChange={v => atualizar('tipo_pagamento', v)}>
+              <SelectTrigger className={!form.tipo_pagamento ? 'text-[var(--text-muted)]' : ''}>
+                <SelectValue placeholder="Selecione o tipo de pagamento" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIPOS_PAGAMENTO.map(t => (
+                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <CampoErro mensagem={erros.tipo_pagamento} />
+          </div>
+
+          {/* Anexo do boleto */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Boleto (PDF ou imagem)</Label>
+            <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface-raised)] cursor-pointer hover:border-[var(--brand)] transition-colors">
+              <Paperclip className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
+              <span className="text-sm text-[var(--text-secondary)] truncate">
+                {form.boletoFile ? form.boletoFile.name : 'Selecionar arquivo do boleto…'}
+              </span>
+              <input
+                type="file"
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={e => atualizar('boletoFile', e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <CampoErro mensagem={erros.boletoFile} />
           </div>
 
           {/* Observação */}

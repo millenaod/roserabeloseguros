@@ -16,7 +16,8 @@ import TimelineContatos from '@/components/TimelineContatos'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp, mensagemCobrancaPadrao } from '@/utils/whatsapp'
-import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle } from 'lucide-react'
+import { labelTipoPagamento } from '@/utils/pagamento'
+import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText } from 'lucide-react'
 
 function InfoLinha({ label, valor }) {
   return (
@@ -119,6 +120,7 @@ export default function DetalheParcela() {
               <InfoLinha label="Parcela"        valor={parcela.numero_parcela ? `Nº ${parcela.numero_parcela}` : null} />
               <InfoLinha label="Tipo de seguro" valor={parcela.tipo_seguro} />
               <InfoLinha label="Valor"          valor={formatarMoeda(parcela.valor)} />
+              <InfoLinha label="Forma de pagamento" valor={labelTipoPagamento(parcela.tipo_pagamento)} />
               <InfoLinha label="Vencimento"     valor={formatarData(parcela.data_vencimento)} />
               <InfoLinha label="Dias em atraso" valor={parcela.dias_atraso != null ? `${parcela.dias_atraso} dias` : null} />
               <InfoLinha label="Telefone"       valor={parcela.cliente_telefone} />
@@ -152,6 +154,13 @@ export default function DetalheParcela() {
                 onClick={() => { setTextoMensagem(mensagemCobrancaPadrao(parcela)); setMensagemAberto(true) }}>
                 <Send className="w-4 h-4" /> Mensagem manual…
               </Button>
+
+              {parcela.boleto_url && (
+                <Button variant="outline" className="w-full justify-start gap-2"
+                  onClick={() => window.open(parcela.boleto_url, '_blank', 'noopener')}>
+                  <FileText className="w-4 h-4" /> Ver boleto
+                </Button>
+              )}
 
               <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-paid)]"
                 onClick={() => setConfirmPagar(true)} disabled={parcela.status === 'pago'}>
