@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero } from '@/utils/mascaras'
 
 const vazio = {
   cliente_nome: '', telefone: '',
@@ -36,7 +37,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
   function validar() {
     const e = {}
     if (!form.cliente_nome.trim())   e.cliente_nome   = true
-    if (!form.telefone.trim())       e.telefone       = true
+    if (!form.telefone.trim() || !telefoneValido(form.telefone)) e.telefone = true
     if (!form.seguradora_id)         e.seguradora_id  = true
     if (!form.numero_apolice.trim()) e.numero_apolice = true
     if (!form.numero_parcela)        e.numero_parcela = true
@@ -51,11 +52,11 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     setSalvando(true)
     await onSalvar({
       cliente_nome:    form.cliente_nome.trim(),
-      telefone:        form.telefone.trim(),
+      telefone:        telefoneCompleto(form.telefone),
       seguradora_id:   form.seguradora_id,
       numero_apolice:  form.numero_apolice.trim(),
       numero_parcela:  Number(form.numero_parcela),
-      valor:           Number(form.valor),
+      valor:           moedaParaNumero(form.valor),
       data_vencimento: form.data_vencimento,
     })
     setSalvando(false)
@@ -78,8 +79,11 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </Campo>
 
           <Campo label="WhatsApp" erro={erros.telefone}>
-            <Input placeholder="(31) 99999-9999" value={form.telefone}
-              onChange={e => set('telefone', e.target.value)} />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">+55</span>
+              <Input className="pl-12" inputMode="numeric" placeholder="(31) 99999-9999" value={form.telefone}
+                onChange={e => set('telefone', mascararTelefone(e.target.value))} />
+            </div>
           </Campo>
 
           <Campo label="Seguradora" erro={erros.seguradora_id}>
@@ -106,8 +110,11 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
 
           <div className="grid grid-cols-2 gap-3">
             <Campo label="Valor (R$)" erro={erros.valor}>
-              <Input type="number" min="0" step="0.01" placeholder="0,00" value={form.valor}
-                onChange={e => set('valor', e.target.value)} />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">R$</span>
+                <Input className="pl-9" inputMode="numeric" placeholder="0,00" value={form.valor}
+                  onChange={e => set('valor', mascararMoeda(e.target.value))} />
+              </div>
             </Campo>
             <Campo label="Vencimento" erro={erros.data_vencimento}>
               <Input type="date" value={form.data_vencimento}

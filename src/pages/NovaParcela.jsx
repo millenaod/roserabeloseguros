@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formatarMoeda, formatarData } from '@/utils/format'
+import { mascararTelefone, mascararMoeda, moedaParaNumero } from '@/utils/mascaras'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
@@ -29,7 +30,7 @@ export default function NovaParcela() {
     }
   }
 
-  const valorNumerico = parseFloat(form.valor) || 0
+  const valorNumerico = moedaParaNumero(form.valor)
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-8">
@@ -58,11 +59,16 @@ export default function NovaParcela() {
               autoFocus
             />
             <CampoErro mensagem={erros.clienteNome} />
-            <Input
-              placeholder="WhatsApp com DDD"
-              value={form.clienteWhatsapp}
-              onChange={e => atualizar('clienteWhatsapp', e.target.value)}
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">+55</span>
+              <Input
+                className="pl-12"
+                inputMode="numeric"
+                placeholder="(31) 99999-9999"
+                value={form.clienteWhatsapp}
+                onChange={e => atualizar('clienteWhatsapp', mascararTelefone(e.target.value))}
+              />
+            </div>
             <CampoErro mensagem={erros.clienteWhatsapp} />
           </div>
 
@@ -100,7 +106,10 @@ export default function NovaParcela() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Valor (R$)</Label>
-              <Input type="number" min="0" step="0.01" placeholder="0,00" value={form.valor} onChange={e => atualizar('valor', e.target.value)} />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">R$</span>
+                <Input className="pl-9" inputMode="numeric" placeholder="0,00" value={form.valor} onChange={e => atualizar('valor', mascararMoeda(e.target.value))} />
+              </div>
               <CampoErro mensagem={erros.valor} />
             </div>
             <div className="flex flex-col gap-1.5">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listarSeguradoras } from '@/services/seguradoras'
 import { salvarParcelaComCliente } from '@/services/parcelas'
+import { telefoneCompleto, telefoneValido, moedaParaNumero } from '@/utils/mascaras'
 
 const camposVazios = {
   clienteNome: '',
@@ -34,6 +35,7 @@ export function useNovaParcela() {
     const e = {}
     if (!form.clienteNome.trim())     e.clienteNome     = 'Informe o nome do cliente'
     if (!form.clienteWhatsapp.trim()) e.clienteWhatsapp = 'Informe o WhatsApp'
+    else if (!telefoneValido(form.clienteWhatsapp)) e.clienteWhatsapp = 'WhatsApp incompleto (DDD + número)'
     if (!form.seguradora_id)          e.seguradora_id   = 'Selecione a seguradora'
     if (!form.numero_apolice.trim())  e.numero_apolice  = 'Informe o número da apólice'
     if (!form.numero_parcela)         e.numero_parcela  = 'Informe o número da parcela'
@@ -49,11 +51,11 @@ export function useNovaParcela() {
 
     const { error } = await salvarParcelaComCliente({
       cliente_nome: form.clienteNome.trim(),
-      telefone: form.clienteWhatsapp.trim(),
+      telefone: telefoneCompleto(form.clienteWhatsapp),
       seguradora_id: form.seguradora_id,
       numero_apolice: form.numero_apolice.trim(),
       numero_parcela: Number(form.numero_parcela),
-      valor: Number(form.valor),
+      valor: moedaParaNumero(form.valor),
       data_vencimento: form.data_vencimento,
     })
 
