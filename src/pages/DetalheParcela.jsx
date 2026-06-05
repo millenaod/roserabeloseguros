@@ -15,7 +15,8 @@ import StatusBadge from '@/components/StatusBadge'
 import TimelineContatos from '@/components/TimelineContatos'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda, formatarData } from '@/utils/format'
-import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send } from 'lucide-react'
+import { linkWhatsApp, mensagemCobrancaPadrao } from '@/utils/whatsapp'
+import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle } from 'lucide-react'
 
 function InfoLinha({ label, valor }) {
   return (
@@ -142,9 +143,14 @@ export default function DetalheParcela() {
             <CardContent className="p-5 flex flex-col gap-2">
               <h2 className="font-semibold text-sm text-[var(--text-primary)] mb-1">Ações</h2>
 
-              <Button className="w-full justify-start gap-2" style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-                onClick={() => setMensagemAberto(true)}>
-                <Send className="w-4 h-4" /> Enviar mensagem
+              <Button className="w-full justify-start gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}
+                onClick={() => window.open(linkWhatsApp(parcela), '_blank', 'noopener')}>
+                <MessageCircle className="w-4 h-4" /> Abrir no WhatsApp
+              </Button>
+
+              <Button variant="outline" className="w-full justify-start gap-2"
+                onClick={() => { setTextoMensagem(mensagemCobrancaPadrao(parcela)); setMensagemAberto(true) }}>
+                <Send className="w-4 h-4" /> Mensagem manual…
               </Button>
 
               <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-paid)]"
@@ -197,11 +203,14 @@ export default function DetalheParcela() {
             <Textarea rows={4} placeholder="Digite a mensagem…" value={textoMensagem}
               onChange={e => setTextoMensagem(e.target.value)} autoFocus />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setMensagemAberto(false)}>Cancelar</Button>
-            <Button onClick={handleEnviarMensagem} disabled={!textoMensagem.trim() || enviando}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
-              {enviando ? 'Enviando…' : 'Registrar'}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={handleEnviarMensagem} disabled={!textoMensagem.trim() || enviando}>
+              {enviando ? 'Salvando…' : 'Só registrar'}
+            </Button>
+            <Button onClick={() => window.open(linkWhatsApp(parcela, textoMensagem), '_blank', 'noopener')}
+              disabled={!textoMensagem.trim()} className="gap-2"
+              style={{ backgroundColor: '#25D366', color: 'white' }}>
+              <MessageCircle className="w-4 h-4" /> Abrir no WhatsApp
             </Button>
           </DialogFooter>
         </DialogContent>

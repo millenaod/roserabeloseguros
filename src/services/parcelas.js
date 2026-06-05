@@ -25,12 +25,12 @@ export async function buscarParcelaPorId(id) {
   return { data, error }
 }
 
-export async function salvarParcelaComCliente({ cliente_nome, telefone, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
-  // Cria o cliente na hora. O que importa no fluxo de cobrança é nome + WhatsApp:
-  // o telefone é por onde a mensagem é enviada, o nome é como ela é personalizada.
+export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento }) {
+  // Cria o cliente na hora. Nome + WhatsApp personalizam e enviam a mensagem;
+  // o CPF é necessário para a funcionária buscar o boleto na seguradora.
   const { data: cliente, error: erroCliente } = await supabase
     .from('clientes')
-    .insert({ nome: cliente_nome, telefone, whatsapp_valido: true })
+    .insert({ nome: cliente_nome, telefone, cpf_cnpj: cpf, whatsapp_valido: true })
     .select('id')
     .single()
   if (erroCliente) { console.error('salvarParcelaComCliente (cliente):', erroCliente); return { error: erroCliente } }

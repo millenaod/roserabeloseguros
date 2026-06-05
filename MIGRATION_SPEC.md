@@ -1,4 +1,5 @@
-# Design System Migration Spec — Rose Rabelo Seguros
+
+,# Design System Migration Spec — Rose Rabelo Seguros
 ## Migração de componentes existentes para o novo design system
 > Stack: React + Tailwind CSS · Light & Dark mode
 

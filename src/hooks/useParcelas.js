@@ -6,11 +6,18 @@ import { supabase } from '@/lib/supabase'
 export function useParcelas() {
   const queryClient = useQueryClient()
   const [filtros, setFiltros] = useState({ status: '', seguradora_id: '', vencimento_ate: '' })
+  const [busca, setBusca] = useState('')
 
   const { data: parcelas = [], isLoading } = useQuery({
     queryKey: ['parcelas', filtros],
     queryFn: () => buscarParcelas(filtros).then(r => r.data ?? []),
   })
+
+  // Busca por nome do cliente — client-side, instantânea conforme digita.
+  const termo = busca.trim().toLowerCase()
+  const parcelasVisiveis = termo
+    ? parcelas.filter(p => (p.cliente_nome || '').toLowerCase().includes(termo))
+    : parcelas
 
   const mesAtual = new Date().toISOString().slice(0, 7)
 
@@ -47,10 +54,11 @@ export function useParcelas() {
 
   function limparFiltros() {
     setFiltros({ status: '', seguradora_id: '', vencimento_ate: '' })
+    setBusca('')
   }
 
   return {
-    parcelas, isLoading, filtros, kpis, executando, salvando,
+    parcelas: parcelasVisiveis, isLoading, filtros, busca, setBusca, kpis, executando, salvando,
     aplicarFiltros, limparFiltros, salvar,
     pagar:         id => executarAcao({ id, status: 'pago' }),
     escalar:       id => executarAcao({ id, status: 'escalado' }),

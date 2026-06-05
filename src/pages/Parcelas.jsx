@@ -18,7 +18,7 @@ import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PainelKanban from '@/components/PainelKanban'
-import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban } from 'lucide-react'
+import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban, Search } from 'lucide-react'
 
 const STATUS_OPCOES = [
   { value: 'pendente',           label: 'Pendente' },
@@ -40,7 +40,7 @@ export default function Parcelas() {
   const [remarcarId, setRemarcarId]       = useState(null)
   const [novaData, setNovaData]           = useState('')
 
-  const { parcelas, isLoading, filtros, executando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
+  const { parcelas, isLoading, filtros, busca, setBusca, executando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
 
   async function handleSalvar(dados) {
@@ -57,7 +57,7 @@ export default function Parcelas() {
   async function handleEscalar(){ await escalar(confirmEscalar); setConfirmEscalar(null); toast({ title: 'Escalada para vendedor.' }) }
   async function handleRemarcar(){ if (!novaData) return; await remarcar(remarcarId, novaData); setRemarcarId(null); toast({ title: 'Remarcada!' }) }
 
-  const temFiltros = filtros.status || filtros.seguradora_id || filtros.vencimento_ate
+  const temFiltros = filtros.status || filtros.seguradora_id || filtros.vencimento_ate || busca
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -99,6 +99,10 @@ export default function Parcelas() {
 
       {/* Filtros desktop */}
       <div className="hidden md:flex px-6 py-3 border-b border-[var(--border)] bg-[var(--surface)] items-center gap-3">
+        <div className="relative w-60">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+          <Input className="pl-9" placeholder="Buscar cliente…" value={busca} onChange={e => setBusca(e.target.value)} />
+        </div>
         <Select value={filtros.status} onValueChange={v => aplicarFiltros({ status: v === 'todos' ? '' : v })}>
           <SelectTrigger className="w-48"><SelectValue placeholder="Todos os status" /></SelectTrigger>
           <SelectContent>
@@ -126,6 +130,10 @@ export default function Parcelas() {
           <SheetContent side="bottom" className="rounded-t-xl">
             <SheetHeader className="mb-4"><SheetTitle>Filtros</SheetTitle></SheetHeader>
             <div className="flex flex-col gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+                <Input className="pl-9" placeholder="Buscar cliente…" value={busca} onChange={e => setBusca(e.target.value)} />
+              </div>
               <Select value={filtros.status} onValueChange={v => aplicarFiltros({ status: v === 'todos' ? '' : v })}>
                 <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
