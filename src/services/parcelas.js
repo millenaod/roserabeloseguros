@@ -41,7 +41,31 @@ export async function uploadBoleto(file) {
 }
 
 export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boletoFile }) {
-  // Sobe o boleto primeiro: se falhar, não cria cliente órfão.
+  // Reaproveita o cliente pelo CPF (cpf_cnpj é único no banco). Assim, cliente
+  // recorrente cadastra a próxima parcela sem recriar — e some o erro de "CPF
+  // duplicado" que acontecia ao cadastrar duas parcelas para o mesmo cliente.
+  let cliente_id
+  if (cpf) {
+    const { data: existente } = await supabase
+      .from('clientes')
+      .select('id')
+      .eq('cpf_cnpj', cpf)
+      .maybeSingle()
+    if (existente) cliente_id = existente.id
+  }
+
+  if (!cliente_id) {
+    const { data: novo, error: erroCliente } = await supabase
+      .from('clientes')
+      .insert({ nome: cliente_nome, telefone, cpf_cnpj: cpf || null, whatsapp_valido: true })
+      .select('id')
+      .single()
+    if (erroCliente) { console.error('salvarParcelaComCliente (cliente):', erroCliente); return { error: erroCliente } }
+    cliente_id = novo.id
+  }
+
+  // Sobe o boleto só depois de garantir o cliente — assim uma falha de cliente
+  // não deixa boleto órfão no Storage.
   let boleto_url = null
   if (boletoFile) {
     const { url, error } = await uploadBoleto(boletoFile)
@@ -49,16 +73,8 @@ export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seg
     boleto_url = url
   }
 
-  // Cria o cliente na hora. Nome + WhatsApp personalizam e enviam a mensagem.
-  const { data: cliente, error: erroCliente } = await supabase
-    .from('clientes')
-    .insert({ nome: cliente_nome, telefone, cpf_cnpj: cpf || null, whatsapp_valido: true })
-    .select('id')
-    .single()
-  if (erroCliente) { console.error('salvarParcelaComCliente (cliente):', erroCliente); return { error: erroCliente } }
-
   return criarApoliceEParcela({
-    cliente_id: cliente.id,
+    cliente_id,
     seguradora_id,
     numero_apolice,
     numero_parcela,
