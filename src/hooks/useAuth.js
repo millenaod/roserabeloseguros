@@ -28,13 +28,21 @@ export function useAuth() {
         if (ativo) { setUsuario(null); setCarregando(false) }
       })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // IMPORTANTE: o callback do onAuthStateChange roda segurando um lock interno
+    // da auth do Supabase. Chamar (com await) outra função do Supabase aqui dentro
+    // — como buscarPerfil — causa DEADLOCK: o lock nunca solta e toda query seguinte
+    // trava pra sempre ("para de carregar" depois de ~1h, quando o token renova).
+    // Por isso o callback NÃO é async e a busca do perfil é adiada com setTimeout(0),
+    // saindo de dentro do lock. (Recomendação oficial da doc do Supabase.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!ativo) return
       if (session?.user) {
         setUsuario(session.user)
         setCarregando(false)
-        const { data } = await buscarPerfil(session.user.id)
-        if (ativo) setPerfil(data)
+        setTimeout(async () => {
+          const { data } = await buscarPerfil(session.user.id)
+          if (ativo) setPerfil(data)
+        }, 0)
       } else {
         setUsuario(null)
         setPerfil(null)
