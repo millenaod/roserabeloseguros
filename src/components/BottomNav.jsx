@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, PlusCircle, Briefcase, UserCircle, LogOut } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, ListChecks, PlusCircle, Briefcase, UserCircle, LogOut, KeyRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -9,12 +9,14 @@ import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { to: '/',             icon: LayoutDashboard, label: 'Parcelas' },
+  { to: '/tarefas',      icon: ListChecks,      label: 'Tarefas' },
   { to: '/nova-parcela', icon: PlusCircle,      label: 'Nova' },
   { to: '/carteira',     icon: Briefcase,       label: 'Carteira' },
 ]
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
+  const navigate = useNavigate()
   const [perfilAberto, setPerfilAberto] = useState(false)
 
   return (
@@ -66,6 +68,13 @@ export default function BottomNav() {
           <Separator className="mb-4" />
 
           <div className="flex flex-col gap-1">
+            <button
+              onClick={() => { navigate('/perfil'); setPerfilAberto(false) }}
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"
+            >
+              <KeyRound className="w-4 h-4" />
+              Meu perfil e senha
+            </button>
             <ThemeToggle className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors" />
             <button
               onClick={() => { sair(); setPerfilAberto(false) }}

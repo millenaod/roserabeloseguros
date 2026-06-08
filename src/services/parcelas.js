@@ -69,22 +69,29 @@ export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seg
 
 // Cria (ou reaproveita) a apólice e insere a parcela a partir de um cliente já existente.
 // Usado pelo cadastro simples, onde o cliente é criado na hora pelo nome.
-export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boleto_url }) {
+// O número da apólice é opcional (o cadastro identifica o cliente pelo CPF).
+export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_apolice = null, numero_parcela, valor, data_vencimento, tipo_pagamento, boleto_url }) {
   let apolice_id
-  const { data: apoliceExistente } = await supabase
-    .from('apolices')
-    .select('id')
-    .eq('cliente_id', cliente_id)
-    .eq('seguradora_id', seguradora_id)
-    .eq('numero_apolice', numero_apolice)
-    .maybeSingle()
+
+  // Só tenta reaproveitar uma apólice existente quando há número para casar.
+  let apoliceExistente = null
+  if (numero_apolice) {
+    const { data } = await supabase
+      .from('apolices')
+      .select('id')
+      .eq('cliente_id', cliente_id)
+      .eq('seguradora_id', seguradora_id)
+      .eq('numero_apolice', numero_apolice)
+      .maybeSingle()
+    apoliceExistente = data
+  }
 
   if (apoliceExistente) {
     apolice_id = apoliceExistente.id
   } else {
     const { data: novaApolice, error } = await supabase
       .from('apolices')
-      .insert({ cliente_id, seguradora_id, numero_apolice })
+      .insert({ cliente_id, seguradora_id, numero_apolice: numero_apolice || null })
       .select('id')
       .single()
     if (error) { console.error('criarApoliceEParcela (apolice):', error); return { error } }
@@ -103,6 +110,48 @@ export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_a
 
   if (error) console.error('criarApoliceEParcela (parcela):', error)
   return { data, error }
+}
+
+// Parcelas cadastradas hoje (mais recentes primeiro) — alimenta o histórico da tela Nova Parcela.
+export async function parcelasDeHoje() {
+  const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0)
+  const { data, error } = await supabase
+    .from('v_parcelas_ui')
+    .select('parcela_id, cliente_nome, cliente_cpf, seguradora_nome, valor, numero_parcela, criado_em')
+    .gte('criado_em', inicioHoje.toISOString())
+    .order('criado_em', { ascending: false })
+  if (error) console.error('parcelasDeHoje:', error)
+  return { data: data ?? [], error }
+}
+
+// Parcelas que precisam de atenção hoje (tudo que não está pago nem já escalado),
+// urgentes (cobertura em risco / mais dias de atraso) no topo. Alimenta o Painel de Tarefas.
+export async function parcelasParaRevisar() {
+  const { data, error } = await supabase
+    .from('v_parcelas_ui')
+    .select('parcela_id, cliente_nome, cliente_telefone, seguradora_nome, valor, numero_parcela, status, dias_atraso, cobertura_em_risco, total_contatos, ultimo_contato_em, tipo_pagamento')
+    .not('status', 'in', '("pago","escalado")')
+    .order('cobertura_em_risco', { ascending: false })
+    .order('dias_atraso', { ascending: false })
+  if (error) console.error('parcelasParaRevisar:', error)
+  return { data: data ?? [], error }
+}
+
+// Dispara uma nova cobrança chamando o mesmo webhook do n8n que o cadastro aciona.
+const N8N_COBRANCA_URL = 'https://millenaod.app.n8n.cloud/webhook/parcela-nova'
+export async function solicitarNovaCobranca(parcelaId) {
+  try {
+    const resp = await fetch(N8N_COBRANCA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ record: { id: parcelaId } }),
+    })
+    if (!resp.ok) return { error: new Error('Falha ao acionar a cobrança (HTTP ' + resp.status + ')') }
+    return { error: null }
+  } catch (e) {
+    console.error('solicitarNovaCobranca:', e)
+    return { error: e }
+  }
 }
 
 export async function atualizarStatus(id, status) {

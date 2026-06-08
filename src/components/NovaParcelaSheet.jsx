@@ -4,13 +4,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero } from '@/utils/mascaras'
+import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpf, cpfValido } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
 import { Paperclip } from 'lucide-react'
 
 const vazio = {
-  cliente_nome: '', telefone: '',
-  seguradora_id: '', numero_apolice: '', numero_parcela: '',
+  cliente_nome: '', telefone: '', cpf: '',
+  seguradora_id: '', numero_parcela: '',
   valor: '', data_vencimento: '',
   tipo_pagamento: '', boletoFile: null,
 }
@@ -41,8 +41,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     const e = {}
     if (!form.cliente_nome.trim())   e.cliente_nome   = true
     if (!form.telefone.trim() || !telefoneValido(form.telefone)) e.telefone = true
+    if (!form.cpf.trim() || !cpfValido(form.cpf)) e.cpf = true
     if (!form.seguradora_id)         e.seguradora_id  = true
-    if (!form.numero_apolice.trim()) e.numero_apolice = true
     if (!form.numero_parcela)        e.numero_parcela = true
     if (!form.valor)                 e.valor          = true
     if (!form.data_vencimento)       e.data_vencimento= true
@@ -58,8 +58,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     await onSalvar({
       cliente_nome:    form.cliente_nome.trim(),
       telefone:        telefoneCompleto(form.telefone),
+      cpf:             form.cpf.trim(),
       seguradora_id:   form.seguradora_id,
-      numero_apolice:  form.numero_apolice.trim(),
       numero_parcela:  Number(form.numero_parcela),
       valor:           moedaParaNumero(form.valor),
       data_vencimento: form.data_vencimento,
@@ -105,9 +105,9 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </Campo>
 
           <div className="grid grid-cols-2 gap-3">
-            <Campo label="Nº Apólice" erro={erros.numero_apolice}>
-              <Input placeholder="Ex: HDI-001" value={form.numero_apolice}
-                onChange={e => set('numero_apolice', e.target.value)} />
+            <Campo label="CPF do cliente" erro={erros.cpf}>
+              <Input inputMode="numeric" placeholder="000.000.000-00" value={form.cpf}
+                onChange={e => set('cpf', mascararCpf(e.target.value))} />
             </Campo>
             <Campo label="Nº Parcela" erro={erros.numero_parcela}>
               <Input type="number" min="1" placeholder="1" value={form.numero_parcela}

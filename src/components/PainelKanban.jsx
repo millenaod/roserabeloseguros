@@ -4,14 +4,21 @@ import { useDroppable } from '@dnd-kit/core'
 import KanbanCardStatus from '@/components/KanbanCardStatus'
 import { cn } from '@/lib/utils'
 
+// Kanban enxuto: 4 colunas que cobrem o ciclo real da cobrança.
 const COLUNAS = [
-  { status: 'pendente',           label: 'Pendente',           cor: 'var(--status-pending)' },
-  { status: 'enviado',            label: 'Enviado',            cor: 'var(--status-sent)' },
-  { status: 'aguardando_retorno', label: 'Aguardando Retorno', cor: 'var(--status-waiting)' },
-  { status: 'remarcado',          label: 'Remarcado',          cor: 'var(--status-rescheduled)' },
-  { status: 'pago',               label: 'Pago',               cor: 'var(--status-paid)' },
-  { status: 'escalado',           label: 'Escalado',           cor: 'var(--status-escalated)' },
+  { status: 'pendente',    label: 'A cobrar',    cor: 'var(--status-pending)' },
+  { status: 'em_cobranca', label: 'Em cobrança', cor: '#f97316' },
+  { status: 'pago',        label: 'Pago',        cor: 'var(--status-paid)' },
+  { status: 'escalado',    label: 'Escalado',    cor: 'var(--status-escalated)' },
 ]
+
+// Mapeia qualquer status (inclusive os antigos) para uma das 4 colunas, pra nenhuma parcela sumir.
+const COLUNA_DE = {
+  pendente: 'pendente', erro: 'pendente',
+  em_cobranca: 'em_cobranca', enviado: 'em_cobranca', aguardando_retorno: 'em_cobranca', remarcado: 'em_cobranca',
+  pago: 'pago',
+  escalado: 'escalado',
+}
 
 function Coluna({ status, label, cor, parcelas }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
@@ -58,10 +65,11 @@ export default function PainelKanban({ parcelas, onMoverCard }) {
     await onMoverCard(active.id, over.id)
   }
 
-  const porStatus = COLUNAS.reduce((acc, col) => {
-    acc[col.status] = parcelas.filter(p => p.status === col.status)
-    return acc
-  }, {})
+  const porStatus = COLUNAS.reduce((acc, col) => { acc[col.status] = []; return acc }, {})
+  parcelas.forEach(p => {
+    const col = COLUNA_DE[p.status] ?? 'pendente'
+    porStatus[col].push(p)
+  })
 
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>

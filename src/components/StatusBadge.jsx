@@ -1,5 +1,6 @@
 const config = {
-  pendente:            { label: 'Pendente',           color: 'var(--status-pending)',    bg: 'var(--status-pending-bg)' },
+  pendente:            { label: 'A cobrar',            color: 'var(--status-pending)',    bg: 'var(--status-pending-bg)' },
+  em_cobranca:         { label: 'Em cobrança',         color: '#c2410c',                  bg: '#ffedd5' },
   enviado:             { label: 'Enviado',             color: 'var(--status-sent)',       bg: 'var(--status-sent-bg)' },
   aguardando_retorno:  { label: 'Aguardando Retorno',  color: 'var(--status-waiting)',    bg: 'var(--status-waiting-bg)' },
   pago:                { label: 'Pago',                color: 'var(--status-paid)',       bg: 'var(--status-paid-bg)' },

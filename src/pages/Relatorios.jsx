@@ -15,7 +15,7 @@ import StatusBadge from '@/components/StatusBadge'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { Toaster } from '@/components/ui/toaster'
-import { Search, Download, BarChart2 } from 'lucide-react'
+import { Search, Download, BarChart2, Info } from 'lucide-react'
 
 const STATUS_OPCOES = ['pendente', 'enviado', 'pago', 'erro', 'escalado', 'remarcado']
 
@@ -35,10 +35,22 @@ export default function Relatorios() {
 
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
         <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Relatórios</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-0.5">Consulte e exporte dados da carteira</p>
+        <p className="text-sm text-[var(--text-secondary)] mt-0.5">Visão geral da cobrança por período</p>
       </div>
 
       <div className="px-6 py-6 flex flex-col gap-6 max-w-6xl">
+
+        {/* Para que serve esta página */}
+        <div className="flex gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-raised)] p-4">
+          <Info className="w-5 h-5 shrink-0 text-[var(--brand)] mt-0.5" />
+          <div className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <span className="font-semibold text-[var(--text-primary)]">Para que serve:</span> aqui você enxerga o quadro geral da
+            cobrança — quanto está em aberto, quanto já foi recuperado e como cada cliente está — filtrando por período,
+            seguradora ou status. Use para acompanhar resultados, fechar o mês ou{' '}
+            <span className="font-medium text-[var(--text-primary)]">exportar uma planilha (CSV)</span> pra contabilidade.
+            Não é a tela do dia a dia: para cadastrar e cobrar, use <span className="font-medium text-[var(--text-primary)]">Parcelas</span>.
+          </div>
+        </div>
 
         {/* Filtros */}
         <Card className="border-[var(--border)]">

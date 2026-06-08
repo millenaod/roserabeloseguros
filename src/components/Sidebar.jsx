@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
+  ListChecks,
   PlusCircle,
   BarChart2,
-  CheckSquare,
   Briefcase,
   LogOut,
   UserCircle,
@@ -15,9 +15,9 @@ import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { to: '/',              icon: LayoutDashboard, label: 'Parcelas' },
+  { to: '/tarefas',       icon: ListChecks,      label: 'Tarefas do dia' },
   { to: '/nova-parcela',  icon: PlusCircle,      label: 'Nova Parcela' },
   { to: '/relatorios',    icon: BarChart2,        label: 'Relatórios' },
-  { to: '/aprovacoes',    icon: CheckSquare,      label: 'Aprovações' },
   { to: '/carteira',      icon: Briefcase,        label: 'Minha Carteira' },
 ]
 
@@ -71,12 +71,21 @@ export default function Sidebar() {
 
       {/* Usuário */}
       <div className="px-2 py-4 flex flex-col gap-1">
-        <div className="flex items-center gap-3 px-2 py-2">
+        <NavLink
+          to="/perfil"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 rounded-md px-2 py-2 transition-colors',
+              isActive ? 'bg-brand-primary/15' : 'hover:bg-brand-primary/10'
+            )
+          }
+          title="Meu perfil e senha"
+        >
           <UserCircle className="w-5 h-5 shrink-0 text-neutral-400" />
           <span className="hidden lg:block text-sm font-medium text-white truncate">
             {perfil?.nome ?? '—'}
           </span>
-        </div>
+        </NavLink>
         <ThemeToggle
           className="flex items-center gap-3 rounded-md px-2 py-2 font-body text-sm font-medium text-neutral-400 hover:bg-brand-primary/10 hover:text-brand-primary transition-colors w-full"
           labelClassName="hidden lg:block"

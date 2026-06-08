@@ -1,5 +1,7 @@
 import { useNovaParcela } from '@/hooks/useNovaParcela'
 import { useToast } from '@/hooks/use-toast'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { parcelasDeHoje } from '@/services/parcelas'
 import { Toaster } from '@/components/ui/toaster'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,10 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { formatarMoeda, formatarData } from '@/utils/format'
-import { mascararTelefone, mascararMoeda, moedaParaNumero } from '@/utils/mascaras'
+import { formatarMoeda } from '@/utils/format'
+import { mascararTelefone, mascararMoeda, mascararCpf } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
-import { Paperclip } from 'lucide-react'
+import { Paperclip, Clock, CheckCircle2 } from 'lucide-react'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
@@ -20,19 +22,25 @@ function CampoErro({ mensagem }) {
 
 export default function NovaParcela() {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const { form, erros, salvando, seguradoras, atualizar, salvar } = useNovaParcela()
+
+  const { data: historico = [] } = useQuery({
+    queryKey: ['parcelas-hoje'],
+    queryFn: () => parcelasDeHoje().then(r => r.data),
+  })
 
   async function handleSalvar() {
     const resultado = await salvar()
     if (resultado.sucesso) {
       toast({ title: 'Parcela cadastrada!', description: 'A parcela foi salva com sucesso.' })
+      queryClient.invalidateQueries({ queryKey: ['parcelas-hoje'] })
+      queryClient.invalidateQueries({ queryKey: ['parcelas'] })
     } else {
       toast({ title: 'Erro ao salvar', description: 'Verifique os campos e tente novamente.', variant: 'destructive' })
     }
   }
-
-  const valorNumerico = moedaParaNumero(form.valor)
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-8">
@@ -90,12 +98,12 @@ export default function NovaParcela() {
             <CampoErro mensagem={erros.seguradora_id} />
           </div>
 
-          {/* Apólice + Parcela */}
+          {/* CPF + Parcela */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Nº Apólice</Label>
-              <Input placeholder="Ex: 123456" value={form.numero_apolice} onChange={e => atualizar('numero_apolice', e.target.value)} />
-              <CampoErro mensagem={erros.numero_apolice} />
+              <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">CPF do cliente</Label>
+              <Input inputMode="numeric" placeholder="000.000.000-00" value={form.cpf} onChange={e => atualizar('cpf', mascararCpf(e.target.value))} />
+              <CampoErro mensagem={erros.cpf} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Nº Parcela</Label>
@@ -179,47 +187,40 @@ export default function NovaParcela() {
           </Button>
         </div>
 
-        {/* Resumo — 1/3 da tela no desktop */}
+        {/* Histórico — parcelas cadastradas hoje */}
         <div className="hidden lg:block">
           <Card className="border-[var(--border)] sticky top-6">
             <CardContent className="p-5 flex flex-col gap-3">
-              <h2 className="font-semibold text-sm text-[var(--text-primary)]">Resumo</h2>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[var(--text-muted)]" />
+                <h2 className="font-semibold text-sm text-[var(--text-primary)]">Cadastradas hoje</h2>
+                {historico.length > 0 && (
+                  <span className="ml-auto text-xs font-semibold text-[var(--text-secondary)] bg-[var(--surface-raised)] rounded-full px-2 py-0.5">
+                    {historico.length}
+                  </span>
+                )}
+              </div>
               <Separator />
-              <dl className="flex flex-col gap-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Cliente</dt>
-                  <dd className="font-medium text-right text-[var(--text-primary)] max-w-[60%] truncate">
-                    {form.clienteNome || '—'}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Seguradora</dt>
-                  <dd className="font-medium text-[var(--text-primary)]">
-                    {seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome || '—'}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Apólice</dt>
-                  <dd className="font-medium text-[var(--text-primary)]">{form.numero_apolice || '—'}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Parcela</dt>
-                  <dd className="font-medium text-[var(--text-primary)]">{form.numero_parcela ? `Nº ${form.numero_parcela}` : '—'}</dd>
-                </div>
-                <Separator />
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Valor</dt>
-                  <dd className="font-display font-bold text-base text-[var(--text-primary)]">
-                    {valorNumerico > 0 ? formatarMoeda(valorNumerico) : '—'}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Vencimento</dt>
-                  <dd className="font-medium text-[var(--text-primary)]">
-                    {form.data_vencimento ? formatarData(form.data_vencimento) : '—'}
-                  </dd>
-                </div>
-              </dl>
+              {historico.length === 0 ? (
+                <p className="text-sm text-[var(--text-muted)] py-6 text-center leading-relaxed">
+                  As parcelas que você cadastrar hoje<br />vão aparecendo aqui.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-2 max-h-[60vh] overflow-auto -mr-2 pr-2">
+                  {historico.map(h => (
+                    <li key={h.parcela_id} className="flex items-start gap-2 text-sm border-b border-[var(--border)] pb-2 last:border-0">
+                      <CheckCircle2 className="w-4 h-4 text-[var(--status-paid)] shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-[var(--text-primary)] truncate">{h.cliente_nome}</p>
+                        <p className="text-xs text-[var(--text-secondary)] truncate">
+                          {h.seguradora_nome} · Parcela {h.numero_parcela}
+                        </p>
+                      </div>
+                      <span className="font-medium text-[var(--text-primary)] shrink-0">{formatarMoeda(h.valor)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </div>

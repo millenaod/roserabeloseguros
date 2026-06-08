@@ -7,12 +7,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 const Login            = lazy(() => import('@/pages/Login'))
 const RedefinirSenha   = lazy(() => import('@/pages/RedefinirSenha'))
 const Dashboard        = lazy(() => import('@/pages/Parcelas'))
+const Tarefas          = lazy(() => import('@/pages/Tarefas'))
 const NovaParcela      = lazy(() => import('@/pages/NovaParcela'))
 const DetalheParcela   = lazy(() => import('@/pages/DetalheParcela'))
 const DashboardRose    = lazy(() => import('@/pages/DashboardRose'))
 const Relatorios       = lazy(() => import('@/pages/Relatorios'))
-const Aprovacoes       = lazy(() => import('@/pages/Aprovacoes'))
 const CarteiraVendedor = lazy(() => import('@/pages/CarteiraVendedor'))
+const Perfil           = lazy(() => import('@/pages/Perfil'))
 
 function PageLoader() {
   return (
@@ -35,14 +36,15 @@ export default function App() {
           <Route element={<RotaProtegida />}>
             <Route element={<AppLayout />}>
               <Route path="/"             element={<Dashboard />} />
+              <Route path="/tarefas"      element={<Tarefas />} />
               <Route path="/nova-parcela" element={<NovaParcela />} />
               <Route path="/parcelas/:id" element={<DetalheParcela />} />
               <Route path="/carteira"     element={<CarteiraVendedor />} />
+              <Route path="/perfil"       element={<Perfil />} />
 
               <Route element={<RotaProtegida perfisPermitidos={['rose']} />}>
                 <Route path="/dashboard-rose" element={<DashboardRose />} />
                 <Route path="/relatorios"     element={<Relatorios />} />
-                <Route path="/aprovacoes"     element={<Aprovacoes />} />
               </Route>
             </Route>
           </Route>
