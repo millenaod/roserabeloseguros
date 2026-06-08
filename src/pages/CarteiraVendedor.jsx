@@ -13,11 +13,12 @@ import StatusBadge from '@/components/StatusBadge'
 import TimelineContatos from '@/components/TimelineContatos'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
-import { Briefcase, AlertTriangle } from 'lucide-react'
+import { linkWhatsApp } from '@/utils/whatsapp'
+import { Briefcase, AlertTriangle, MessageCircle } from 'lucide-react'
 
 export default function CarteiraVendedor() {
   const { toast } = useToast()
-  const { clientes, isLoading, salvandoObs, buscarContatosCliente, salvarObservacao } = useCarteiraVendedor()
+  const { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao } = useCarteiraVendedor()
 
   const [clienteSelecionado, setClienteSelecionado] = useState(null)
   const [contatos, setContatos] = useState([])
@@ -26,10 +27,14 @@ export default function CarteiraVendedor() {
 
   async function abrirDetalhe(cliente) {
     setClienteSelecionado(cliente)
-    setObservacao(cliente.observacao ?? '')
+    setObservacao('')
     setCarregandoContatos(true)
-    const data = await buscarContatosCliente(cliente.cliente_id)
+    const [data, obs] = await Promise.all([
+      buscarContatosCliente(cliente.cliente_id),
+      buscarObservacao(cliente.cliente_id),
+    ])
     setContatos(data)
+    setObservacao(obs)
     setCarregandoContatos(false)
   }
 
@@ -117,6 +122,17 @@ export default function CarteiraVendedor() {
               {formatarMoeda(clienteSelecionado?.valorAberto ?? 0)} em aberto
             </p>
           </SheetHeader>
+
+          {/* Contato por WhatsApp Web — abre a conversa do cliente com a mensagem pronta */}
+          {clienteSelecionado?.parcelas?.[0] && (
+            <Button
+              className="w-full justify-center gap-2 mb-6"
+              style={{ backgroundColor: '#25D366', color: 'white' }}
+              onClick={() => window.open(linkWhatsApp(clienteSelecionado.parcelas[0]), '_blank', 'noopener')}
+            >
+              <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
+            </Button>
+          )}
 
           {/* Parcelas do cliente */}
           <div className="flex flex-col gap-3 mb-6">

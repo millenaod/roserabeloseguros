@@ -36,6 +36,18 @@ export function useCarteiraVendedor() {
     }, {})
   ).sort((a, b) => b.valorAberto - a.valorAberto)
 
+  // Lê a observação salva direto da tabela clientes (a view de parcelas não traz
+  // esse campo, por isso a observação não reaparecia ao reabrir o cliente).
+  async function buscarObservacao(cliente_id) {
+    if (!cliente_id) return ''
+    const { data } = await supabase
+      .from('clientes')
+      .select('observacoes')
+      .eq('id', cliente_id)
+      .maybeSingle()
+    return data?.observacoes ?? ''
+  }
+
   async function buscarContatosCliente(cliente_id) {
     const parcelasCliente = parcelas.filter(p => p.cliente_id === cliente_id).map(p => p.id)
     if (!parcelasCliente.length) return []
@@ -58,5 +70,5 @@ export function useCarteiraVendedor() {
     return { error }
   }
 
-  return { clientes, isLoading, salvandoObs, buscarContatosCliente, salvarObservacao }
+  return { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao }
 }

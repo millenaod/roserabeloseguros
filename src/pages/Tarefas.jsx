@@ -11,7 +11,8 @@ import StatusBadge from '@/components/StatusBadge'
 import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda } from '@/utils/format'
-import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { linkWhatsApp } from '@/utils/whatsapp'
+import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle } from 'lucide-react'
 
 function tempoDesde(iso) {
   if (!iso) return 'nunca contatado'
@@ -77,14 +78,18 @@ export default function Tarefas() {
             const ocupado = processando === p.parcela_id
             return (
               <Card key={p.parcela_id} className={`border-[var(--border)] ${p.cobertura_em_risco ? 'border-l-4 border-l-[var(--status-error)]' : ''}`}>
-                <CardContent className="p-4 flex flex-col gap-3">
+                {/* Card inteiro abre o detalhe da parcela; os botões abaixo param a propagação. */}
+                <CardContent
+                  className="p-4 flex flex-col gap-3 cursor-pointer"
+                  onClick={() => navigate(`/parcelas/${p.parcela_id}`)}
+                >
                   <div className="flex items-start justify-between gap-3">
-                    <button onClick={() => navigate(`/parcelas/${p.parcela_id}`)} className="text-left min-w-0">
+                    <div className="text-left min-w-0">
                       <p className="font-semibold text-[var(--text-primary)] truncate">{p.cliente_nome}</p>
                       <p className="text-xs text-[var(--text-secondary)] truncate">
                         {p.seguradora_nome} · Parcela {p.numero_parcela} · {formatarMoeda(p.valor)}
                       </p>
-                    </button>
+                    </div>
                     <StatusBadge status={p.status} />
                   </div>
 
@@ -99,16 +104,21 @@ export default function Tarefas() {
                   </div>
 
                   <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" disabled={ocupado} onClick={() => setConfirmCobrar(p)}
+                    <Button size="sm" disabled={ocupado} onClick={(e) => { e.stopPropagation(); setConfirmCobrar(p) }}
                       style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
                       <Send className="w-4 h-4 mr-1.5" /> Cobrar de novo
                     </Button>
                     <Button size="sm" variant="outline" disabled={ocupado}
-                      onClick={() => handleStatus(p, 'pago', 'Marcada como paga!')}>
+                      onClick={(e) => { e.stopPropagation(); window.open(linkWhatsApp(p), '_blank', 'noopener') }}
+                      style={{ borderColor: '#25D366', color: '#1ea952' }}>
+                      <MessageCircle className="w-4 h-4 mr-1.5" /> WhatsApp
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={ocupado}
+                      onClick={(e) => { e.stopPropagation(); handleStatus(p, 'pago', 'Marcada como paga!') }}>
                       <Check className="w-4 h-4 mr-1.5" /> Marcar paga
                     </Button>
                     <Button size="sm" variant="ghost" disabled={ocupado} className="text-[var(--text-secondary)]"
-                      onClick={() => handleStatus(p, 'escalado', 'Escalada para o vendedor.')}>
+                      onClick={(e) => { e.stopPropagation(); handleStatus(p, 'escalado', 'Escalada para o vendedor.') }}>
                       <ArrowUpRight className="w-4 h-4 mr-1.5" /> Escalar
                     </Button>
                   </div>
