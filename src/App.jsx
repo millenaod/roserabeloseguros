@@ -14,6 +14,7 @@ const DashboardRose    = lazy(() => import('@/pages/DashboardRose'))
 const Relatorios       = lazy(() => import('@/pages/Relatorios'))
 const CarteiraVendedor = lazy(() => import('@/pages/CarteiraVendedor'))
 const Perfil           = lazy(() => import('@/pages/Perfil'))
+const Ajuda            = lazy(() => import('@/pages/Ajuda'))
 
 function PageLoader() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/parcelas/:id" element={<DetalheParcela />} />
               <Route path="/carteira"     element={<CarteiraVendedor />} />
               <Route path="/perfil"       element={<Perfil />} />
+              <Route path="/ajuda"        element={<Ajuda />} />
 
               <Route element={<RotaProtegida perfisPermitidos={['rose']} />}>
                 <Route path="/dashboard-rose" element={<DashboardRose />} />

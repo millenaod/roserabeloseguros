@@ -7,6 +7,7 @@ import {
   Briefcase,
   LogOut,
   UserCircle,
+  HelpCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
@@ -85,6 +86,20 @@ export default function Sidebar() {
           <span className="hidden lg:block text-sm font-medium text-white truncate">
             {perfil?.nome ?? '—'}
           </span>
+        </NavLink>
+        <NavLink
+          to="/ajuda"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 rounded-md px-2 py-2 font-body text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-brand-primary text-white'
+                : 'text-neutral-400 hover:bg-brand-primary/10 hover:text-brand-primary'
+            )
+          }
+        >
+          <HelpCircle className="w-5 h-5 shrink-0" />
+          <span className="hidden lg:block">Ajuda</span>
         </NavLink>
         <ThemeToggle
           className="flex items-center gap-3 rounded-md px-2 py-2 font-body text-sm font-medium text-neutral-400 hover:bg-brand-primary/10 hover:text-brand-primary transition-colors w-full"

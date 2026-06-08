@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ListChecks, PlusCircle, Briefcase, UserCircle, LogOut, KeyRound } from 'lucide-react'
+import { LayoutDashboard, ListChecks, PlusCircle, Briefcase, UserCircle, LogOut, KeyRound, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -74,6 +74,13 @@ export default function BottomNav() {
             >
               <KeyRound className="w-4 h-4" />
               Meu perfil e senha
+            </button>
+            <button
+              onClick={() => { navigate('/ajuda'); setPerfilAberto(false) }}
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+              Ajuda
             </button>
             <ThemeToggle className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors" />
             <button
