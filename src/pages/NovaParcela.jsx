@@ -17,7 +17,7 @@ import { Paperclip, Clock, CheckCircle2 } from 'lucide-react'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
-  return <p className="text-xs text-[var(--status-error)] mt-1">{mensagem}</p>
+  return <p data-erro="true" className="text-xs text-[var(--status-error)] mt-1">{mensagem}</p>
 }
 
 export default function NovaParcela() {
@@ -37,8 +37,20 @@ export default function NovaParcela() {
       toast({ title: 'Parcela cadastrada!', description: 'A parcela foi salva com sucesso.' })
       queryClient.invalidateQueries({ queryKey: ['parcelas-hoje'] })
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+    } else if (resultado.motivo === 'validacao') {
+      // Não é erro de sistema: faltam campos. Nomeia quais e rola até o primeiro destacado.
+      toast({
+        title: 'Faltam preencher',
+        description: `Confira: ${resultado.campos.join(', ')}.`,
+        variant: 'destructive',
+      })
+      document.querySelector('[data-erro="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     } else {
-      toast({ title: 'Erro ao salvar', description: 'Verifique os campos e tente novamente.', variant: 'destructive' })
+      toast({
+        title: 'Não foi possível salvar',
+        description: resultado.erro?.message || 'Falha de conexão. Tente de novo em instantes.',
+        variant: 'destructive',
+      })
     }
   }
 

@@ -33,6 +33,13 @@ export function useNovaParcela() {
     if (erros[campo]) setErros(prev => ({ ...prev, [campo]: null }))
   }
 
+  // Rótulo amigável de cada campo, pra nomear o que falta na mensagem de erro.
+  const LABELS = {
+    clienteNome: 'Nome', clienteWhatsapp: 'WhatsApp', cpf: 'CPF',
+    seguradora_id: 'Seguradora', numero_parcela: 'Nº da parcela', valor: 'Valor',
+    data_vencimento: 'Vencimento', tipo_pagamento: 'Tipo de pagamento', boletoFile: 'Boleto',
+  }
+
   function validar() {
     const e = {}
     if (!form.clienteNome.trim())     e.clienteNome     = 'Informe o nome do cliente'
@@ -47,11 +54,15 @@ export function useNovaParcela() {
     if (!form.tipo_pagamento)         e.tipo_pagamento  = 'Selecione o tipo de pagamento'
     if (!form.boletoFile)             e.boletoFile      = 'Anexe o boleto'
     setErros(e)
-    return Object.keys(e).length === 0
+    return e
   }
 
   async function salvar() {
-    if (!validar()) return { sucesso: false }
+    const e = validar()
+    const faltando = Object.keys(e)
+    if (faltando.length) {
+      return { sucesso: false, motivo: 'validacao', campos: faltando.map(k => LABELS[k] ?? k) }
+    }
     setSalvando(true)
 
     const { error } = await salvarParcelaComCliente({
@@ -67,7 +78,7 @@ export function useNovaParcela() {
     })
 
     setSalvando(false)
-    if (error) return { sucesso: false, erro: error }
+    if (error) return { sucesso: false, motivo: 'erro', erro: error }
 
     setForm(camposVazios)
     return { sucesso: true }
