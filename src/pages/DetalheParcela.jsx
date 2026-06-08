@@ -17,7 +17,7 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp, mensagemCobrancaPadrao } from '@/utils/whatsapp'
 import { labelTipoPagamento } from '@/utils/pagamento'
-import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText } from 'lucide-react'
+import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText, Archive, RotateCcw } from 'lucide-react'
 
 function InfoLinha({ label, valor }) {
   return (
@@ -33,10 +33,11 @@ export default function DetalheParcela() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const { parcela, isLoading, contatos, executando, pagar, escalar, remarcar, enviarMensagem } = useDetalheParcela(id)
+  const { parcela, isLoading, contatos, executando, pagar, escalar, desconsiderar, reativar, remarcar, enviarMensagem } = useDetalheParcela(id)
 
   const [confirmPagar, setConfirmPagar]     = useState(false)
   const [confirmEscalar, setConfirmEscalar] = useState(false)
+  const [confirmDesconsiderar, setConfirmDesconsiderar] = useState(false)
   const [remarcarAberto, setRemarcarAberto] = useState(false)
   const [mensagemAberto, setMensagemAberto] = useState(false)
   const [novaData, setNovaData]             = useState('')
@@ -53,6 +54,17 @@ export default function DetalheParcela() {
     await escalar()
     setConfirmEscalar(false)
     toast({ title: 'Parcela escalada para vendedor.' })
+  }
+
+  async function handleDesconsiderar() {
+    await desconsiderar()
+    setConfirmDesconsiderar(false)
+    toast({ title: 'Parcela desconsiderada.', description: 'Saiu da cobrança. Você encontra em Parcelas → Desconsideradas.' })
+  }
+
+  async function handleReativar() {
+    await reativar()
+    toast({ title: 'Parcela reativada!', description: 'Voltou para a cobrança como "A cobrar".' })
   }
 
   async function handleRemarcar() {
@@ -162,20 +174,34 @@ export default function DetalheParcela() {
                 </Button>
               )}
 
-              <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-paid)]"
-                onClick={() => setConfirmPagar(true)} disabled={parcela.status === 'pago'}>
-                <CheckCircle className="w-4 h-4" /> Marcar como paga
-              </Button>
+              {parcela.status === 'desconsiderada' ? (
+                <Button variant="outline" className="w-full justify-start gap-2 text-[var(--brand)]"
+                  onClick={handleReativar} disabled={executando}>
+                  <RotateCcw className="w-4 h-4" /> Reativar cobrança
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-paid)]"
+                    onClick={() => setConfirmPagar(true)} disabled={parcela.status === 'pago'}>
+                    <CheckCircle className="w-4 h-4" /> Marcar como paga
+                  </Button>
 
-              <Button variant="outline" className="w-full justify-start gap-2"
-                onClick={() => setRemarcarAberto(true)}>
-                <CalendarClock className="w-4 h-4" /> Remarcar
-              </Button>
+                  <Button variant="outline" className="w-full justify-start gap-2"
+                    onClick={() => setRemarcarAberto(true)}>
+                    <CalendarClock className="w-4 h-4" /> Remarcar
+                  </Button>
 
-              <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-escalated)]"
-                onClick={() => setConfirmEscalar(true)}>
-                <ArrowUpCircle className="w-4 h-4" /> Escalar para vendedor
-              </Button>
+                  <Button variant="outline" className="w-full justify-start gap-2 text-[var(--status-escalated)]"
+                    onClick={() => setConfirmEscalar(true)}>
+                    <ArrowUpCircle className="w-4 h-4" /> Escalar para vendedor
+                  </Button>
+
+                  <Button variant="ghost" className="w-full justify-start gap-2 text-[var(--text-secondary)]"
+                    onClick={() => setConfirmDesconsiderar(true)}>
+                    <Archive className="w-4 h-4" /> Desconsiderar
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -189,6 +215,11 @@ export default function DetalheParcela() {
       <ConfirmDialog aberto={confirmEscalar} onFechar={() => setConfirmEscalar(false)}
         onConfirmar={handleEscalar} titulo="Escalar para vendedor?"
         descricao="O status será atualizado para escalado." labelConfirmar="Escalar" carregando={executando} />
+
+      <ConfirmDialog aberto={confirmDesconsiderar} onFechar={() => setConfirmDesconsiderar(false)}
+        onConfirmar={handleDesconsiderar} titulo="Desconsiderar esta parcela?"
+        descricao="Ela sai da cobrança (Tarefas, Carteira e Parcelas). Fica guardada em Parcelas → Desconsideradas e pode ser reativada quando quiser."
+        labelConfirmar="Desconsiderar" carregando={executando} />
 
       <Dialog open={remarcarAberto} onOpenChange={v => !v && setRemarcarAberto(false)}>
         <DialogContent className="sm:max-w-sm">

@@ -5,6 +5,8 @@ export async function buscarParcelas(filtros = {}) {
 
   if (filtros.seguradora_id)  query = query.eq('seguradora_id', filtros.seguradora_id)
   if (filtros.status)         query = query.eq('status', filtros.status)
+  // Sem filtro de status explícito, as desconsideradas ficam escondidas (vivem só na "pasta").
+  else                        query = query.neq('status', 'desconsiderada')
   if (filtros.vencimento_ate) query = query.lte('data_vencimento', filtros.vencimento_ate)
 
   query = query.order('data_vencimento', { ascending: true })
@@ -130,7 +132,7 @@ export async function parcelasParaRevisar() {
   const { data, error } = await supabase
     .from('v_parcelas_ui')
     .select('parcela_id, cliente_nome, cliente_telefone, seguradora_nome, valor, numero_parcela, status, dias_atraso, cobertura_em_risco, total_contatos, ultimo_contato_em, tipo_pagamento, boleto_url')
-    .not('status', 'in', '("pago","escalado")')
+    .not('status', 'in', '("pago","escalado","desconsiderada")')
     .order('cobertura_em_risco', { ascending: false })
     .order('dias_atraso', { ascending: false })
   if (error) console.error('parcelasParaRevisar:', error)

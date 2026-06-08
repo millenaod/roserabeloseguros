@@ -21,10 +21,11 @@ import PainelKanban from '@/components/PainelKanban'
 import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban, Search } from 'lucide-react'
 
 const STATUS_OPCOES = [
-  { value: 'pendente',    label: 'A cobrar' },
-  { value: 'em_cobranca', label: 'Em cobrança' },
-  { value: 'pago',        label: 'Pago' },
-  { value: 'escalado',    label: 'Escalado' },
+  { value: 'pendente',       label: 'A cobrar' },
+  { value: 'em_cobranca',    label: 'Em cobrança' },
+  { value: 'pago',           label: 'Pago' },
+  { value: 'escalado',       label: 'Escalado' },
+  { value: 'desconsiderada', label: '🗂️ Desconsideradas' },
 ]
 
 export default function Parcelas() {

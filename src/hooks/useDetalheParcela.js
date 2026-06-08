@@ -62,6 +62,8 @@ export function useDetalheParcela(id) {
     executando,
     pagar: () => executarAcao({ status: 'pago' }),
     escalar: () => executarAcao({ status: 'escalado' }),
+    desconsiderar: () => executarAcao({ status: 'desconsiderada' }),
+    reativar: () => executarAcao({ status: 'pendente' }),
     remarcar,
     enviarMensagem,
   }

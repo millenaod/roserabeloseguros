@@ -7,6 +7,7 @@ const config = {
   escalado:            { label: 'Escalado',            color: 'var(--status-escalated)',  bg: 'var(--status-escalated-bg)' },
   remarcado:           { label: 'Remarcado',           color: 'var(--status-rescheduled)',bg: 'var(--status-rescheduled-bg)' },
   erro:                { label: 'Erro',                color: 'var(--status-error)',      bg: 'var(--status-error-bg)' },
+  desconsiderada:      { label: 'Desconsiderada',      color: '#6b7280',                  bg: '#f3f4f6' },
 }
 
 export default function StatusBadge({ status }) {

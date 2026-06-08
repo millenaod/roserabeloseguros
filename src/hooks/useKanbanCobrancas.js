@@ -28,6 +28,7 @@ export function useKanbanCobrancas() {
 
   // Filtros aplicados
   const parcelasFiltradas = parcelas.filter(p => {
+    if (p.status === 'desconsiderada') return false // desconsideradas não entram no quadro
     if (filtros.busca && !p.cliente_nome?.toLowerCase().includes(filtros.busca.toLowerCase())) return false
     if (filtros.seguradora_id && p.seguradora_id !== filtros.seguradora_id) return false
     if (filtros.vip && !p.cliente_vip) return false

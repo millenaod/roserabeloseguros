@@ -12,7 +12,7 @@ import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda } from '@/utils/format'
 import { linkWhatsApp } from '@/utils/whatsapp'
-import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle } from 'lucide-react'
+import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle, Archive } from 'lucide-react'
 
 function tempoDesde(iso) {
   if (!iso) return 'nunca contatado'
@@ -120,6 +120,10 @@ export default function Tarefas() {
                     <Button size="sm" variant="ghost" disabled={ocupado} className="text-[var(--text-secondary)]"
                       onClick={(e) => { e.stopPropagation(); handleStatus(p, 'escalado', 'Escalada para o vendedor.') }}>
                       <ArrowUpRight className="w-4 h-4 mr-1.5" /> Escalar
+                    </Button>
+                    <Button size="sm" variant="ghost" disabled={ocupado} className="text-[var(--text-muted)]"
+                      onClick={(e) => { e.stopPropagation(); handleStatus(p, 'desconsiderada', 'Parcela desconsiderada.') }}>
+                      <Archive className="w-4 h-4 mr-1.5" /> Desconsiderar
                     </Button>
                   </div>
                 </CardContent>

@@ -10,7 +10,7 @@ export function useCarteiraVendedor() {
   const { data: parcelas = [], isLoading } = useQuery({
     queryKey: ['carteira-vendedor'],
     queryFn: () => buscarParcelas({ status: '' }).then(r =>
-      (r.data ?? []).filter(p => p.status !== 'pago')
+      (r.data ?? []).filter(p => p.status !== 'pago' && p.status !== 'desconsiderada')
     ),
   })
 
