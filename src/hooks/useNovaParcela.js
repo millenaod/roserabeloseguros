@@ -57,7 +57,9 @@ export function useNovaParcela() {
     return e
   }
 
-  async function salvar() {
+  // decisaoCliente: undefined na 1ª tentativa; 'usar_existente'/'atualizar' ao resolver
+  // o conflito de CPF (mesmo CPF cadastrado com nome/telefone diferente).
+  async function salvar(decisaoCliente) {
     const e = validar()
     const faltando = Object.keys(e)
     if (faltando.length) {
@@ -65,7 +67,7 @@ export function useNovaParcela() {
     }
     setSalvando(true)
 
-    const { error } = await salvarParcelaComCliente({
+    const { error, conflito } = await salvarParcelaComCliente({
       cliente_nome: form.clienteNome.trim(),
       telefone: telefoneCompleto(form.clienteWhatsapp),
       cpf: form.cpf.trim(),
@@ -75,9 +77,13 @@ export function useNovaParcela() {
       data_vencimento: form.data_vencimento,
       tipo_pagamento: form.tipo_pagamento,
       boletoFile: form.boletoFile,
+      decisaoCliente,
     })
 
     setSalvando(false)
+    // Não salvou nada: o CPF já existe com dados diferentes. Devolve sem limpar o
+    // formulário pra tela avisar e a operadora decidir.
+    if (conflito) return { sucesso: false, motivo: 'conflito', conflito }
     if (error) return { sucesso: false, motivo: 'erro', erro: error }
 
     setForm(camposVazios)

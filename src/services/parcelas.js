@@ -40,18 +40,59 @@ export async function uploadBoleto(file) {
   return { url: data.publicUrl }
 }
 
-export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boletoFile }) {
+const soDigitos = (v) => String(v ?? '').replace(/\D/g, '')
+
+export async function salvarParcelaComCliente({ cliente_nome, telefone, cpf, seguradora_id, numero_apolice, numero_parcela, valor, data_vencimento, tipo_pagamento, boletoFile, decisaoCliente }) {
   // Reaproveita o cliente pelo CPF (cpf_cnpj é único no banco). Assim, cliente
   // recorrente cadastra a próxima parcela sem recriar — e some o erro de "CPF
   // duplicado" que acontecia ao cadastrar duas parcelas para o mesmo cliente.
+  //
+  // Mas o CPF não pode "vencer" calado: se o mesmo CPF já existe com NOME ou
+  // TELEFONE diferentes do que foi digitado agora, devolvemos um `conflito` em
+  // vez de salvar — quem chama (a tela) avisa e deixa a operadora decidir entre
+  // usar o cadastro existente ou atualizá-lo. `decisaoCliente` carrega a escolha:
+  //   undefined          → primeira passada: detecta e devolve o conflito
+  //   'usar_existente'    → mantém nome/telefone do banco
+  //   'atualizar'         → grava nome/telefone digitados por cima do cadastro
   let cliente_id
   if (cpf) {
     const { data: existente } = await supabase
       .from('clientes')
-      .select('id')
+      .select('id, nome, telefone')
       .eq('cpf_cnpj', cpf)
       .maybeSingle()
-    if (existente) cliente_id = existente.id
+
+    if (existente) {
+      cliente_id = existente.id
+      const telAntigo = soDigitos(existente.telefone)
+      const telNovo   = soDigitos(telefone)
+      const nomeDifere = (existente.nome || '').trim().toLowerCase() !== (cliente_nome || '').trim().toLowerCase()
+      // Telefone só conta como divergência quando os dois existem e diferem;
+      // cadastro sem telefone a gente completa sem incomodar (ver adiante).
+      const telDifere  = telAntigo && telNovo && telAntigo !== telNovo
+
+      if ((nomeDifere || telDifere) && !decisaoCliente) {
+        return {
+          conflito: {
+            existente: { nome: existente.nome, telefone: existente.telefone },
+            digitado:  { nome: cliente_nome, telefone },
+          },
+        }
+      }
+
+      // Atualiza o cadastro quando a operadora pediu, ou quando o cadastro
+      // antigo estava sem telefone e agora temos um (preenche sem atrito).
+      const completarTelVazio = !telAntigo && telNovo
+      if (decisaoCliente === 'atualizar') {
+        const { error: erroUpd } = await supabase
+          .from('clientes')
+          .update({ nome: cliente_nome, telefone })
+          .eq('id', existente.id)
+        if (erroUpd) { console.error('salvarParcelaComCliente (update cliente):', erroUpd); return { error: erroUpd } }
+      } else if (completarTelVazio) {
+        await supabase.from('clientes').update({ telefone }).eq('id', existente.id)
+      }
+    }
   }
 
   if (!cliente_id) {

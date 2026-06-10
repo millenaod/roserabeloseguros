@@ -42,13 +42,16 @@ export default function Parcelas() {
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
 
   async function handleSalvar(dados) {
-    const { error } = await salvar(dados)
-    if (!error) {
+    const res = await salvar(dados)
+    // Conflito de CPF: a própria Sheet abre o aviso e decide; não fecha nem avisa aqui.
+    if (res?.conflito) return res
+    if (!res?.error) {
       toast({ title: 'Parcela cadastrada!' })
       setSheetAberto(false)
     } else {
       toast({ title: 'Erro ao salvar', variant: 'destructive' })
     }
+    return res
   }
 
   async function handlePagar()  { await pagar(confirmPagar);   setConfirmPagar(null);   toast({ title: 'Marcada como paga!' }) }

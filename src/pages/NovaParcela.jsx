@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useNovaParcela } from '@/hooks/useNovaParcela'
 import { useToast } from '@/hooks/use-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { parcelasDeHoje } from '@/services/parcelas'
 import { Toaster } from '@/components/ui/toaster'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,11 +15,18 @@ import { Separator } from '@/components/ui/separator'
 import { formatarMoeda } from '@/utils/format'
 import { mascararTelefone, mascararMoeda, mascararCpf } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
-import { Paperclip, Clock, CheckCircle2 } from 'lucide-react'
+import { Paperclip, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
   return <p data-erro="true" className="text-xs text-[var(--status-error)] mt-1">{mensagem}</p>
+}
+
+// Mostra o telefone do banco (55 + DDD + número) como (DD) XXXXX-XXXX.
+function exibirTelefone(valor) {
+  const d = String(valor ?? '').replace(/\D/g, '')
+  const semDdi = d.startsWith('55') && d.length > 11 ? d.slice(2) : d
+  return semDdi ? mascararTelefone(semDdi) : '—'
 }
 
 export default function NovaParcela() {
@@ -25,18 +34,23 @@ export default function NovaParcela() {
   const queryClient = useQueryClient()
 
   const { form, erros, salvando, seguradoras, atualizar, salvar } = useNovaParcela()
+  const [conflito, setConflito] = useState(null)
 
   const { data: historico = [] } = useQuery({
     queryKey: ['parcelas-hoje'],
     queryFn: () => parcelasDeHoje().then(r => r.data),
   })
 
-  async function handleSalvar() {
-    const resultado = await salvar()
+  async function handleSalvar(decisaoCliente) {
+    const resultado = await salvar(decisaoCliente)
     if (resultado.sucesso) {
+      setConflito(null)
       toast({ title: 'Parcela cadastrada!', description: 'A parcela foi salva com sucesso.' })
       queryClient.invalidateQueries({ queryKey: ['parcelas-hoje'] })
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+    } else if (resultado.motivo === 'conflito') {
+      // Mesmo CPF com nome/telefone diferentes: abre o aviso pra operadora decidir.
+      setConflito(resultado.conflito)
     } else if (resultado.motivo === 'validacao') {
       // Não é erro de sistema: faltam campos. Nomeia quais e rola até o primeiro destacado.
       toast({
@@ -192,7 +206,7 @@ export default function NovaParcela() {
           <Button
             className="hidden md:flex w-full mt-2"
             style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-            onClick={handleSalvar}
+            onClick={() => handleSalvar()}
             disabled={salvando}
           >
             {salvando ? 'Salvando…' : 'Salvar Parcela'}
@@ -243,12 +257,58 @@ export default function NovaParcela() {
         <Button
           className="w-full"
           style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-          onClick={handleSalvar}
+          onClick={() => handleSalvar()}
           disabled={salvando}
         >
           {salvando ? 'Salvando…' : 'Salvar Parcela'}
         </Button>
       </div>
+
+      {/* Aviso de CPF já cadastrado com nome/telefone diferente */}
+      <Dialog open={!!conflito} onOpenChange={v => { if (!v) setConflito(null) }}>
+        <DialogContent className="bg-[var(--surface)]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-[var(--status-warning,#B45309)]" />
+              CPF já cadastrado
+            </DialogTitle>
+            <DialogDescription>
+              Esse CPF já existe no sistema com dados diferentes dos que você digitou.
+              Confira se é a mesma pessoa antes de continuar.
+            </DialogDescription>
+          </DialogHeader>
+
+          {conflito && (
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-md border border-[var(--border)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-1">No sistema</p>
+                <p className="font-medium">{conflito.existente.nome || '—'}</p>
+                <p className="text-[var(--text-secondary)]">{exibirTelefone(conflito.existente.telefone)}</p>
+              </div>
+              <div className="rounded-md border border-[var(--brand)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-1">Você digitou</p>
+                <p className="font-medium">{conflito.digitado.nome || '—'}</p>
+                <p className="text-[var(--text-secondary)]">{exibirTelefone(conflito.digitado.telefone)}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2 pt-2">
+            <Button variant="primary" className="w-full" disabled={salvando}
+              onClick={() => handleSalvar('atualizar')}>
+              {salvando ? 'Salvando…' : 'Atualizar com os dados novos'}
+            </Button>
+            <Button variant="outline" className="w-full" disabled={salvando}
+              onClick={() => handleSalvar('usar_existente')}>
+              Usar o cadastro existente
+            </Button>
+            <Button variant="ghost" className="w-full" disabled={salvando}
+              onClick={() => setConflito(null)}>
+              Cancelar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

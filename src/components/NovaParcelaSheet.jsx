@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpf, cpfValido } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
-import { Paperclip } from 'lucide-react'
+import { Paperclip, AlertTriangle } from 'lucide-react'
+
+// Mostra o telefone do banco (55 + DDD + número) como (DD) XXXXX-XXXX.
+function exibirTelefone(valor) {
+  const d = String(valor ?? '').replace(/\D/g, '')
+  const semDdi = d.startsWith('55') && d.length > 11 ? d.slice(2) : d
+  return semDdi ? mascararTelefone(semDdi) : '—'
+}
 
 const vazio = {
   cliente_nome: '', telefone: '', cpf: '',
@@ -31,6 +39,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
   const [form, setForm] = useState(vazio)
   const [erros, setErros] = useState({})
   const [salvando, setSalvando] = useState(false)
+  const [conflito, setConflito] = useState(null)
 
   function set(campo, valor) {
     setForm(f => ({ ...f, [campo]: valor }))
@@ -52,10 +61,8 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     return Object.keys(e).length === 0
   }
 
-  async function handleSalvar() {
-    if (!validar()) return
-    setSalvando(true)
-    await onSalvar({
+  function montarPayload(decisaoCliente) {
+    return {
       cliente_nome:    form.cliente_nome.trim(),
       telefone:        telefoneCompleto(form.telefone),
       cpf:             form.cpf.trim(),
@@ -65,11 +72,29 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
       data_vencimento: form.data_vencimento,
       tipo_pagamento:  form.tipo_pagamento,
       boletoFile:      form.boletoFile,
-    })
+      decisaoCliente,
+    }
+  }
+
+  // decisaoCliente: undefined na 1ª tentativa; 'usar_existente'/'atualizar' ao resolver o conflito.
+  async function enviar(decisaoCliente) {
+    setSalvando(true)
+    const res = await onSalvar(montarPayload(decisaoCliente))
     setSalvando(false)
+
+    // Mesmo CPF com nome/telefone diferentes: abre o aviso e mantém a Sheet aberta.
+    if (res?.conflito) { setConflito(res.conflito); return }
+    if (res?.error) return  // erro já avisado pelo pai; deixa a operadora corrigir
+
     setForm(vazio)
     setErros({})
+    setConflito(null)
     onFechar()
+  }
+
+  function handleSalvar() {
+    if (!validar()) return
+    enviar(undefined)
   }
 
   return (
@@ -160,6 +185,52 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </Button>
         </div>
       </SheetContent>
+
+      {/* Aviso de CPF já cadastrado com nome/telefone diferente */}
+      <Dialog open={!!conflito} onOpenChange={v => { if (!v) setConflito(null) }}>
+        <DialogContent className="bg-[var(--surface)]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-[var(--status-warning,#B45309)]" />
+              CPF já cadastrado
+            </DialogTitle>
+            <DialogDescription>
+              Esse CPF já existe no sistema com dados diferentes dos que você digitou.
+              Confira se é a mesma pessoa antes de continuar.
+            </DialogDescription>
+          </DialogHeader>
+
+          {conflito && (
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-md border border-[var(--border)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-1">No sistema</p>
+                <p className="font-medium">{conflito.existente.nome || '—'}</p>
+                <p className="text-[var(--text-secondary)]">{exibirTelefone(conflito.existente.telefone)}</p>
+              </div>
+              <div className="rounded-md border border-[var(--brand)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-1">Você digitou</p>
+                <p className="font-medium">{conflito.digitado.nome || '—'}</p>
+                <p className="text-[var(--text-secondary)]">{exibirTelefone(conflito.digitado.telefone)}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2 pt-2">
+            <Button variant="primary" className="w-full" disabled={salvando}
+              onClick={() => enviar('atualizar')}>
+              {salvando ? 'Salvando…' : 'Atualizar com os dados novos'}
+            </Button>
+            <Button variant="outline" className="w-full" disabled={salvando}
+              onClick={() => enviar('usar_existente')}>
+              Usar o cadastro existente
+            </Button>
+            <Button variant="ghost" className="w-full" disabled={salvando}
+              onClick={() => setConflito(null)}>
+              Cancelar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   )
 }
