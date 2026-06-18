@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { buscarParcelaPorId, atualizarStatus } from '@/services/parcelas'
+import { buscarParcelaPorId, atualizarStatus, atualizarBoleto as uploadNovoBoleto, solicitarNovaCobranca } from '@/services/parcelas'
 import { supabase } from '@/lib/supabase'
 
 export function useDetalheParcela(id) {
@@ -44,6 +44,21 @@ export function useDetalheParcela(id) {
     return { error }
   }
 
+  async function atualizarBoleto(file) {
+    const { error } = await uploadNovoBoleto(id, file)
+    if (!error) queryClient.invalidateQueries({ queryKey: ['parcela', id] })
+    return { error }
+  }
+
+  async function cobrarDeNovo(file) {
+    if (file) {
+      const { error } = await uploadNovoBoleto(id, file)
+      if (error) return { error }
+      queryClient.invalidateQueries({ queryKey: ['parcela', id] })
+    }
+    return solicitarNovaCobranca(id)
+  }
+
   async function enviarMensagem(texto) {
     const { error } = await supabase.from('contatos').insert({
       parcela_id: id,
@@ -65,6 +80,8 @@ export function useDetalheParcela(id) {
     desconsiderar: () => executarAcao({ status: 'desconsiderada' }),
     reativar: () => executarAcao({ status: 'pendente' }),
     remarcar,
+    atualizarBoleto,
+    cobrarDeNovo,
     enviarMensagem,
   }
 }

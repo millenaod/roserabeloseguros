@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { parcelasParaRevisar, solicitarNovaCobranca, atualizarStatus } from '@/services/parcelas'
+import { parcelasParaRevisar, solicitarNovaCobranca, atualizarStatus, atualizarBoleto } from '@/services/parcelas'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import StatusBadge from '@/components/StatusBadge'
 import EmptyState from '@/components/EmptyState'
-import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda } from '@/utils/format'
 import { linkWhatsApp } from '@/utils/whatsapp'
-import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle, Archive } from 'lucide-react'
+import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle, Archive, Paperclip } from 'lucide-react'
 
 function tempoDesde(iso) {
   if (!iso) return 'nunca contatado'
@@ -27,6 +27,7 @@ export default function Tarefas() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [confirmCobrar, setConfirmCobrar] = useState(null)
+  const [novoBoletoFile, setNovoBoletoFile] = useState(null)
   const [processando, setProcessando] = useState(null) // parcela_id em ação
 
   const { data: parcelas = [], isLoading } = useQuery({
@@ -41,8 +42,20 @@ export default function Tarefas() {
 
   async function handleCobrar() {
     const p = confirmCobrar
+    const arquivo = novoBoletoFile
     setConfirmCobrar(null)
+    setNovoBoletoFile(null)
     setProcessando(p.parcela_id)
+
+    if (arquivo) {
+      const { error: erroBoleto } = await atualizarBoleto(p.parcela_id, arquivo)
+      if (erroBoleto) {
+        setProcessando(null)
+        toast({ title: 'Erro ao enviar boleto', description: erroBoleto.message, variant: 'destructive' })
+        return
+      }
+    }
+
     const { error } = await solicitarNovaCobranca(p.parcela_id)
     setProcessando(null)
     if (error) toast({ title: 'Não foi possível cobrar', description: 'Tente novamente em instantes.', variant: 'destructive' })
@@ -133,14 +146,45 @@ export default function Tarefas() {
         )}
       </div>
 
-      <ConfirmDialog
-        aberto={!!confirmCobrar}
-        onFechar={() => setConfirmCobrar(null)}
-        onConfirmar={handleCobrar}
-        titulo="Enviar nova cobrança?"
-        descricao={confirmCobrar ? `Vai disparar uma nova mensagem de WhatsApp com o boleto para ${confirmCobrar.cliente_nome}.` : ''}
-        labelConfirmar="Enviar cobrança"
-      />
+      <Dialog open={!!confirmCobrar} onOpenChange={v => { if (!v) { setConfirmCobrar(null); setNovoBoletoFile(null) } }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)]">Enviar nova cobrança?</DialogTitle>
+            {confirmCobrar && (
+              <DialogDescription className="text-[var(--text-secondary)]">
+                Uma nova mensagem de WhatsApp será disparada para {confirmCobrar.cliente_nome}.
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <div className="flex flex-col gap-1.5 py-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Boleto atualizado? Anexe antes de enviar</p>
+            <label className="w-full cursor-pointer">
+              <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none" asChild>
+                <span>
+                  <Paperclip className="w-4 h-4" />
+                  {novoBoletoFile ? novoBoletoFile.name : 'Anexar novo boleto (opcional)'}
+                </span>
+              </Button>
+              <input
+                type="file"
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => { setConfirmCobrar(null); setNovoBoletoFile(null) }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCobrar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              Enviar cobrança
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -213,6 +213,19 @@ export async function solicitarNovaCobranca(parcelaId) {
   }
 }
 
+export async function atualizarBoleto(id, file) {
+  const { url, error: uploadError } = await uploadBoleto(file)
+  if (uploadError) return { error: uploadError }
+
+  const { error } = await supabase
+    .from('parcelas')
+    .update({ boleto_url: url })
+    .eq('id', id)
+
+  if (error) console.error('atualizarBoleto:', error)
+  return { error }
+}
+
 export async function atualizarStatus(id, status) {
   const { data, error } = await supabase
     .from('parcelas')
