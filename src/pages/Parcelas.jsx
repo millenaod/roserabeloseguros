@@ -250,18 +250,26 @@ export default function Parcelas() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-display">Cobrar de novo</DialogTitle>
-            {cobrarParcela && <p className="text-sm text-[var(--text-secondary)]">Tem boleto atualizado? Anexe antes de enviar.</p>}
           </DialogHeader>
-          <label className="w-full cursor-pointer">
-            <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none" asChild>
-              <span><Paperclip className="w-4 h-4" />{novoBoletoFile ? novoBoletoFile.name : 'Anexar novo boleto (opcional)'}</span>
-            </Button>
-            <input type="file" accept="application/pdf,image/*" className="hidden"
-              onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)} />
-          </label>
+          <div className="flex flex-col gap-1.5">
+            {cobrarParcela?.boleto_url && !novoBoletoFile && (
+              <p className="text-xs text-[var(--text-secondary)]">Será enviado o boleto já anexado. Troque abaixo se tiver um atualizado.</p>
+            )}
+            <label className="w-full cursor-pointer">
+              <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none" asChild>
+                <span><Paperclip className="w-4 h-4" />{novoBoletoFile ? novoBoletoFile.name : cobrarParcela?.boleto_url ? 'Substituir boleto' : 'Anexar boleto *'}</span>
+              </Button>
+              <input type="file" accept="application/pdf,image/*" className="hidden"
+                onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)} />
+            </label>
+            {!cobrarParcela?.boleto_url && !novoBoletoFile && (
+              <p className="text-xs text-[var(--status-error)]">O template exige um boleto anexado.</p>
+            )}
+          </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => { setCobrarParcela(null); setNovoBoletoFile(null) }}>Cancelar</Button>
-            <Button onClick={handleCobrar} disabled={processandoCobrar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+            <Button onClick={handleCobrar} disabled={processandoCobrar || (!cobrarParcela?.boleto_url && !novoBoletoFile)}
+              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
               {processandoCobrar ? 'Enviando…' : 'Enviar'}
             </Button>
           </DialogFooter>

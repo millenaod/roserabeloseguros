@@ -158,29 +158,29 @@ export default function Tarefas() {
           </DialogHeader>
 
           <div className="flex flex-col gap-1.5 py-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Boleto atualizado? Anexe antes de enviar</p>
+            {confirmCobrar?.boleto_url && !novoBoletoFile && (
+              <p className="text-xs text-[var(--text-secondary)]">Será enviado o boleto já anexado. Troque abaixo se tiver um atualizado.</p>
+            )}
             <label className="w-full cursor-pointer">
               <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none" asChild>
                 <span>
                   <Paperclip className="w-4 h-4" />
-                  {novoBoletoFile ? novoBoletoFile.name : 'Anexar novo boleto (opcional)'}
+                  {novoBoletoFile ? novoBoletoFile.name : confirmCobrar?.boleto_url ? 'Substituir boleto' : 'Anexar boleto *'}
                 </span>
               </Button>
-              <input
-                type="file"
-                accept="application/pdf,image/*"
-                className="hidden"
-                onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)}
-              />
+              <input type="file" accept="application/pdf,image/*" className="hidden"
+                onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)} />
             </label>
+            {!confirmCobrar?.boleto_url && !novoBoletoFile && (
+              <p className="text-xs text-[var(--status-error)]">O template exige um boleto anexado.</p>
+            )}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={() => { setConfirmCobrar(null); setNovoBoletoFile(null) }}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCobrar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
-              Enviar cobrança
+            <Button variant="ghost" onClick={() => { setConfirmCobrar(null); setNovoBoletoFile(null) }}>Cancelar</Button>
+            <Button onClick={handleCobrar} disabled={!confirmCobrar?.boleto_url && !novoBoletoFile}
+              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              Enviar
             </Button>
           </DialogFooter>
         </DialogContent>
