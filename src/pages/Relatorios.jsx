@@ -90,7 +90,7 @@ export default function Relatorios() {
               <Button onClick={aplicar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
                 <Search className="w-4 h-4 mr-2" /> Consultar
               </Button>
-              {aplicados && <Button variant="ghost" onClick={limpar} className="text-[var(--text-secondary)]">Limpar</Button>}
+              <Button variant="ghost" onClick={limpar} className="text-[var(--text-secondary)]">Mês atual</Button>
             </div>
           </CardContent>
         </Card>

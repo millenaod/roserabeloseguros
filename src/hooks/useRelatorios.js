@@ -1,12 +1,36 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
-const filtrosVazios = { data_inicio: '', data_fim: '', seguradora_id: '', status: '' }
+function inicioPadrao() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+}
+
+function hoje() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function filtrosPadrao() {
+  return { data_inicio: inicioPadrao(), data_fim: hoje(), seguradora_id: '', status: '' }
+}
 
 export function useRelatorios() {
-  const [filtros, setFiltros] = useState(filtrosVazios)
-  const [aplicados, setAplicados] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  function lerDaUrl() {
+    return {
+      data_inicio:   searchParams.get('de')     || inicioPadrao(),
+      data_fim:      searchParams.get('ate')    || hoje(),
+      seguradora_id: searchParams.get('seg')    || '',
+      status:        searchParams.get('status') || '',
+    }
+  }
+
+  const [filtros, setFiltros] = useState(lerDaUrl)
+  // Inicia já aplicado (com o que vier da URL ou os padrões do mês)
+  const [aplicados, setAplicados] = useState(lerDaUrl)
 
   const { data: parcelas = [], isLoading, isFetching } = useQuery({
     queryKey: ['relatorio', aplicados],
@@ -30,9 +54,31 @@ export function useRelatorios() {
     pagos: parcelas.filter(p => p.status === 'pago').reduce((acc, p) => acc + (p.valor || 0), 0),
   }
 
-  function aplicar() { setAplicados({ ...filtros }) }
-  function limpar()  { setFiltros(filtrosVazios); setAplicados(null) }
-  function atualizar(campo, valor) { setFiltros(prev => ({ ...prev, [campo]: valor })) }
+  function salvarUrl(f) {
+    const p = {}
+    if (f.data_inicio)   p.de     = f.data_inicio
+    if (f.data_fim)      p.ate    = f.data_fim
+    if (f.seguradora_id) p.seg    = f.seguradora_id
+    if (f.status)        p.status = f.status
+    setSearchParams(p, { replace: true })
+  }
+
+  function aplicar() {
+    const f = { ...filtros }
+    setAplicados(f)
+    salvarUrl(f)
+  }
+
+  function limpar() {
+    const f = filtrosPadrao()
+    setFiltros(f)
+    setAplicados(f)
+    salvarUrl(f)
+  }
+
+  function atualizar(campo, valor) {
+    setFiltros(prev => ({ ...prev, [campo]: valor }))
+  }
 
   return { filtros, parcelas, totais, isLoading: isLoading && isFetching, aplicados, atualizar, aplicar, limpar }
 }
