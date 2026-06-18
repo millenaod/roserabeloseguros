@@ -13,6 +13,8 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { solicitarNovaCobranca, atualizarBoleto } from '@/services/parcelas'
+import { Paperclip } from 'lucide-react'
 import ParcelaRow from '@/components/ParcelaRow'
 import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
@@ -37,6 +39,9 @@ export default function Parcelas() {
   const [confirmEscalar, setConfirmEscalar] = useState(null)
   const [remarcarId, setRemarcarId]       = useState(null)
   const [novaData, setNovaData]           = useState('')
+  const [cobrarParcela, setCobrarParcela] = useState(null)
+  const [novoBoletoFile, setNovoBoletoFile] = useState(null)
+  const [processandoCobrar, setProcessandoCobrar] = useState(false)
 
   const { parcelas, isLoading, filtros, busca, setBusca, executando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
@@ -52,6 +57,20 @@ export default function Parcelas() {
       toast({ title: 'Erro ao salvar', variant: 'destructive' })
     }
     return res
+  }
+
+  async function handleCobrar() {
+    const p = cobrarParcela
+    const arquivo = novoBoletoFile
+    setCobrarParcela(null); setNovoBoletoFile(null); setProcessandoCobrar(true)
+    if (arquivo) {
+      const { error } = await atualizarBoleto(p.parcela_id, arquivo)
+      if (error) { setProcessandoCobrar(false); toast({ title: 'Erro ao enviar boleto', variant: 'destructive' }); return }
+    }
+    const { error } = await solicitarNovaCobranca(p.parcela_id)
+    setProcessandoCobrar(false)
+    if (error) toast({ title: 'Não foi possível cobrar', variant: 'destructive' })
+    else toast({ title: 'Cobrança enviada!', description: `Mensagem disparada para ${p.cliente_nome}.` })
   }
 
   async function handlePagar()  { await pagar(confirmPagar);   setConfirmPagar(null);   toast({ title: 'Marcada como paga!' }) }
@@ -198,6 +217,7 @@ export default function Parcelas() {
                         onPagar={() => setConfirmPagar(p.parcela_id)}
                         onRemarcar={() => { setRemarcarId(p.parcela_id); setNovaData('') }}
                         onEscalar={() => setConfirmEscalar(p.parcela_id)}
+                        onCobrar={() => { setCobrarParcela(p); setNovoBoletoFile(null) }}
                       />
                     ))
                   )}
@@ -208,7 +228,7 @@ export default function Parcelas() {
         ) : (
           isLoading
             ? <div className="flex gap-4">{[...Array(4)].map((_, i) => <div key={i} className="w-60 shrink-0"><Skeleton className="h-6 w-32 mb-2" /><Skeleton className="h-28 w-full" /></div>)}</div>
-            : <PainelKanban parcelas={parcelas} onMoverCard={moverKanban} />
+            : <PainelKanban parcelas={parcelas} onMoverCard={moverKanban} onCobrar={p => { setCobrarParcela(p); setNovoBoletoFile(null) }} />
         )}
       </div>
 
@@ -225,6 +245,28 @@ export default function Parcelas() {
         titulo="Marcar como paga?" labelConfirmar="Confirmar" carregando={executando} />
       <ConfirmDialog aberto={!!confirmEscalar} onFechar={() => setConfirmEscalar(null)} onConfirmar={handleEscalar}
         titulo="Escalar para vendedor?" labelConfirmar="Escalar" carregando={executando} />
+
+      <Dialog open={!!cobrarParcela} onOpenChange={v => { if (!v) { setCobrarParcela(null); setNovoBoletoFile(null) } }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Cobrar de novo</DialogTitle>
+            {cobrarParcela && <p className="text-sm text-[var(--text-secondary)]">Tem boleto atualizado? Anexe antes de enviar.</p>}
+          </DialogHeader>
+          <label className="w-full cursor-pointer">
+            <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none" asChild>
+              <span><Paperclip className="w-4 h-4" />{novoBoletoFile ? novoBoletoFile.name : 'Anexar novo boleto (opcional)'}</span>
+            </Button>
+            <input type="file" accept="application/pdf,image/*" className="hidden"
+              onChange={e => setNovoBoletoFile(e.target.files?.[0] ?? null)} />
+          </label>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => { setCobrarParcela(null); setNovoBoletoFile(null) }}>Cancelar</Button>
+            <Button onClick={handleCobrar} disabled={processandoCobrar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              {processandoCobrar ? 'Enviando…' : 'Enviar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!remarcarId} onOpenChange={v => !v && setRemarcarId(null)}>
         <DialogContent className="sm:max-w-sm">

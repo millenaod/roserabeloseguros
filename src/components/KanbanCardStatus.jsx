@@ -3,8 +3,9 @@ import { CSS } from '@dnd-kit/utilities'
 import { useNavigate } from 'react-router-dom'
 import { formatarMoeda, formatarDataCurta } from '@/utils/format'
 import { cn } from '@/lib/utils'
+import { Send } from 'lucide-react'
 
-export default function KanbanCardStatus({ parcela }) {
+export default function KanbanCardStatus({ parcela, onCobrar }) {
   const navigate = useNavigate()
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: parcela.parcela_id,
@@ -44,6 +45,15 @@ export default function KanbanCardStatus({ parcela }) {
         )}>
           {parcela.dias_atraso}d em atraso
         </span>
+      )}
+      {onCobrar && (
+        <button
+          onPointerDown={e => e.stopPropagation()}
+          onClick={e => { e.stopPropagation(); onCobrar(parcela) }}
+          className="flex items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:underline self-start mt-0.5"
+        >
+          <Send className="w-3 h-3" /> Cobrar de novo
+        </button>
       )}
     </div>
   )

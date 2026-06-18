@@ -20,7 +20,7 @@ const COLUNA_DE = {
   escalado: 'escalado',
 }
 
-function Coluna({ status, label, cor, parcelas }) {
+function Coluna({ status, label, cor, parcelas, onCobrar }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
@@ -40,7 +40,7 @@ function Coluna({ status, label, cor, parcelas }) {
         )}
       >
         {parcelas.map(p => (
-          <KanbanCardStatus key={p.parcela_id} parcela={p} />
+          <KanbanCardStatus key={p.parcela_id} parcela={p} onCobrar={onCobrar} />
         ))}
         {parcelas.length === 0 && (
           <p className="text-xs text-[var(--text-muted)] text-center py-4 select-none">Vazio</p>
@@ -50,7 +50,7 @@ function Coluna({ status, label, cor, parcelas }) {
   )
 }
 
-export default function PainelKanban({ parcelas, onMoverCard }) {
+export default function PainelKanban({ parcelas, onMoverCard, onCobrar }) {
   const [cardArrastando, setCardArrastando] = useState(null)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
@@ -81,6 +81,7 @@ export default function PainelKanban({ parcelas, onMoverCard }) {
             label={col.label}
             cor={col.cor}
             parcelas={porStatus[col.status] ?? []}
+            onCobrar={onCobrar}
           />
         ))}
       </div>

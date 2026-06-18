@@ -149,10 +149,10 @@ export default function Tarefas() {
       <Dialog open={!!confirmCobrar} onOpenChange={v => { if (!v) { setConfirmCobrar(null); setNovoBoletoFile(null) } }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)]">Enviar nova cobrança?</DialogTitle>
+            <DialogTitle className="font-display">Cobrar de novo</DialogTitle>
             {confirmCobrar && (
               <DialogDescription className="text-[var(--text-secondary)]">
-                Uma nova mensagem de WhatsApp será disparada para {confirmCobrar.cliente_nome}.
+                Tem boleto atualizado? Anexe antes de enviar para {confirmCobrar.cliente_nome}.
               </DialogDescription>
             )}
           </DialogHeader>

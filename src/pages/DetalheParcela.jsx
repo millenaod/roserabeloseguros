@@ -288,8 +288,8 @@ export default function DetalheParcela() {
       <Dialog open={cobrarAberto} onOpenChange={v => { if (!v) { setCobrarAberto(false); setNovoBoletoFile(null) } }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)]">Enviar nova cobrança?</DialogTitle>
-            <p className="text-sm text-[var(--text-secondary)]">Uma nova mensagem de WhatsApp será disparada para {parcela?.cliente_nome}.</p>
+            <DialogTitle className="font-display">Cobrar de novo</DialogTitle>
+            <p className="text-sm text-[var(--text-secondary)]">Tem boleto atualizado? Anexe antes de enviar.</p>
           </DialogHeader>
           <div className="flex flex-col gap-1.5 py-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Boleto atualizado? Anexe antes de enviar</p>
