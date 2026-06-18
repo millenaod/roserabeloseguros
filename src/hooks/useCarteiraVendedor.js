@@ -53,16 +53,20 @@ export function useCarteiraVendedor() {
     a.nome.localeCompare(b.nome)
   )
 
-  // Lê a observação salva direto da tabela clientes (a view de parcelas não traz
-  // esse campo, por isso a observação não reaparecia ao reabrir o cliente).
+  // Lê as observações do cliente como array. Suporta retrocompat com o formato
+  // antigo (texto puro), que vira uma única entrada na lista.
   async function buscarObservacao(cliente_id) {
-    if (!cliente_id) return ''
+    if (!cliente_id) return []
     const { data } = await supabase
       .from('clientes')
       .select('observacoes')
       .eq('id', cliente_id)
       .maybeSingle()
-    return data?.observacoes ?? ''
+    const raw = data?.observacoes ?? ''
+    if (!raw) return []
+    try { return JSON.parse(raw) } catch {
+      return [{ id: crypto.randomUUID(), texto: raw, criado_em: new Date(0).toISOString() }]
+    }
   }
 
   async function buscarContatosCliente(cliente_id) {
@@ -76,14 +80,13 @@ export function useCarteiraVendedor() {
     return data ?? []
   }
 
-  async function salvarObservacao(cliente_id, texto) {
+  async function salvarObservacao(cliente_id, array) {
     setSalvandoObs(true)
     const { error } = await supabase
       .from('clientes')
-      .update({ observacoes: texto })
+      .update({ observacoes: JSON.stringify(array) })
       .eq('id', cliente_id)
     setSalvandoObs(false)
-    if (!error) queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
     return { error }
   }
 

@@ -168,6 +168,7 @@ export async function criarApoliceEParcela({ cliente_id, seguradora_id, numero_a
     .single()
 
   if (error) console.error('criarApoliceEParcela (parcela):', error)
+  if (!error && data) registrarContatoEnvio(data.id)
   return { data, error }
 }
 
@@ -196,6 +197,16 @@ export async function parcelasParaRevisar() {
   return { data: data ?? [], error }
 }
 
+function registrarContatoEnvio(parcelaId) {
+  supabase.from('contatos').insert({
+    parcela_id: parcelaId,
+    tipo: 'mensagem',
+    canal: 'whatsapp_api',
+    mensagem_enviada: 'Cobrança enviada via WhatsApp',
+    enviado_em: new Date().toISOString(),
+  })
+}
+
 // Dispara uma nova cobrança chamando o mesmo webhook do n8n que o cadastro aciona.
 const N8N_COBRANCA_URL = 'https://millenaod.app.n8n.cloud/webhook/parcela-nova'
 export async function solicitarNovaCobranca(parcelaId) {
@@ -206,6 +217,7 @@ export async function solicitarNovaCobranca(parcelaId) {
       body: JSON.stringify({ record: { id: parcelaId } }),
     })
     if (!resp.ok) return { error: new Error('Falha ao acionar a cobrança (HTTP ' + resp.status + ')') }
+    registrarContatoEnvio(parcelaId)
     return { error: null }
   } catch (e) {
     console.error('solicitarNovaCobranca:', e)

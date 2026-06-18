@@ -15,7 +15,40 @@ import TimelineContatos from '@/components/TimelineContatos'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp, numeroWhatsApp } from '@/utils/whatsapp'
-import { Briefcase, AlertTriangle, MessageCircle, Search, CheckCircle2 } from 'lucide-react'
+import { Briefcase, AlertTriangle, MessageCircle, Search, CheckCircle2, Pencil, Trash2, Plus } from 'lucide-react'
+
+function ObservacaoItem({ obs, onEditar, onExcluir }) {
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState(obs.texto)
+  if (editando) {
+    return (
+      <div className="flex flex-col gap-2 p-3 rounded-md border border-[var(--brand)] bg-[var(--surface-raised)]">
+        <Textarea rows={2} value={texto} onChange={e => setTexto(e.target.value)} autoFocus />
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => { onEditar(obs.id, texto); setEditando(false) }}
+            disabled={!texto.trim()} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>Salvar</Button>
+          <Button size="sm" variant="ghost" onClick={() => { setTexto(obs.texto); setEditando(false) }}>Cancelar</Button>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-start gap-2 p-3 rounded-md border border-[var(--border)] bg-[var(--surface)]">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-[var(--text-primary)] whitespace-pre-wrap">{obs.texto}</p>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatarData(obs.criado_em)}</p>
+      </div>
+      <div className="flex gap-1 shrink-0">
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditando(true)}>
+          <Pencil className="w-3.5 h-3.5" />
+        </Button>
+        <Button size="icon" variant="ghost" className="h-7 w-7 text-[var(--status-error)]" onClick={() => onExcluir(obs.id)}>
+          <Trash2 className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 const FILTROS = [
   { id: 'todos',     label: 'Todos' },
@@ -40,7 +73,9 @@ export default function CarteiraVendedor() {
   const [clienteSelecionado, setClienteSelecionado] = useState(null)
   const [contatos, setContatos] = useState([])
   const [carregandoContatos, setCarregandoContatos] = useState(false)
-  const [observacao, setObservacao] = useState('')
+  const [observacoes, setObservacoes] = useState([])
+  const [adicionandoObs, setAdicionandoObs] = useState(false)
+  const [novaObs, setNovaObs] = useState('')
 
   const termo = busca.trim().toLowerCase()
   const visiveis = clientes.filter(c => {
@@ -54,21 +89,39 @@ export default function CarteiraVendedor() {
 
   async function abrirDetalhe(cliente) {
     setClienteSelecionado(cliente)
-    setObservacao('')
+    setObservacoes([])
+    setAdicionandoObs(false)
+    setNovaObs('')
     setCarregandoContatos(true)
     const [data, obs] = await Promise.all([
       buscarContatosCliente(cliente.cliente_id),
       buscarObservacao(cliente.cliente_id),
     ])
     setContatos(data)
-    setObservacao(obs)
+    setObservacoes(obs)
     setCarregandoContatos(false)
   }
 
-  async function handleSalvarObservacao() {
-    const { error } = await salvarObservacao(clienteSelecionado.cliente_id, observacao)
-    if (error) toast({ title: 'Erro ao salvar', description: 'Tente novamente.', variant: 'destructive' })
-    else toast({ title: 'Observação salva!' })
+  async function handleAdicionarObs() {
+    const nova = { id: crypto.randomUUID(), texto: novaObs.trim(), criado_em: new Date().toISOString() }
+    const novas = [...observacoes, nova]
+    const { error } = await salvarObservacao(clienteSelecionado.cliente_id, novas)
+    if (error) toast({ title: 'Erro ao salvar', variant: 'destructive' })
+    else { setObservacoes(novas); setNovaObs(''); setAdicionandoObs(false) }
+  }
+
+  async function handleEditarObs(id, texto) {
+    const novas = observacoes.map(o => o.id === id ? { ...o, texto } : o)
+    const { error } = await salvarObservacao(clienteSelecionado.cliente_id, novas)
+    if (error) toast({ title: 'Erro ao salvar', variant: 'destructive' })
+    else setObservacoes(novas)
+  }
+
+  async function handleExcluirObs(id) {
+    const novas = observacoes.filter(o => o.id !== id)
+    const { error } = await salvarObservacao(clienteSelecionado.cliente_id, novas)
+    if (error) toast({ title: 'Erro ao salvar', variant: 'destructive' })
+    else setObservacoes(novas)
   }
 
   const parcelasAbertas  = clienteSelecionado?.parcelas.filter(p => parcelaEmAberto(p.status)) ?? []
@@ -239,25 +292,39 @@ export default function CarteiraVendedor() {
 
           <Separator className="mb-6" />
 
-          {/* Observação */}
+          {/* Observações */}
           <div className="flex flex-col gap-2">
             <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Observação sobre o cliente
+              Observações sobre o cliente
             </Label>
-            <Textarea
-              rows={3}
-              placeholder="Anote informações relevantes sobre este cliente…"
-              value={observacao}
-              onChange={e => setObservacao(e.target.value)}
-            />
-            <Button
-              size="sm"
-              onClick={handleSalvarObservacao}
-              disabled={salvandoObs}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-            >
-              {salvandoObs ? 'Salvando…' : 'Salvar observação'}
-            </Button>
+
+            {observacoes.length === 0 && !adicionandoObs && (
+              <p className="text-sm text-[var(--text-muted)]">Nenhuma observação ainda.</p>
+            )}
+
+            {observacoes.map(obs => (
+              <ObservacaoItem key={obs.id} obs={obs} onEditar={handleEditarObs} onExcluir={handleExcluirObs} />
+            ))}
+
+            {adicionandoObs ? (
+              <div className="flex flex-col gap-2 p-3 rounded-md border border-[var(--brand)] bg-[var(--surface-raised)]">
+                <Textarea rows={2} placeholder="Anote algo sobre este cliente…" value={novaObs}
+                  onChange={e => setNovaObs(e.target.value)} autoFocus />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleAdicionarObs} disabled={!novaObs.trim() || salvandoObs}
+                    style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                    {salvandoObs ? 'Salvando…' : 'Salvar'}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setAdicionandoObs(false); setNovaObs('') }}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button size="sm" variant="outline" className="self-start gap-1.5" onClick={() => setAdicionandoObs(true)}>
+                <Plus className="w-3.5 h-3.5" /> Adicionar observação
+              </Button>
+            )}
           </div>
         </SheetContent>
       </Sheet>
