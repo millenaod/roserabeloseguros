@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -15,7 +14,7 @@ import StatusBadge from '@/components/StatusBadge'
 import TimelineContatos from '@/components/TimelineContatos'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda, formatarData } from '@/utils/format'
-import { linkWhatsApp, mensagemCobrancaPadrao } from '@/utils/whatsapp'
+import { linkWhatsApp } from '@/utils/whatsapp'
 import { labelTipoPagamento } from '@/utils/pagamento'
 import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText, Archive, RotateCcw, Paperclip, Trash2 } from 'lucide-react'
 
@@ -33,16 +32,13 @@ export default function DetalheParcela() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const { parcela, isLoading, contatos, executando, pagar, escalar, desconsiderar, reativar, remarcar, atualizarBoleto, cobrarDeNovo, excluir, enviarMensagem } = useDetalheParcela(id)
+  const { parcela, isLoading, contatos, executando, pagar, escalar, desconsiderar, reativar, remarcar, atualizarBoleto, cobrarDeNovo, excluir } = useDetalheParcela(id)
 
   const [confirmPagar, setConfirmPagar]     = useState(false)
   const [confirmEscalar, setConfirmEscalar] = useState(false)
   const [confirmDesconsiderar, setConfirmDesconsiderar] = useState(false)
   const [remarcarAberto, setRemarcarAberto] = useState(false)
-  const [mensagemAberto, setMensagemAberto] = useState(false)
   const [novaData, setNovaData]             = useState('')
-  const [textoMensagem, setTextoMensagem]   = useState('')
-  const [enviando, setEnviando]             = useState(false)
   const [enviandoBoleto, setEnviandoBoleto] = useState(false)
   const [cobrarAberto, setCobrarAberto]     = useState(false)
   const [novoBoletoFile, setNovoBoletoFile] = useState(null)
@@ -114,13 +110,6 @@ export default function DetalheParcela() {
     else toast({ title: 'Cobrança enviada!', description: `Nova mensagem disparada para ${parcela.cliente_nome}.` })
   }
 
-  async function handleEnviarMensagem() {
-    if (!textoMensagem.trim()) return
-    setEnviando(true)
-    const { error } = await enviarMensagem(textoMensagem.trim())
-    setEnviando(false)
-    if (!error) { setMensagemAberto(false); setTextoMensagem(''); toast({ title: 'Mensagem registrada!' }) }
-  }
 
   if (isLoading) {
     return (
@@ -206,11 +195,6 @@ export default function DetalheParcela() {
               <Button className="w-full justify-start gap-2" style={{ backgroundColor: '#25D366', color: 'white' }}
                 onClick={() => window.open(linkWhatsApp(parcela), '_blank', 'noopener')}>
                 <MessageCircle className="w-4 h-4" /> Abrir no WhatsApp
-              </Button>
-
-              <Button variant="outline" className="w-full justify-start gap-2"
-                onClick={() => { setTextoMensagem(mensagemCobrancaPadrao(parcela)); setMensagemAberto(true) }}>
-                <Send className="w-4 h-4" /> Mensagem manual…
               </Button>
 
               {parcela.boleto_url && (
@@ -347,26 +331,6 @@ export default function DetalheParcela() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={mensagemAberto} onOpenChange={v => !v && setMensagemAberto(false)}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle className="font-display">Enviar mensagem</DialogTitle></DialogHeader>
-          <div className="flex flex-col gap-1.5 py-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Texto da mensagem</Label>
-            <Textarea rows={4} placeholder="Digite a mensagem…" value={textoMensagem}
-              onChange={e => setTextoMensagem(e.target.value)} autoFocus />
-          </div>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={handleEnviarMensagem} disabled={!textoMensagem.trim() || enviando}>
-              {enviando ? 'Salvando…' : 'Só registrar'}
-            </Button>
-            <Button onClick={() => window.open(linkWhatsApp(parcela, textoMensagem), '_blank', 'noopener')}
-              disabled={!textoMensagem.trim()} className="gap-2"
-              style={{ backgroundColor: '#25D366', color: 'white' }}>
-              <MessageCircle className="w-4 h-4" /> Abrir no WhatsApp
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
