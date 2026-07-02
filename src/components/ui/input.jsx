@@ -7,7 +7,7 @@ const Input = React.forwardRef(({ className, type, error, success, ...props }, r
     ? "border-semantic-danger focus-visible:border-semantic-danger focus-visible:shadow-focus"
     : success
     ? "border-semantic-success focus-visible:border-semantic-success focus-visible:shadow-focus"
-    : "border-neutral-200 dark:border-neutral-700 focus-visible:border-brand-primary focus-visible:shadow-focus";
+    : "border-neutral-200 focus-visible:border-brand-primary focus-visible:shadow-focus";
 
   const input = (
     <input

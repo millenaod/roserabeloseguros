@@ -146,7 +146,7 @@ export default function Relatorios() {
                 <TableBody>
                   {parcelas.map(p => (
                     <TableRow key={p.id} className="hover:bg-[var(--surface-raised)] transition-colors">
-                      <TableCell className="font-medium text-[var(--text-primary)]">{p.nome_cliente}</TableCell>
+                      <TableCell className="font-medium text-[var(--text-primary)]">{p.cliente_nome}</TableCell>
                       <TableCell className="text-[var(--text-secondary)]">{p.seguradora}</TableCell>
                       <TableCell className="text-[var(--text-secondary)]">{p.numero_apolice}</TableCell>
                       <TableCell className="font-medium">{formatarMoeda(p.valor)}</TableCell>

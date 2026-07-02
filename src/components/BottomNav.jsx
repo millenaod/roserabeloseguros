@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import ThemeToggle from '@/components/ThemeToggle'
-
 const navItems = [
   { to: '/',             icon: LayoutDashboard, label: 'Parcelas' },
   { to: '/tarefas',      icon: ListChecks,      label: 'Tarefas' },
@@ -21,7 +19,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 flex h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 flex h-16">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -82,7 +80,6 @@ export default function BottomNav() {
               <HelpCircle className="w-4 h-4" />
               Ajuda
             </button>
-            <ThemeToggle className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors" />
             <button
               onClick={() => { sair(); setPerfilAberto(false) }}
               className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--status-error)] hover:bg-[var(--status-error-bg)] transition-colors"

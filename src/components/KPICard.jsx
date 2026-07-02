@@ -27,7 +27,7 @@ export default function KPICard({ valor, label, variacao, variant = 'default' })
         <span className={cn('font-display font-bold text-[32px] leading-tight', corValor)}>
           {valor}
         </span>
-        <span className="text-xs text-neutral-500 dark:text-neutral-400 font-body">
+        <span className="text-xs text-neutral-500 font-body">
           {label}
         </span>
         {temVariacao && (

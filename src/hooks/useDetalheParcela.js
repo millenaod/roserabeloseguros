@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { buscarParcelaPorId, atualizarStatus, atualizarBoleto as uploadNovoBoleto, solicitarNovaCobranca } from '@/services/parcelas'
+import { buscarParcelaPorId, atualizarStatus, atualizarBoleto as uploadNovoBoleto, solicitarNovaCobranca, excluirParcela } from '@/services/parcelas'
 import { supabase } from '@/lib/supabase'
 
 export function useDetalheParcela(id) {
@@ -59,6 +59,10 @@ export function useDetalheParcela(id) {
     return solicitarNovaCobranca(id)
   }
 
+  async function excluir() {
+    return excluirParcela(id)
+  }
+
   async function enviarMensagem(texto) {
     const { error } = await supabase.from('contatos').insert({
       parcela_id: id,
@@ -82,6 +86,7 @@ export function useDetalheParcela(id) {
     remarcar,
     atualizarBoleto,
     cobrarDeNovo,
+    excluir,
     enviarMensagem,
   }
 }

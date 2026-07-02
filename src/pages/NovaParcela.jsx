@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { parcelasDeHoje } from '@/services/parcelas'
 import { Toaster } from '@/components/ui/toaster'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,6 +16,16 @@ import { formatarMoeda } from '@/utils/format'
 import { mascararTelefone, mascararMoeda, mascararCpf } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
 import { Paperclip, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
+
+function LinhaRevisao({ label, valor }) {
+  if (!valor) return null
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-[var(--border)] last:border-0">
+      <span className="text-sm text-[var(--text-secondary)] shrink-0">{label}</span>
+      <span className="text-sm font-medium text-[var(--text-primary)] text-right">{valor}</span>
+    </div>
+  )
+}
 
 function CampoErro({ mensagem }) {
   if (!mensagem) return null
@@ -33,13 +43,23 @@ export default function NovaParcela() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const { form, erros, salvando, seguradoras, atualizar, salvar } = useNovaParcela()
+  const { form, erros, salvando, seguradoras, atualizar, validar, salvar } = useNovaParcela()
   const [conflito, setConflito] = useState(null)
+  const [revisao, setRevisao]   = useState(false)
 
   const { data: historico = [] } = useQuery({
     queryKey: ['parcelas-hoje'],
     queryFn: () => parcelasDeHoje().then(r => r.data),
   })
+
+  function abrirRevisao() {
+    const e = validar()
+    if (Object.keys(e).length > 0) {
+      document.querySelector('[data-erro="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+    setRevisao(true)
+  }
 
   async function handleSalvar(decisaoCliente) {
     const resultado = await salvar(decisaoCliente)
@@ -206,7 +226,7 @@ export default function NovaParcela() {
           <Button
             className="hidden md:flex w-full mt-2"
             style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-            onClick={() => handleSalvar()}
+            onClick={abrirRevisao}
             disabled={salvando}
           >
             {salvando ? 'Salvando…' : 'Salvar Parcela'}
@@ -257,12 +277,41 @@ export default function NovaParcela() {
         <Button
           className="w-full"
           style={{ backgroundColor: 'var(--brand)', color: 'white' }}
-          onClick={() => handleSalvar()}
+          onClick={abrirRevisao}
           disabled={salvando}
         >
           {salvando ? 'Salvando…' : 'Salvar Parcela'}
         </Button>
       </div>
+
+      {/* Revisão antes de salvar */}
+      <Dialog open={revisao} onOpenChange={v => { if (!v) setRevisao(false) }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Revise antes de enviar</DialogTitle>
+            <DialogDescription>Confirme os dados abaixo antes de cadastrar a parcela.</DialogDescription>
+          </DialogHeader>
+          <div className="py-1">
+            <LinhaRevisao label="Cliente"    valor={form.clienteNome} />
+            <LinhaRevisao label="WhatsApp"   valor={form.clienteWhatsapp} />
+            <LinhaRevisao label="CPF"        valor={form.cpf} />
+            <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
+            <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
+            <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
+            <LinhaRevisao label="Vencimento" valor={formatarData(form.data_vencimento)} />
+            <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
+            <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
+            <LinhaRevisao label="Observação" valor={form.observacao || null} />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setRevisao(false)}>Voltar e editar</Button>
+            <Button onClick={() => { setRevisao(false); handleSalvar() }} disabled={salvando}
+              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              {salvando ? 'Salvando…' : 'Confirmar e salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Aviso de CPF já cadastrado com nome/telefone diferente */}
       <Dialog open={!!conflito} onOpenChange={v => { if (!v) setConflito(null) }}>

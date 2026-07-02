@@ -225,6 +225,15 @@ export async function solicitarNovaCobranca(parcelaId) {
   }
 }
 
+export async function excluirParcela(id) {
+  const { error } = await supabase
+    .from('parcelas')
+    .delete()
+    .eq('id', id)
+  if (error) console.error('excluirParcela:', error)
+  return { error }
+}
+
 export async function atualizarBoleto(id, file) {
   const { url, error: uploadError } = await uploadBoleto(file)
   if (uploadError) return { error: uploadError }

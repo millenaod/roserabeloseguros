@@ -10,7 +10,7 @@ export default function EmptyState({ icone: Icone = InboxIcon, titulo, descricao
       <div className="flex flex-col gap-1">
         <p className="font-display text-lg font-bold text-[var(--text-primary)]">{titulo}</p>
         {descricao && (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs">{descricao}</p>
+          <p className="text-sm text-neutral-500 max-w-xs">{descricao}</p>
         )}
       </div>
       {acaoLabel && onAcao && (

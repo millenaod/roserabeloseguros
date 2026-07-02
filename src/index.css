@@ -92,44 +92,6 @@
     --font-body:    'Inter', sans-serif;
   }
 
-  .dark {
-    /* Shadcn/ui tokens — tema escuro */
-    --background:         0 0% 5%;     /* #0D0D0D — neutral-900 */
-    --foreground:         0 0% 100%;   /* #FFFFFF */
-
-    --card:               0 0% 10%;    /* #1A1A1A — neutral-800 */
-    --card-foreground:    0 0% 100%;
-
-    --popover:            0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary:            6 100% 40%;  /* #CC1500 — brand-primary */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary:          0 0% 17%;    /* #2C2C2C — neutral-700 */
-    --secondary-foreground: 0 0% 100%;
-
-    --muted:              0 0% 17%;
-    --muted-foreground:   0 0% 60%;    /* #999999 — neutral-400 */
-
-    --accent:             0 0% 17%;
-    --accent-foreground:  0 0% 100%;
-
-    --destructive:        4 100% 44%;  /* #CC1500 — semantic-danger */
-    --destructive-foreground: 0 0% 100%;
-
-    --border:             0 0% 17%;    /* #2C2C2C — neutral-700 */
-    --input:              0 0% 17%;
-    --ring:               6 100% 40%;  /* #CC1500 */
-
-    /* Tokens de projeto — tema escuro */
-    --surface:        #1A1A1A;
-    --surface-raised: #2C2C2C;
-    --text-primary:   #FFFFFF;
-    --text-secondary: #999999;
-    --text-muted:     #555555;
-    --brand-tint:     rgba(204, 21, 0, 0.16);
-  }
 }
 
 * {

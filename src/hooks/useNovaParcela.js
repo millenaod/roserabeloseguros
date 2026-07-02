@@ -92,6 +92,6 @@ export function useNovaParcela() {
 
   return {
     form, erros, salvando, seguradoras,
-    atualizar, salvar,
+    atualizar, validar, salvar,
   }
 }

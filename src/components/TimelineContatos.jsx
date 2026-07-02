@@ -11,7 +11,7 @@ const icones = {
 const cores = {
   mensagem:   'text-[var(--status-sent)]   bg-[var(--status-sent-bg)]',
   escalado:   'text-[var(--status-escalated)] bg-[var(--status-escalated-bg)]',
-  observacao: 'text-[var(--text-secondary)] bg-neutral-100 dark:bg-neutral-700',
+  observacao: 'text-[var(--text-secondary)] bg-neutral-100',
 }
 
 function formatarHora(dataHora) {
@@ -45,7 +45,7 @@ export default function TimelineContatos({ contatos = [] }) {
                 <Icone className="w-4 h-4" />
               </div>
               {!isUltimo && (
-                <div className="w-px flex-1 bg-neutral-200 dark:bg-neutral-700 my-1" />
+                <div className="w-px flex-1 bg-neutral-200 my-1" />
               )}
             </div>
 

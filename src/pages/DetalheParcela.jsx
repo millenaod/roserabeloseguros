@@ -17,7 +17,7 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp, mensagemCobrancaPadrao } from '@/utils/whatsapp'
 import { labelTipoPagamento } from '@/utils/pagamento'
-import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText, Archive, RotateCcw, Paperclip } from 'lucide-react'
+import { ArrowLeft, CheckCircle, CalendarClock, ArrowUpCircle, Send, MessageCircle, FileText, Archive, RotateCcw, Paperclip, Trash2 } from 'lucide-react'
 
 function InfoLinha({ label, valor }) {
   return (
@@ -33,7 +33,7 @@ export default function DetalheParcela() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const { parcela, isLoading, contatos, executando, pagar, escalar, desconsiderar, reativar, remarcar, atualizarBoleto, cobrarDeNovo, enviarMensagem } = useDetalheParcela(id)
+  const { parcela, isLoading, contatos, executando, pagar, escalar, desconsiderar, reativar, remarcar, atualizarBoleto, cobrarDeNovo, excluir, enviarMensagem } = useDetalheParcela(id)
 
   const [confirmPagar, setConfirmPagar]     = useState(false)
   const [confirmEscalar, setConfirmEscalar] = useState(false)
@@ -47,6 +47,8 @@ export default function DetalheParcela() {
   const [cobrarAberto, setCobrarAberto]     = useState(false)
   const [novoBoletoFile, setNovoBoletoFile] = useState(null)
   const [cobrando, setCobrando]             = useState(false)
+  const [confirmExcluir, setConfirmExcluir] = useState(false)
+  const [excluindo, setExcluindo]           = useState(false)
 
   async function handlePagar() {
     await pagar()
@@ -69,6 +71,17 @@ export default function DetalheParcela() {
   async function handleReativar() {
     await reativar()
     toast({ title: 'Parcela reativada!', description: 'Voltou para a cobrança como "A cobrar".' })
+  }
+
+  async function handleExcluir() {
+    setExcluindo(true)
+    const { error } = await excluir()
+    setExcluindo(false)
+    if (error) {
+      toast({ title: 'Não foi possível excluir', description: error.message, variant: 'destructive' })
+    } else {
+      navigate('/')
+    }
   }
 
   async function handleRemarcar() {
@@ -250,6 +263,13 @@ export default function DetalheParcela() {
                     onClick={() => setConfirmDesconsiderar(true)}>
                     <Archive className="w-4 h-4" /> Desconsiderar
                   </Button>
+
+                  <Separator className="my-1" />
+
+                  <Button variant="ghost" className="w-full justify-start gap-2 text-[var(--status-error)]"
+                    onClick={() => setConfirmExcluir(true)}>
+                    <Trash2 className="w-4 h-4" /> Excluir parcela
+                  </Button>
                 </>
               )}
             </CardContent>
@@ -258,6 +278,15 @@ export default function DetalheParcela() {
       </div>
 
       {/* Dialogs */}
+      <ConfirmDialog aberto={confirmExcluir} onFechar={() => setConfirmExcluir(false)}
+        onConfirmar={handleExcluir}
+        titulo="Excluir parcela?"
+        descricao={`Essa ação não pode ser desfeita. A parcela de ${parcela?.cliente_nome ?? ''} será removida permanentemente do sistema.`}
+        labelConfirmar="Excluir permanentemente"
+        carregando={excluindo}
+        variante="destructive"
+      />
+
       <ConfirmDialog aberto={confirmPagar} onFechar={() => setConfirmPagar(false)}
         onConfirmar={handlePagar} titulo="Marcar como paga?"
         descricao="O status será atualizado para pago." labelConfirmar="Confirmar pagamento" carregando={executando} />

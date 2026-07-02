@@ -1,13 +1,24 @@
 import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpf, cpfValido } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
+import { formatarData } from '@/utils/format'
 import { Paperclip, AlertTriangle } from 'lucide-react'
+
+function LinhaRevisao({ label, valor }) {
+  if (!valor) return null
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-[var(--border)] last:border-0">
+      <span className="text-sm text-[var(--text-secondary)] shrink-0">{label}</span>
+      <span className="text-sm font-medium text-[var(--text-primary)] text-right">{valor}</span>
+    </div>
+  )
+}
 
 // Mostra o telefone do banco (55 + DDD + número) como (DD) XXXXX-XXXX.
 function exibirTelefone(valor) {
@@ -40,6 +51,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
   const [erros, setErros] = useState({})
   const [salvando, setSalvando] = useState(false)
   const [conflito, setConflito] = useState(null)
+  const [revisao, setRevisao]   = useState(false)
 
   function set(campo, valor) {
     setForm(f => ({ ...f, [campo]: valor }))
@@ -94,7 +106,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
 
   function handleSalvar() {
     if (!validar()) return
-    enviar(undefined)
+    setRevisao(true)
   }
 
   return (
@@ -185,6 +197,33 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </Button>
         </div>
       </SheetContent>
+
+      {/* Revisão antes de salvar */}
+      <Dialog open={revisao} onOpenChange={v => { if (!v) setRevisao(false) }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Revise antes de enviar</DialogTitle>
+            <DialogDescription>Confirme os dados abaixo antes de cadastrar a parcela.</DialogDescription>
+          </DialogHeader>
+          <div className="py-1">
+            <LinhaRevisao label="Cliente"    valor={form.cliente_nome} />
+            <LinhaRevisao label="WhatsApp"   valor={form.telefone} />
+            <LinhaRevisao label="CPF"        valor={form.cpf} />
+            <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
+            <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
+            <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
+            <LinhaRevisao label="Vencimento" valor={formatarData(form.data_vencimento)} />
+            <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
+            <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setRevisao(false)}>Voltar e editar</Button>
+            <Button variant="primary" onClick={() => { setRevisao(false); enviar(undefined) }} disabled={salvando}>
+              {salvando ? 'Salvando…' : 'Confirmar e salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Aviso de CPF já cadastrado com nome/telefone diferente */}
       <Dialog open={!!conflito} onOpenChange={v => { if (!v) setConflito(null) }}>
