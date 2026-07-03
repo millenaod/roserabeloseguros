@@ -282,27 +282,14 @@ export default function CarteiraVendedor() {
       {/* Sheet de detalhe do cliente */}
       <Sheet open={!!clienteSelecionado} onOpenChange={v => { if (!v) { setClienteSelecionado(null); setEditando(false) } }}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <SheetTitle className="font-display text-lg">{clienteSelecionado?.nome}</SheetTitle>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {clienteSelecionado?.temPendencia
-                    ? `${formatarMoeda(clienteSelecionado?.valorAberto ?? 0)} em aberto`
-                    : 'Sem pendências — em dia'}
-                </p>
-              </div>
-              {!editando && (
-                <div className="flex gap-1 shrink-0">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={abrirEdicao}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-[var(--status-error)]" onClick={() => setConfirmandoExclusao(true)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+          {/* Header: só título + subtítulo — longe do X de fechar do Sheet */}
+          <SheetHeader className="mb-5 pr-6">
+            <SheetTitle className="font-display text-lg">{clienteSelecionado?.nome}</SheetTitle>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {clienteSelecionado?.temPendencia
+                ? `${formatarMoeda(clienteSelecionado?.valorAberto ?? 0)} em aberto`
+                : 'Sem pendências — em dia'}
+            </p>
           </SheetHeader>
 
           {/* Formulário de edição */}
@@ -338,15 +325,26 @@ export default function CarteiraVendedor() {
             </div>
           )}
 
-          {/* Contato por WhatsApp */}
-          {!editando && clienteSelecionado?.telefone && (
-            <Button
-              className="w-full justify-center gap-2 mb-6"
-              style={{ backgroundColor: '#25D366', color: 'white' }}
-              onClick={() => window.open(linkContatoCliente(clienteSelecionado), '_blank', 'noopener')}
-            >
-              <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
-            </Button>
+          {/* Barra de ações (visualização normal) */}
+          {!editando && (
+            <div className="flex gap-2 mb-6">
+              {clienteSelecionado?.telefone && (
+                <Button
+                  className="flex-1 justify-center gap-2"
+                  style={{ backgroundColor: '#25D366', color: 'white' }}
+                  onClick={() => window.open(linkContatoCliente(clienteSelecionado), '_blank', 'noopener')}
+                >
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
+                </Button>
+              )}
+              <Button variant="outline" className="gap-2 px-4" onClick={abrirEdicao}>
+                <Pencil className="w-4 h-4" /> Editar
+              </Button>
+              <Button variant="outline" className="gap-2 px-4 text-[var(--status-error)] border-[var(--status-error)] hover:bg-red-50"
+                onClick={() => setConfirmandoExclusao(true)}>
+                <Trash2 className="w-4 h-4" /> Excluir
+              </Button>
+            </div>
           )}
 
           {/* Conteúdo de visualização (oculto durante edição) */}
