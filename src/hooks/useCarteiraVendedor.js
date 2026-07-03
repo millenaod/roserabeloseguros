@@ -79,7 +79,7 @@ export function useCarteiraVendedor() {
       .from('contatos')
       .select('*')
       .in('parcela_id', ids)
-      .order('data_contato', { ascending: false })
+      .order('enviado_em', { ascending: false })
     return data ?? []
   }
 

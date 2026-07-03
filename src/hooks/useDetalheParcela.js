@@ -18,7 +18,7 @@ export function useDetalheParcela(id) {
         .from('contatos')
         .select('*')
         .eq('parcela_id', id)
-        .order('data_contato', { ascending: true })
+        .order('enviado_em', { ascending: true })
       return data ?? []
     },
     enabled: !!id,
