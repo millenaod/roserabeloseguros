@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { login, limparParcelas } from './helpers/setup'
+import { login, limparParcelas, criarClienteTeste } from './helpers/setup'
 
 test.beforeEach(async ({ page }) => {
   await login(page)
@@ -247,4 +247,18 @@ test('D6 — Thainá escala parcela para vendedor e status muda para escalado', 
   await page.getByRole('button', { name: 'Escalar' }).click()
 
   await expect(page.getByText('Parcela escalada para vendedor.')).toBeVisible()
+})
+
+test('D7 — Thainá exclui parcela e ela some da listagem ao voltar para home', async ({ page }) => {
+  const { parcelaId } = await criarClienteTeste()
+
+  await page.goto(`/parcelas/${parcelaId}`)
+  await expect(page.getByText('Dados da parcela')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Excluir parcela' }).click()
+  await expect(page.getByText('Excluir parcela?')).toBeVisible()
+  await page.getByRole('button', { name: 'Excluir permanentemente' }).click()
+
+  await expect(page).toHaveURL('/')
+  await expect(page.getByText('João da Silva Teste')).not.toBeVisible()
 })

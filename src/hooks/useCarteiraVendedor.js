@@ -101,7 +101,8 @@ export function useCarteiraVendedor() {
 
   async function excluirCliente(cliente_id, parcelaIds) {
     for (const id of parcelaIds) {
-      await excluirParcela(id)
+      const { error } = await excluirParcela(id)
+      if (error) return { error }
     }
     // Apólices ficam no banco após deletar parcelas; a FK apolices→clientes
     // bloquearia a exclusão do cliente se não removermos antes.

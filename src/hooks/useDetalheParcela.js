@@ -60,7 +60,12 @@ export function useDetalheParcela(id) {
   }
 
   async function excluir() {
-    return excluirParcela(id)
+    const result = await excluirParcela(id)
+    if (!result.error) {
+      queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+      queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
+    }
+    return result
   }
 
   async function enviarMensagem(texto) {
