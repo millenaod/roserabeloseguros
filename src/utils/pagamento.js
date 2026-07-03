@@ -5,16 +5,21 @@
 // `anexaBoleto` = se o template tem cabeçalho de documento (o boleto vai anexado).
 // `variaveisCorpo` = variáveis posicionais do corpo do template, na ordem.
 //
-// Estrutura confirmada por teste real contra a Meta (07/06): os 3 templates têm cabeçalho
-// Documento (boleto anexado) e 2 variáveis no corpo = (1) primeiro nome do cliente, (2) atendente.
-// O nome de cada variável muda por template (named params), por isso a lista guarda os nomes reais:
-//   boleto            -> cobranca_de_boleto   : anexa boleto | vars: nome, usuario
-//   debito_automatico -> regularizacao_debito : anexa boleto | vars: nome, nome_usuario
-//   cartao_credito    -> recusa_cartao        : anexa boleto | vars: primeiro_nome, nome_usuario
+// Templates com 3 variáveis (aprovados no Meta em jul/2026):
+//   {{1}} primeiro nome do cliente
+//   {{2}} atendente (Thainá)
+//   {{3}} nome da seguradora (ex: Porto Seguro)
+//
+//   boleto            -> cobranca_de_boleto   : vars: nome, usuario, seguradora
+//   debito_automatico -> regularizacao_debito : vars: nome, nome_usuario, seguradora
+//   cartao_credito    -> recusa_cartao        : vars: primeiro_nome, nome_usuario, seguradora
+//
+// ATENÇÃO n8n: o array de parâmetros do corpo agora tem 3 itens — o 3º é seguradora_nome
+// (campo disponível na view v_parcelas_ui).
 export const TIPOS_PAGAMENTO = [
-  { value: 'boleto',            label: 'Boleto',            template: 'cobranca_de_boleto',   anexaBoleto: true, variaveisCorpo: ['nome', 'usuario'] },
-  { value: 'debito_automatico', label: 'Débito automático', template: 'regularizacao_debito', anexaBoleto: true, variaveisCorpo: ['nome', 'nome_usuario'] },
-  { value: 'cartao_credito',    label: 'Cartão de crédito', template: 'recusa_cartao',        anexaBoleto: true, variaveisCorpo: ['primeiro_nome', 'nome_usuario'] },
+  { value: 'boleto',            label: 'Boleto',            template: 'cobranca_de_boleto',   anexaBoleto: true, variaveisCorpo: ['nome', 'usuario', 'seguradora'] },
+  { value: 'debito_automatico', label: 'Débito automático', template: 'regularizacao_debito', anexaBoleto: true, variaveisCorpo: ['nome', 'nome_usuario', 'seguradora'] },
+  { value: 'cartao_credito',    label: 'Cartão de crédito', template: 'recusa_cartao',        anexaBoleto: true, variaveisCorpo: ['primeiro_nome', 'nome_usuario', 'seguradora'] },
 ]
 
 export function labelTipoPagamento(valor) {
