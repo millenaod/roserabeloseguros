@@ -1,17 +1,33 @@
 import { formatarData } from '@/utils/format'
 import { cn } from '@/lib/utils'
-import { MessageCircle, ArrowUpCircle, FileText } from 'lucide-react'
+import { MessageCircle, ArrowUpCircle, FileText, AlertCircle } from 'lucide-react'
 
 const icones = {
   mensagem:   MessageCircle,
   escalado:   ArrowUpCircle,
   observacao: FileText,
+  erro:       AlertCircle,
 }
 
 const cores = {
   mensagem:   'text-[var(--status-sent)]   bg-[var(--status-sent-bg)]',
   escalado:   'text-[var(--status-escalated)] bg-[var(--status-escalated-bg)]',
   observacao: 'text-[var(--text-secondary)] bg-neutral-100',
+  erro:       'text-[var(--status-error)] bg-red-50',
+}
+
+function decodificar(texto) {
+  if (!texto) return texto
+  try { return decodeURIComponent(texto) } catch { return texto }
+}
+
+function parsearContato(contato) {
+  const msg = decodificar(contato.mensagem_enviada ?? '')
+  if (msg.startsWith('Falha')) {
+    const [, detalhe] = msg.split(/\r?\n/)
+    return { tipo: 'erro', titulo: 'Falha no envio', detalhe: detalhe?.trim() ?? null }
+  }
+  return { tipo: contato.tipo, titulo: msg || contato.tipo, detalhe: null }
 }
 
 function formatarHora(dataHora) {
@@ -32,8 +48,9 @@ export default function TimelineContatos({ contatos = [] }) {
   return (
     <ol className="flex flex-col gap-0">
       {contatos.map((contato, i) => {
-        const Icone = icones[contato.tipo] ?? MessageCircle
-        const corClasse = cores[contato.tipo] ?? cores.observacao
+        const { tipo, titulo, detalhe } = parsearContato(contato)
+        const Icone = icones[tipo] ?? MessageCircle
+        const corClasse = cores[tipo] ?? cores.observacao
         const isUltimo = i === contatos.length - 1
 
         return (
@@ -51,9 +68,12 @@ export default function TimelineContatos({ contatos = [] }) {
 
             {/* Conteúdo */}
             <div className={cn('pb-5 flex-1', isUltimo && 'pb-0')}>
-              <p className="text-sm font-medium text-[var(--text-primary)] leading-snug">
-                {contato.mensagem_enviada || contato.tipo}
+              <p className={cn('text-sm font-medium leading-snug', tipo === 'erro' ? 'text-[var(--status-error)]' : 'text-[var(--text-primary)]')}>
+                {titulo}
               </p>
+              {detalhe && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5 break-words">{detalhe}</p>
+              )}
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 {formatarData(contato.enviado_em)}
                 {contato.enviado_em && <> às {formatarHora(contato.enviado_em)}</>}
