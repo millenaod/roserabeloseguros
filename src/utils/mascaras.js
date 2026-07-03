@@ -52,6 +52,24 @@ export function cpfValido(valor) {
   return soDigitos(valor).length === 11
 }
 
+// Exibe CPF (000.000.000-00) ou CNPJ (00.000.000/0001-00) conforme a quantidade de dígitos.
+export function mascararCpfCnpj(valor) {
+  const d = soDigitos(valor).slice(0, 14)
+  if (d.length <= 11) return mascararCpf(d)
+  // CNPJ: 00.000.000/0001-00
+  if (d.length <= 2)  return d
+  if (d.length <= 5)  return `${d.slice(0, 2)}.${d.slice(2)}`
+  if (d.length <= 8)  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+}
+
+// CPF (11 dígitos) ou CNPJ (14 dígitos).
+export function cpfCnpjValido(valor) {
+  const n = soDigitos(valor).length
+  return n === 11 || n === 14
+}
+
 function soDigitos(valor) {
   return String(valor ?? '').replace(/\D/g, '')
 }

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formatarMoeda } from '@/utils/format'
-import { mascararTelefone, mascararMoeda, mascararCpf } from '@/utils/mascaras'
+import { mascararTelefone, mascararMoeda, mascararCpfCnpj } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
 import { Paperclip, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
 
@@ -147,8 +147,8 @@ export default function NovaParcela() {
           {/* CPF + Parcela */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">CPF do cliente</Label>
-              <Input inputMode="numeric" placeholder="000.000.000-00" value={form.cpf} onChange={e => atualizar('cpf', mascararCpf(e.target.value))} />
+              <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">CPF / CNPJ do cliente</Label>
+              <Input inputMode="numeric" placeholder="CPF ou CNPJ" value={form.cpf} onChange={e => atualizar('cpf', mascararCpfCnpj(e.target.value))} />
               <CampoErro mensagem={erros.cpf} />
             </div>
             <div className="flex flex-col gap-1.5">

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Eye, EyeOff } from 'lucide-react'
 
 const DESTINO_POR_PERFIL = {
   rose:     '/dashboard-rose',
@@ -19,6 +20,7 @@ export default function Login() {
   const [senha, setSenha]   = useState('')
   const [erro, setErro]     = useState('')
   const [carregando, setCarregando] = useState(false)
+  const [verSenha, setVerSenha]     = useState(false)
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -93,13 +95,24 @@ export default function Login() {
 
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Senha</Label>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={senha}
-                    onChange={e => setSenha(e.target.value)}
-                    autoComplete="current-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={verSenha ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={senha}
+                      onChange={e => setSenha(e.target.value)}
+                      autoComplete="current-password"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setVerSenha(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                      tabIndex={-1}
+                    >
+                      {verSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {erro && (

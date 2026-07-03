@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpf, cpfValido } from '@/utils/mascaras'
+import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpfCnpj, cpfCnpjValido } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
 import { formatarData } from '@/utils/format'
 import { Paperclip, AlertTriangle } from 'lucide-react'
@@ -62,7 +62,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     const e = {}
     if (!form.cliente_nome.trim())   e.cliente_nome   = true
     if (!form.telefone.trim() || !telefoneValido(form.telefone)) e.telefone = true
-    if (!form.cpf.trim() || !cpfValido(form.cpf)) e.cpf = true
+    if (!form.cpf.trim() || !cpfCnpjValido(form.cpf)) e.cpf = true
     if (!form.seguradora_id)         e.seguradora_id  = true
     if (!form.numero_parcela)        e.numero_parcela = true
     if (!form.valor)                 e.valor          = true
@@ -142,9 +142,9 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </Campo>
 
           <div className="grid grid-cols-2 gap-3">
-            <Campo label="CPF do cliente" erro={erros.cpf}>
-              <Input inputMode="numeric" placeholder="000.000.000-00" value={form.cpf}
-                onChange={e => set('cpf', mascararCpf(e.target.value))} />
+            <Campo label="CPF / CNPJ" erro={erros.cpf}>
+              <Input inputMode="numeric" placeholder="CPF ou CNPJ" value={form.cpf}
+                onChange={e => set('cpf', mascararCpfCnpj(e.target.value))} />
             </Campo>
             <Campo label="Nº Parcela" erro={erros.numero_parcela}>
               <Input type="number" min="1" placeholder="1" value={form.numero_parcela}
@@ -208,7 +208,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           <div className="py-1">
             <LinhaRevisao label="Cliente"    valor={form.cliente_nome} />
             <LinhaRevisao label="WhatsApp"   valor={form.telefone} />
-            <LinhaRevisao label="CPF"        valor={form.cpf} />
+            <LinhaRevisao label="CPF/CNPJ"   valor={form.cpf} />
             <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
             <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
             <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
