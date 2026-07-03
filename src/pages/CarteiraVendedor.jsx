@@ -9,12 +9,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import StatusBadge from '@/components/StatusBadge'
 import TimelineContatos from '@/components/TimelineContatos'
 import EmptyState from '@/components/EmptyState'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp, numeroWhatsApp } from '@/utils/whatsapp'
+import { mascararTelefone, mascararCpfCnpj, telefoneValido, cpfCnpjValido, telefoneCompleto } from '@/utils/mascaras'
 import { Briefcase, AlertTriangle, MessageCircle, Search, CheckCircle2, Pencil, Trash2, Plus } from 'lucide-react'
 
 function ObservacaoItem({ obs, onEditar, onExcluir }) {
@@ -66,7 +68,7 @@ function linkContatoCliente(cliente) {
 
 export default function CarteiraVendedor() {
   const { toast } = useToast()
-  const { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao } = useCarteiraVendedor()
+  const { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao, atualizarCliente, excluirCliente } = useCarteiraVendedor()
 
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState('todos')
@@ -76,6 +78,13 @@ export default function CarteiraVendedor() {
   const [observacoes, setObservacoes] = useState([])
   const [adicionandoObs, setAdicionandoObs] = useState(false)
   const [novaObs, setNovaObs] = useState('')
+
+  const [editando, setEditando] = useState(false)
+  const [formEdit, setFormEdit] = useState({ nome: '', telefone: '', cpf: '' })
+  const [errosEdit, setErrosEdit] = useState({})
+  const [salvandoEdit, setSalvandoEdit] = useState(false)
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false)
+  const [excluindo, setExcluindo] = useState(false)
 
   const termo = busca.trim().toLowerCase()
   const visiveis = clientes.filter(c => {
@@ -92,6 +101,8 @@ export default function CarteiraVendedor() {
     setObservacoes([])
     setAdicionandoObs(false)
     setNovaObs('')
+    setEditando(false)
+    setErrosEdit({})
     setCarregandoContatos(true)
     const [data, obs] = await Promise.all([
       buscarContatosCliente(cliente.cliente_id),
@@ -100,6 +111,60 @@ export default function CarteiraVendedor() {
     setContatos(data)
     setObservacoes(obs)
     setCarregandoContatos(false)
+  }
+
+  function abrirEdicao() {
+    const telSem55 = String(clienteSelecionado.telefone ?? '').replace(/^\D*55/, '')
+    setFormEdit({
+      nome: clienteSelecionado.nome,
+      telefone: mascararTelefone(telSem55),
+      cpf: clienteSelecionado.cpf ?? '',
+    })
+    setErrosEdit({})
+    setEditando(true)
+  }
+
+  async function handleSalvarEdicao() {
+    const e = {}
+    if (!formEdit.nome.trim())             e.nome     = true
+    if (!telefoneValido(formEdit.telefone)) e.telefone = true
+    if (!cpfCnpjValido(formEdit.cpf))      e.cpf      = true
+    setErrosEdit(e)
+    if (Object.keys(e).length) return
+
+    setSalvandoEdit(true)
+    const { error } = await atualizarCliente(clienteSelecionado.cliente_id, {
+      nome:     formEdit.nome.trim(),
+      telefone: telefoneCompleto(formEdit.telefone),
+      cpf_cnpj: formEdit.cpf.trim(),
+    })
+    setSalvandoEdit(false)
+    if (error) {
+      toast({ title: 'Erro ao salvar', variant: 'destructive' })
+    } else {
+      setClienteSelecionado(prev => ({
+        ...prev,
+        nome:     formEdit.nome.trim(),
+        telefone: telefoneCompleto(formEdit.telefone),
+        cpf:      formEdit.cpf.trim(),
+      }))
+      setEditando(false)
+      toast({ title: 'Cliente atualizado com sucesso' })
+    }
+  }
+
+  async function handleExcluirCliente() {
+    setExcluindo(true)
+    const parcelaIds = clienteSelecionado.parcelas.map(p => p.parcela_id)
+    const { error } = await excluirCliente(clienteSelecionado.cliente_id, parcelaIds)
+    setExcluindo(false)
+    if (error) {
+      toast({ title: 'Erro ao excluir cliente', variant: 'destructive' })
+    } else {
+      setConfirmandoExclusao(false)
+      setClienteSelecionado(null)
+      toast({ title: 'Cliente excluído' })
+    }
   }
 
   async function handleAdicionarObs() {
@@ -215,19 +280,66 @@ export default function CarteiraVendedor() {
       </div>
 
       {/* Sheet de detalhe do cliente */}
-      <Sheet open={!!clienteSelecionado} onOpenChange={v => !v && setClienteSelecionado(null)}>
+      <Sheet open={!!clienteSelecionado} onOpenChange={v => { if (!v) { setClienteSelecionado(null); setEditando(false) } }}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="mb-4">
-            <SheetTitle className="font-display text-lg">{clienteSelecionado?.nome}</SheetTitle>
-            <p className="text-sm text-[var(--text-secondary)]">
-              {clienteSelecionado?.temPendencia
-                ? `${formatarMoeda(clienteSelecionado?.valorAberto ?? 0)} em aberto`
-                : 'Sem pendências — em dia'}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <SheetTitle className="font-display text-lg">{clienteSelecionado?.nome}</SheetTitle>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {clienteSelecionado?.temPendencia
+                    ? `${formatarMoeda(clienteSelecionado?.valorAberto ?? 0)} em aberto`
+                    : 'Sem pendências — em dia'}
+                </p>
+              </div>
+              {!editando && (
+                <div className="flex gap-1 shrink-0">
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={abrirEdicao}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-[var(--status-error)]" onClick={() => setConfirmandoExclusao(true)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </SheetHeader>
 
+          {/* Formulário de edição */}
+          {editando && (
+            <div className="flex flex-col gap-3 mb-6">
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Nome</Label>
+                <Input value={formEdit.nome} onChange={e => setFormEdit(f => ({ ...f, nome: e.target.value }))} autoFocus />
+                {errosEdit.nome && <p className="text-xs text-[var(--status-error)]">Informe o nome</p>}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">WhatsApp</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)] pointer-events-none">+55</span>
+                  <Input className="pl-12" inputMode="numeric" value={formEdit.telefone}
+                    onChange={e => setFormEdit(f => ({ ...f, telefone: mascararTelefone(e.target.value) }))} />
+                </div>
+                {errosEdit.telefone && <p className="text-xs text-[var(--status-error)]">WhatsApp incompleto</p>}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">CPF / CNPJ</Label>
+                <Input inputMode="numeric" value={formEdit.cpf}
+                  onChange={e => setFormEdit(f => ({ ...f, cpf: mascararCpfCnpj(e.target.value) }))} />
+                {errosEdit.cpf && <p className="text-xs text-[var(--status-error)]">CPF ou CNPJ inválido</p>}
+              </div>
+              <div className="flex gap-2 pt-1">
+                <Button onClick={handleSalvarEdicao} disabled={salvandoEdit}
+                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                  {salvandoEdit ? 'Salvando…' : 'Salvar'}
+                </Button>
+                <Button variant="ghost" onClick={() => setEditando(false)}>Cancelar</Button>
+              </div>
+            </div>
+          )}
+
           {/* Contato por WhatsApp */}
-          {clienteSelecionado?.telefone && (
+          {!editando && clienteSelecionado?.telefone && (
             <Button
               className="w-full justify-center gap-2 mb-6"
               style={{ backgroundColor: '#25D366', color: 'white' }}
@@ -237,97 +349,126 @@ export default function CarteiraVendedor() {
             </Button>
           )}
 
-          {/* Parcelas em aberto (destaque) */}
-          <div className="flex flex-col gap-3 mb-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              {parcelasAbertas.length > 0 ? 'Parcelas em aberto' : 'Nenhuma parcela em aberto'}
-            </h3>
-            {parcelasAbertas.map(p => (
-              <div key={p.parcela_id} className="flex items-center justify-between py-2 px-3 rounded-md bg-[var(--surface-raised)] text-sm">
-                <div>
-                  <p className="font-medium text-[var(--text-primary)]">{p.seguradora_nome}</p>
-                  <p className="text-xs text-[var(--text-secondary)]">Venc. {formatarData(p.data_vencimento)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[var(--text-primary)]">{formatarMoeda(p.valor)}</span>
-                  <StatusBadge status={p.status} />
-                </div>
-              </div>
-            ))}
-
-            {/* Histórico completo (pagas/desconsideradas) — recolhido */}
-            {parcelasFechadas.length > 0 && (
-              <details className="group">
-                <summary className="cursor-pointer list-none text-xs font-medium text-[var(--brand)] hover:underline">
-                  Ver histórico completo ({parcelasFechadas.length})
-                </summary>
-                <div className="flex flex-col gap-2 mt-2">
-                  {parcelasFechadas.map(p => (
-                    <div key={p.parcela_id} className="flex items-center justify-between py-2 px-3 rounded-md border border-[var(--border)] text-sm">
-                      <div>
-                        <p className="font-medium text-[var(--text-primary)]">{p.seguradora_nome}</p>
-                        <p className="text-xs text-[var(--text-secondary)]">Venc. {formatarData(p.data_vencimento)}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[var(--text-primary)]">{formatarMoeda(p.valor)}</span>
-                        <StatusBadge status={p.status} />
-                      </div>
+          {/* Conteúdo de visualização (oculto durante edição) */}
+          {!editando && (
+            <>
+              {/* Parcelas em aberto (destaque) */}
+              <div className="flex flex-col gap-3 mb-6">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                  {parcelasAbertas.length > 0 ? 'Parcelas em aberto' : 'Nenhuma parcela em aberto'}
+                </h3>
+                {parcelasAbertas.map(p => (
+                  <div key={p.parcela_id} className="flex items-center justify-between py-2 px-3 rounded-md bg-[var(--surface-raised)] text-sm">
+                    <div>
+                      <p className="font-medium text-[var(--text-primary)]">{p.seguradora_nome}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">Venc. {formatarData(p.data_vencimento)}</p>
                     </div>
-                  ))}
-                </div>
-              </details>
-            )}
-          </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-[var(--text-primary)]">{formatarMoeda(p.valor)}</span>
+                      <StatusBadge status={p.status} />
+                    </div>
+                  </div>
+                ))}
 
-          <Separator className="mb-6" />
-
-          {/* Histórico de contatos */}
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-3">Histórico de contatos</h3>
-            {carregandoContatos
-              ? <Skeleton className="h-24 w-full" />
-              : <TimelineContatos contatos={contatos} />
-            }
-          </div>
-
-          <Separator className="mb-6" />
-
-          {/* Observações */}
-          <div className="flex flex-col gap-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Observações sobre o cliente
-            </Label>
-
-            {observacoes.length === 0 && !adicionandoObs && (
-              <p className="text-sm text-[var(--text-muted)]">Nenhuma observação ainda.</p>
-            )}
-
-            {observacoes.map(obs => (
-              <ObservacaoItem key={obs.id} obs={obs} onEditar={handleEditarObs} onExcluir={handleExcluirObs} />
-            ))}
-
-            {adicionandoObs ? (
-              <div className="flex flex-col gap-2 p-3 rounded-md border border-[var(--brand)] bg-[var(--surface-raised)]">
-                <Textarea rows={2} placeholder="Anote algo sobre este cliente…" value={novaObs}
-                  onChange={e => setNovaObs(e.target.value)} autoFocus />
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={handleAdicionarObs} disabled={!novaObs.trim() || salvandoObs}
-                    style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
-                    {salvandoObs ? 'Salvando…' : 'Salvar'}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setAdicionandoObs(false); setNovaObs('') }}>
-                    Cancelar
-                  </Button>
-                </div>
+                {/* Histórico completo (pagas/desconsideradas) — recolhido */}
+                {parcelasFechadas.length > 0 && (
+                  <details className="group">
+                    <summary className="cursor-pointer list-none text-xs font-medium text-[var(--brand)] hover:underline">
+                      Ver histórico completo ({parcelasFechadas.length})
+                    </summary>
+                    <div className="flex flex-col gap-2 mt-2">
+                      {parcelasFechadas.map(p => (
+                        <div key={p.parcela_id} className="flex items-center justify-between py-2 px-3 rounded-md border border-[var(--border)] text-sm">
+                          <div>
+                            <p className="font-medium text-[var(--text-primary)]">{p.seguradora_nome}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">Venc. {formatarData(p.data_vencimento)}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-[var(--text-primary)]">{formatarMoeda(p.valor)}</span>
+                            <StatusBadge status={p.status} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
               </div>
-            ) : (
-              <Button size="sm" variant="outline" className="self-start gap-1.5" onClick={() => setAdicionandoObs(true)}>
-                <Plus className="w-3.5 h-3.5" /> Adicionar observação
-              </Button>
-            )}
-          </div>
+
+              <Separator className="mb-6" />
+
+              {/* Histórico de contatos */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)] mb-3">Histórico de contatos</h3>
+                {carregandoContatos
+                  ? <Skeleton className="h-24 w-full" />
+                  : <TimelineContatos contatos={contatos} />
+                }
+              </div>
+
+              <Separator className="mb-6" />
+
+              {/* Observações */}
+              <div className="flex flex-col gap-2">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                  Observações sobre o cliente
+                </Label>
+
+                {observacoes.length === 0 && !adicionandoObs && (
+                  <p className="text-sm text-[var(--text-muted)]">Nenhuma observação ainda.</p>
+                )}
+
+                {observacoes.map(obs => (
+                  <ObservacaoItem key={obs.id} obs={obs} onEditar={handleEditarObs} onExcluir={handleExcluirObs} />
+                ))}
+
+                {adicionandoObs ? (
+                  <div className="flex flex-col gap-2 p-3 rounded-md border border-[var(--brand)] bg-[var(--surface-raised)]">
+                    <Textarea rows={2} placeholder="Anote algo sobre este cliente…" value={novaObs}
+                      onChange={e => setNovaObs(e.target.value)} autoFocus />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={handleAdicionarObs} disabled={!novaObs.trim() || salvandoObs}
+                        style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                        {salvandoObs ? 'Salvando…' : 'Salvar'}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => { setAdicionandoObs(false); setNovaObs('') }}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" className="self-start gap-1.5" onClick={() => setAdicionandoObs(true)}>
+                    <Plus className="w-3.5 h-3.5" /> Adicionar observação
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
         </SheetContent>
       </Sheet>
+
+      {/* Dialog de confirmação de exclusão */}
+      <Dialog open={confirmandoExclusao} onOpenChange={v => { if (!v) setConfirmandoExclusao(false) }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[var(--status-error)]">
+              <Trash2 className="w-5 h-5" /> Excluir cliente
+            </DialogTitle>
+            <DialogDescription>
+              Isso vai excluir <strong>{clienteSelecionado?.nome}</strong> e todas as{' '}
+              <strong>{clienteSelecionado?.parcelas?.length ?? 0} parcela(s)</strong> vinculadas a ele.
+              Essa ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setConfirmandoExclusao(false)} disabled={excluindo}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleExcluirCliente} disabled={excluindo}>
+              {excluindo ? 'Excluindo…' : 'Confirmar exclusão'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

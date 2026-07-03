@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { atualizarCliente as atualizarClienteService, excluirCliente as excluirClienteService } from '@/services/clientes'
+import { excluirParcela } from '@/services/parcelas'
 
 // Uma parcela conta como "em aberto" (pendência) se não está paga nem desconsiderada.
 export const parcelaEmAberto = s => s !== 'pago' && s !== 'desconsiderada'
@@ -31,6 +33,7 @@ export function useCarteiraVendedor() {
           cliente_id: p.cliente_id,
           nome: p.cliente_nome ?? '—',
           telefone: p.cliente_telefone,
+          cpf: p.cliente_cpf ?? '',
           vip: p.cliente_vip,
           valorAberto: 0,
           diasAtrasoMax: 0,
@@ -90,5 +93,23 @@ export function useCarteiraVendedor() {
     return { error }
   }
 
-  return { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao }
+  async function atualizarCliente(cliente_id, dados) {
+    const { error } = await atualizarClienteService(cliente_id, dados)
+    if (!error) queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
+    return { error }
+  }
+
+  async function excluirCliente(cliente_id, parcelaIds) {
+    for (const id of parcelaIds) {
+      await excluirParcela(id)
+    }
+    const { error } = await excluirClienteService(cliente_id)
+    if (!error) {
+      queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
+      queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+    }
+    return { error }
+  }
+
+  return { clientes, isLoading, salvandoObs, buscarContatosCliente, buscarObservacao, salvarObservacao, atualizarCliente, excluirCliente }
 }
