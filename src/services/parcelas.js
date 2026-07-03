@@ -226,6 +226,13 @@ export async function solicitarNovaCobranca(parcelaId) {
 }
 
 export async function excluirParcela(id) {
+  // Contatos têm FK para parcelas — precisam ser removidos antes.
+  const { error: erroContatos } = await supabase
+    .from('contatos')
+    .delete()
+    .eq('parcela_id', id)
+  if (erroContatos) { console.error('excluirParcela (contatos):', erroContatos); return { error: erroContatos } }
+
   const { error } = await supabase
     .from('parcelas')
     .delete()
