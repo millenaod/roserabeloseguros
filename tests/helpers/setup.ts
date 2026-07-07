@@ -15,10 +15,36 @@ export async function login(page: Page) {
 }
 
 export async function limparParcelas() {
-  await supabase
+  const { data: clientes } = await supabase
     .from('clientes')
-    .delete()
+    .select('id')
     .ilike('nome', '%Teste%')
+  if (!clientes?.length) return
+
+  const clienteIds = clientes.map(c => c.id)
+
+  const { data: apolices } = await supabase
+    .from('apolices')
+    .select('id')
+    .in('cliente_id', clienteIds)
+
+  if (apolices?.length) {
+    const apoliceIds = apolices.map(a => a.id)
+
+    const { data: parcelas } = await supabase
+      .from('parcelas')
+      .select('id')
+      .in('apolice_id', apoliceIds)
+
+    if (parcelas?.length) {
+      const parcelaIds = parcelas.map(p => p.id)
+      await supabase.from('contatos').delete().in('parcela_id', parcelaIds)
+      await supabase.from('parcelas').delete().in('id', parcelaIds)
+    }
+    await supabase.from('apolices').delete().in('id', apoliceIds)
+  }
+
+  await supabase.from('clientes').delete().in('id', clienteIds)
 }
 
 export async function criarClienteTeste() {

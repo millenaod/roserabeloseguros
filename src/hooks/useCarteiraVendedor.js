@@ -106,7 +106,8 @@ export function useCarteiraVendedor() {
     }
     // Apólices ficam no banco após deletar parcelas; a FK apolices→clientes
     // bloquearia a exclusão do cliente se não removermos antes.
-    await supabase.from('apolices').delete().eq('cliente_id', cliente_id)
+    const { error: erroApolices } = await supabase.from('apolices').delete().eq('cliente_id', cliente_id)
+    if (erroApolices) return { error: erroApolices }
     const { error } = await excluirClienteService(cliente_id)
     if (!error) {
       queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
