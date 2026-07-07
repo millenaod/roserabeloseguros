@@ -62,7 +62,10 @@ export function useDetalheParcela(id) {
   async function excluir() {
     const result = await excluirParcela(id)
     if (!result.error) {
-      queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+      // Remove o cache da lista e do detalhe para que ao navegar de volta
+      // a tela não mostre dados antigos enquanto o refetch acontece.
+      queryClient.removeQueries({ queryKey: ['parcelas'] })
+      queryClient.removeQueries({ queryKey: ['parcela', id] })
       queryClient.invalidateQueries({ queryKey: ['carteira-clientes'] })
     }
     return result
