@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { solicitarNovaCobranca, atualizarBoleto } from '@/services/parcelas'
 import { Paperclip, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react'
@@ -344,12 +344,12 @@ export default function Parcelas() {
               <p className="text-xs text-[var(--status-error)]">O template exige um boleto anexado.</p>
             )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <div className="flex gap-2 justify-end pt-1">
             <Button variant="ghost" onClick={() => { setCobrarParcela(null); setNovoBoletoFile(null) }}>Cancelar</Button>
             <Button variant="primary" onClick={handleCobrar} disabled={processandoCobrar || (!cobrarParcela?.boleto_url && !novoBoletoFile)}>
               {processandoCobrar ? 'Enviando…' : 'Enviar'}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -360,10 +360,10 @@ export default function Parcelas() {
             <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Nova data</Label>
             <Input type="date" value={novaData} onChange={e => setNovaData(e.target.value)} autoFocus />
           </div>
-          <DialogFooter>
+          <div className="flex gap-2 justify-end pt-1">
             <Button variant="outline" onClick={() => setRemarcarId(null)}>Cancelar</Button>
             <Button variant="primary" onClick={handleRemarcar} disabled={!novaData}>Confirmar</Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
