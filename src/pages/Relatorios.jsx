@@ -30,11 +30,11 @@ export default function Relatorios() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <Toaster />
 
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Relatórios</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Relatórios</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">Visão geral da cobrança por período</p>
       </div>
 
@@ -87,7 +87,7 @@ export default function Relatorios() {
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <Button onClick={aplicar} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              <Button onClick={aplicar} variant="primary">
                 <Search className="w-4 h-4 mr-2" /> Consultar
               </Button>
               <Button variant="ghost" onClick={limpar} className="text-[var(--text-secondary)]">Mês atual</Button>

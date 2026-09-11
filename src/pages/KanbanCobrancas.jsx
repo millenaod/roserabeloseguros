@@ -64,12 +64,12 @@ export default function KanbanCobrancas() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-[var(--background)]">
+    <div className="flex flex-col h-full min-h-screen bg-background">
 
       {/* Cabeçalho */}
       <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Cobranças</h1>
-        <Button onClick={() => navigate('/nova-parcela')} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Cobranças</h1>
+        <Button onClick={() => navigate('/nova-parcela')} variant="primary">
           <PlusCircle className="w-4 h-4 mr-2" /> Nova Parcela
         </Button>
       </div>
@@ -139,7 +139,7 @@ export default function KanbanCobrancas() {
                     onKeyDown={e => { if (e.key === 'Enter') handleCriarColuna(); if (e.key === 'Escape') setAdicionandoColuna(false) }}
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleCriarColuna} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>Criar</Button>
+                    <Button size="sm" onClick={handleCriarColuna} variant="primary">Criar</Button>
                     <Button size="sm" variant="ghost" onClick={() => setAdicionandoColuna(false)}>Cancelar</Button>
                   </div>
                 </div>

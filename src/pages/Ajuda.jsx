@@ -86,9 +86,9 @@ const SECOES = [
 
 export default function Ajuda() {
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center gap-2">
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)] flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-[var(--brand)]" /> Ajuda
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">

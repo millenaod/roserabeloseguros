@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function login(page: Page) {
   await page.goto('/login')
-  await page.getByPlaceholder('seu@email.com').fill('rose@roseseguros.com.br')
+  await page.getByPlaceholder('seu@email.com').fill(process.env.TEST_EMAIL!)
   await page.locator('input[type="password"]').fill(process.env.TEST_PASSWORD!)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await page.waitForURL('/dashboard-rose')
@@ -57,6 +57,7 @@ export async function criarClienteTeste() {
   const { data: seg } = await supabase
     .from('seguradoras')
     .select('id')
+    .order('nome')
     .limit(1)
     .single()
 

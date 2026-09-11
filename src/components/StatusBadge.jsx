@@ -1,13 +1,13 @@
 const config = {
   pendente:            { label: 'A cobrar',            color: 'var(--status-pending)',    bg: 'var(--status-pending-bg)' },
-  em_cobranca:         { label: 'Em cobrança',         color: '#c2410c',                  bg: '#ffedd5' },
+  em_cobranca:         { label: 'Em cobrança',         color: 'var(--status-sent)',       bg: 'var(--status-sent-bg)' },
   enviado:             { label: 'Enviado',             color: 'var(--status-sent)',       bg: 'var(--status-sent-bg)' },
   aguardando_retorno:  { label: 'Aguardando Retorno',  color: 'var(--status-waiting)',    bg: 'var(--status-waiting-bg)' },
   pago:                { label: 'Pago',                color: 'var(--status-paid)',       bg: 'var(--status-paid-bg)' },
   escalado:            { label: 'Escalado',            color: 'var(--status-escalated)',  bg: 'var(--status-escalated-bg)' },
   remarcado:           { label: 'Remarcado',           color: 'var(--status-rescheduled)',bg: 'var(--status-rescheduled-bg)' },
   erro:                { label: 'Erro',                color: 'var(--status-error)',      bg: 'var(--status-error-bg)' },
-  desconsiderada:      { label: 'Desconsiderada',      color: '#6b7280',                  bg: '#f3f4f6' },
+  desconsiderada:      { label: 'Desconsiderada',      color: 'var(--neutral-400)',       bg: 'var(--neutral-100)' },
 }
 
 export default function StatusBadge({ status }) {

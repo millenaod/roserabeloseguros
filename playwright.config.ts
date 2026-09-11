@@ -16,15 +16,16 @@ try {
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
+  workers: 1,
   retries: 1,
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: 'npm run dev -- --mode test --port 5174',
+    url: 'http://localhost:5174',
+    reuseExistingServer: false,
     timeout: 30_000,
   },
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
   },
   projects: [

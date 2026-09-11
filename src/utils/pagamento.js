@@ -10,16 +10,16 @@
 //   {{2}} atendente (Thainá)
 //   {{3}} nome da seguradora (ex: Porto Seguro)
 //
-//   boleto            -> cobranca_de_boleto   : vars: nome, usuario, seguradora
-//   debito_automatico -> regularizacao_debito : vars: nome, nome_usuario, seguradora
-//   cartao_credito    -> recusa_cartao        : vars: primeiro_nome, nome_usuario, seguradora
+//   boleto            -> cobranca_de_boleto   : vars: cliente, atendente, seguradora
+//   debito_automatico -> regularizacao_debito : vars: cliente, atendente, seguradora
+//   cartao_credito    -> recusa_cartao        : vars: cliente, atendente, seguradora
 //
 // ATENÇÃO n8n: o array de parâmetros do corpo agora tem 3 itens — o 3º é seguradora_nome
 // (campo disponível na view v_parcelas_ui).
 export const TIPOS_PAGAMENTO = [
-  { value: 'boleto',            label: 'Boleto',            template: 'cobranca_de_boleto',   anexaBoleto: true, variaveisCorpo: ['nome', 'usuario', 'seguradora'] },
-  { value: 'debito_automatico', label: 'Débito automático', template: 'regularizacao_debito', anexaBoleto: true, variaveisCorpo: ['nome', 'nome_usuario', 'seguradora'] },
-  { value: 'cartao_credito',    label: 'Cartão de crédito', template: 'recusa_cartao',        anexaBoleto: true, variaveisCorpo: ['primeiro_nome', 'nome_usuario', 'seguradora'] },
+  { value: 'boleto',            label: 'Boleto',            template: 'cobranca_de_boleto',   anexaBoleto: true, variaveisCorpo: ['cliente', 'atendente', 'seguradora'] },
+  { value: 'debito_automatico', label: 'Débito automático', template: 'regularizacao_debito', anexaBoleto: true, variaveisCorpo: ['cliente', 'atendente', 'seguradora'] },
+  { value: 'cartao_credito',    label: 'Cartão de crédito', template: 'recusa_cartao',        anexaBoleto: true, variaveisCorpo: ['cliente', 'atendente', 'seguradora'] },
 ]
 
 export function labelTipoPagamento(valor) {

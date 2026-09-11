@@ -131,7 +131,7 @@ export default function DetalheParcela() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-8">
+    <div className="min-h-screen bg-background pb-8">
       <Toaster />
 
       {/* Cabeçalho */}
@@ -140,7 +140,7 @@ export default function DetalheParcela() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="font-display font-semibold text-xl text-[var(--text-primary)]">{parcela.cliente_nome}</h1>
+          <h1 className="font-display font-bold text-xl text-[var(--text-primary)]">{parcela.cliente_nome}</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-sm text-[var(--text-secondary)]">{parcela.seguradora_nome}</span>
             <StatusBadge status={parcela.status} />
@@ -187,7 +187,7 @@ export default function DetalheParcela() {
             <CardContent className="p-5 flex flex-col gap-2">
               <h2 className="font-semibold text-sm text-[var(--text-primary)] mb-1">Ações</h2>
 
-              <Button className="w-full justify-start gap-2" style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+              <Button variant="primary" className="w-full justify-start gap-2"
                 onClick={() => setCobrarAberto(true)} disabled={cobrando}>
                 <Send className="w-4 h-4" /> Cobrar de novo
               </Button>
@@ -293,7 +293,7 @@ export default function DetalheParcela() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRemarcarAberto(false)}>Cancelar</Button>
-            <Button onClick={handleRemarcar} disabled={!novaData} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>Confirmar</Button>
+            <Button variant="primary" onClick={handleRemarcar} disabled={!novaData}>Confirmar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -323,8 +323,7 @@ export default function DetalheParcela() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => { setCobrarAberto(false); setNovoBoletoFile(null) }}>Cancelar</Button>
-            <Button onClick={handleCobrarDeNovo} disabled={cobrando || (!parcela?.boleto_url && !novoBoletoFile)}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+            <Button variant="primary" onClick={handleCobrarDeNovo} disabled={cobrando || (!parcela?.boleto_url && !novoBoletoFile)}>
               {cobrando ? 'Enviando…' : 'Enviar'}
             </Button>
           </DialogFooter>

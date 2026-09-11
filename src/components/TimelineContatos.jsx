@@ -23,10 +23,25 @@ function decodificar(texto) {
 
 function parsearContato(contato) {
   const msg = decodificar(contato.mensagem_enviada ?? '')
+
+  // Formato legado: "Falha\nDetalhe técnico" (plain text, URL-encoded)
   if (msg.startsWith('Falha')) {
     const [, detalhe] = msg.split(/\r?\n/)
     return { tipo: 'erro', titulo: 'Falha no envio', detalhe: detalhe?.trim() ?? null }
   }
+
+  // n8n pode gravar tipo='erro' com mensagem em outros formatos (JSON, texto livre)
+  if (contato.tipo === 'erro') {
+    let detalhe = msg || null
+    try {
+      const json = JSON.parse(msg)
+      // Extrai mensagem legível do JSON da API do WhatsApp (Meta) ou do n8n
+      const legivel = json.message ?? json.error?.message ?? json.error ?? null
+      if (typeof legivel === 'string') detalhe = legivel
+    } catch { /* não é JSON — usa msg direto */ }
+    return { tipo: 'erro', titulo: 'Falha no envio', detalhe }
+  }
+
   return { tipo: contato.tipo, titulo: msg || contato.tipo, detalhe: null }
 }
 

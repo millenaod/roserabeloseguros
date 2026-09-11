@@ -89,16 +89,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <Toaster />
 
       {/* Cabeçalho */}
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between">
         <div>
-          <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Parcelas</h1>
+          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Parcelas</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">{parcelas.length} parcela{parcelas.length !== 1 ? 's' : ''} encontrada{parcelas.length !== 1 ? 's' : ''}</p>
         </div>
-        <Button onClick={() => navigate('/nova-parcela')} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+        <Button onClick={() => navigate('/nova-parcela')} variant="primary">
           <PlusCircle className="w-4 h-4 mr-2" /> Nova Parcela
         </Button>
       </div>
@@ -243,7 +243,7 @@ export default function Dashboard() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRemarcarId(null)}>Cancelar</Button>
-            <Button onClick={handleRemarcar} disabled={!novaData} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+            <Button onClick={handleRemarcar} disabled={!novaData} variant="primary">
               Confirmar
             </Button>
           </DialogFooter>

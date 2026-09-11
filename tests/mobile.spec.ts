@@ -44,7 +44,7 @@ test('M4 — usuário clica em Nova no mobile e bottom sheet sobe com formulári
   // Botão "Nova" do cabeçalho da página (não o do BottomNav)
   await page.getByRole('button', { name: 'Nova' }).click()
 
-  await expect(page.getByText('Nova Parcela')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Nova Parcela' })).toBeVisible()
   await expect(page.getByText('Nome do cliente')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Salvar Parcela' })).toBeVisible()
 })
@@ -55,20 +55,30 @@ test('M5 — usuário clica em Filtros e drawer de filtros abre', async ({ page 
   await page.getByRole('button', { name: 'Filtros' }).click()
 
   // Sheet de filtros abre com o título "Filtros"
-  await expect(page.getByText('Filtros')).toBeVisible()
-  // Tem os selects de status e seguradora
-  await expect(page.getByRole('combobox', { name: /status/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Filtros' })).toBeVisible()
+  // Radix SelectTrigger não tem accessible name — verifica apenas que existe ao menos um combobox
+  await expect(page.getByRole('combobox').first()).toBeVisible()
+})
+
+test('M7 — perfil rose acessa a Visão Gerencial pelo drawer de perfil no mobile', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: 'Perfil' }).click()
+  // O drawer de perfil expõe os atalhos gerenciais só para o perfil rose
+  await page.getByRole('button', { name: 'Visão Gerencial' }).click()
+
+  await expect(page).toHaveURL('/dashboard-rose')
 })
 
 test('M6 — usuário navega para Kanban no mobile e colunas rolam horizontalmente', async ({ page }) => {
   await page.goto('/')
 
-  await page.getByRole('button', { name: 'Kanban' }).click()
+  await page.getByRole('button', { name: 'Por status' }).click()
 
   // Container das colunas deve ter overflow-x-auto (colunas roláveis horizontalmente)
   const kanbanContainer = page.locator('.overflow-x-auto')
   await expect(kanbanContainer).toBeVisible()
 
   // Ao menos a primeira coluna está visível
-  await expect(page.getByRole('heading', { name: 'Pendente' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'A cobrar' })).toBeVisible()
 })

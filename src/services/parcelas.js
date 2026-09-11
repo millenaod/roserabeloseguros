@@ -7,6 +7,7 @@ export async function buscarParcelas(filtros = {}) {
   if (filtros.status)         query = query.eq('status', filtros.status)
   // Sem filtro de status explícito, as desconsideradas ficam escondidas (vivem só na "pasta").
   else                        query = query.neq('status', 'desconsiderada')
+  if (filtros.vencimento_de)  query = query.gte('data_vencimento', filtros.vencimento_de)
   if (filtros.vencimento_ate) query = query.lte('data_vencimento', filtros.vencimento_ate)
 
   query = query.order('data_vencimento', { ascending: true })

@@ -39,9 +39,9 @@ export default function Perfil() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Meu Perfil</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Meu Perfil</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">Seus dados e troca de senha</p>
       </div>
 
@@ -105,7 +105,7 @@ export default function Perfil() {
               )}
 
               <Button type="submit" className="mt-1" disabled={salvando}
-                style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                variant="primary">
                 {salvando ? 'Salvando…' : 'Salvar nova senha'}
               </Button>
             </form>

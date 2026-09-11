@@ -28,7 +28,7 @@ function ObservacaoItem({ obs, onEditar, onExcluir }) {
         <Textarea rows={2} value={texto} onChange={e => setTexto(e.target.value)} autoFocus />
         <div className="flex gap-2">
           <Button size="sm" onClick={() => { onEditar(obs.id, texto); setEditando(false) }}
-            disabled={!texto.trim()} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>Salvar</Button>
+            variant="primary" disabled={!texto.trim()}>Salvar</Button>
           <Button size="sm" variant="ghost" onClick={() => { setTexto(obs.texto); setEditando(false) }}>Cancelar</Button>
         </div>
       </div>
@@ -94,7 +94,10 @@ export default function CarteiraVendedor() {
     return true
   })
 
-  const comPendencia = clientes.filter(c => c.temPendencia).length
+  const comPendencia  = clientes.filter(c => c.temPendencia).length
+  const emDia         = clientes.length - comPendencia
+
+  const contagemFiltro = { todos: clientes.length, pendencia: comPendencia, emdia: emDia }
 
   async function abrirDetalhe(cliente) {
     setClienteSelecionado(cliente)
@@ -193,11 +196,11 @@ export default function CarteiraVendedor() {
   const parcelasFechadas = clienteSelecionado?.parcelas.filter(p => !parcelaEmAberto(p.status)) ?? []
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <Toaster />
 
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Minha Carteira</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Minha Carteira</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">
           {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} no total
           {comPendencia > 0 && <> · <span className="text-[var(--status-error)] font-medium">{comPendencia} com pendência</span></>}
@@ -215,6 +218,11 @@ export default function CarteiraVendedor() {
             <button key={f.id} onClick={() => setFiltro(f.id)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors border-l border-[var(--border)] first:border-l-0 ${filtro === f.id ? 'bg-[var(--brand)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}>
               {f.label}
+              {!isLoading && contagemFiltro[f.id] > 0 && (
+                <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-semibold px-1 ${filtro === f.id ? 'bg-white/25 text-white' : f.id === 'pendencia' ? 'bg-[var(--status-error)]/15 text-[var(--status-error)]' : 'bg-[var(--surface-raised)] text-[var(--text-muted)]'}`}>
+                  {contagemFiltro[f.id]}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -235,7 +243,7 @@ export default function CarteiraVendedor() {
           <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-[var(--surface-raised)]">
+                <TableRow className="bg-neutral-100">
                   <TableHead>Cliente</TableHead>
                   <TableHead>Situação</TableHead>
                   <TableHead className="hidden md:table-cell text-center">Parcelas</TableHead>
@@ -316,8 +324,7 @@ export default function CarteiraVendedor() {
                 {errosEdit.cpf && <p className="text-xs text-[var(--status-error)]">CPF ou CNPJ inválido</p>}
               </div>
               <div className="flex gap-2 pt-1">
-                <Button onClick={handleSalvarEdicao} disabled={salvandoEdit}
-                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                <Button variant="primary" onClick={handleSalvarEdicao} disabled={salvandoEdit}>
                   {salvandoEdit ? 'Salvando…' : 'Salvar'}
                 </Button>
                 <Button variant="ghost" onClick={() => setEditando(false)}>Cancelar</Button>
@@ -424,8 +431,7 @@ export default function CarteiraVendedor() {
                     <Textarea rows={2} placeholder="Anote algo sobre este cliente…" value={novaObs}
                       onChange={e => setNovaObs(e.target.value)} autoFocus />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={handleAdicionarObs} disabled={!novaObs.trim() || salvandoObs}
-                        style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                      <Button size="sm" variant="primary" onClick={handleAdicionarObs} disabled={!novaObs.trim() || salvandoObs}>
                         {salvandoObs ? 'Salvando…' : 'Salvar'}
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => { setAdicionandoObs(false); setNovaObs('') }}>

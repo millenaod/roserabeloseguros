@@ -63,7 +63,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
 
         {/* Logo */}
@@ -71,7 +71,7 @@ export default function Login() {
           <div className="w-14 h-14 rounded-full bg-[var(--brand)] flex items-center justify-center">
             <span className="font-display font-bold text-2xl text-white">R</span>
           </div>
-          <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
+          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
           <p className="text-sm text-[var(--text-secondary)]">Sistema de Cobrança</p>
         </div>
 
@@ -125,7 +125,7 @@ export default function Login() {
                   type="submit"
                   className="w-full mt-1"
                   disabled={carregando}
-                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+                  variant="primary"
                 >
                   {carregando ? 'Entrando…' : 'Entrar'}
                 </Button>
@@ -172,7 +172,7 @@ export default function Login() {
                   type="submit"
                   className="w-full"
                   disabled={carregando}
-                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+                  variant="primary"
                 >
                   {carregando ? 'Enviando…' : 'Enviar link de redefinição'}
                 </Button>

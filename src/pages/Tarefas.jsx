@@ -71,11 +71,11 @@ export default function Tarefas() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <Toaster />
 
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Tarefas do dia</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Tarefas do dia</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">
           Revise as parcelas que precisam de atenção e, em cada uma, cobre de novo, marque como paga ou escale.
         </p>
@@ -117,8 +117,7 @@ export default function Tarefas() {
                   </div>
 
                   <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" disabled={ocupado} onClick={(e) => { e.stopPropagation(); setConfirmCobrar(p) }}
-                      style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+                    <Button size="sm" variant="primary" disabled={ocupado} onClick={(e) => { e.stopPropagation(); setConfirmCobrar(p) }}>
                       <Send className="w-4 h-4 mr-1.5" /> Cobrar de novo
                     </Button>
                     <Button size="sm" variant="outline" disabled={ocupado}
@@ -178,8 +177,7 @@ export default function Tarefas() {
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => { setConfirmCobrar(null); setNovoBoletoFile(null) }}>Cancelar</Button>
-            <Button onClick={handleCobrar} disabled={!confirmCobrar?.boleto_url && !novoBoletoFile}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+            <Button variant="primary" onClick={handleCobrar} disabled={!confirmCobrar?.boleto_url && !novoBoletoFile}>
               Enviar
             </Button>
           </DialogFooter>

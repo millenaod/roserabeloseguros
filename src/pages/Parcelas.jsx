@@ -21,6 +21,7 @@ import EmptyState from '@/components/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PainelKanban from '@/components/PainelKanban'
 import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban, Search } from 'lucide-react'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 
 const STATUS_OPCOES = [
   { value: 'pendente',       label: 'A cobrar' },
@@ -77,16 +78,16 @@ export default function Parcelas() {
   async function handleEscalar(){ await escalar(confirmEscalar); setConfirmEscalar(null); toast({ title: 'Escalada para vendedor.' }) }
   async function handleRemarcar(){ if (!novaData) return; await remarcar(remarcarId, novaData); setRemarcarId(null); toast({ title: 'Remarcada!' }) }
 
-  const temFiltros = filtros.status || filtros.seguradora_id || filtros.vencimento_ate || busca
+  const temFiltros = filtros.status || filtros.seguradora_id || filtros.vencimento_de || filtros.vencimento_ate || busca
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <Toaster />
 
       {/* Cabeçalho */}
       <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Parcelas</h1>
+          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Parcelas</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">{parcelas.length} parcela{parcelas.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -101,15 +102,15 @@ export default function Parcelas() {
           </div>
           {/* Nova parcela — desktop abre inline, mobile abre sheet */}
           <Button
+            variant="primary"
             className="hidden md:flex"
-            style={{ backgroundColor: 'var(--brand)', color: 'white' }}
             onClick={() => setSheetAberto(true)}
           >
             <PlusCircle className="w-4 h-4 mr-2" /> Nova Parcela
           </Button>
           <Button
+            variant="primary"
             className="md:hidden"
-            style={{ backgroundColor: 'var(--brand)', color: 'white' }}
             onClick={() => setSheetAberto(true)}
           >
             <PlusCircle className="w-4 h-4 mr-2" /> Nova
@@ -137,7 +138,10 @@ export default function Parcelas() {
             {seguradoras.map(s => <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Input type="date" className="w-40" value={filtros.vencimento_ate} onChange={e => aplicarFiltros({ vencimento_ate: e.target.value })} />
+        <DateRangePicker
+          value={{ de: filtros.vencimento_de, ate: filtros.vencimento_ate }}
+          onChange={({ de, ate }) => aplicarFiltros({ vencimento_de: de, vencimento_ate: ate })}
+        />
         {temFiltros && <Button variant="ghost" size="sm" onClick={limparFiltros} className="text-[var(--text-secondary)]">Limpar</Button>}
       </div>
 
@@ -168,7 +172,11 @@ export default function Parcelas() {
                   {seguradoras.map(s => <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Input type="date" value={filtros.vencimento_ate} onChange={e => aplicarFiltros({ vencimento_ate: e.target.value })} />
+              <DateRangePicker
+                value={{ de: filtros.vencimento_de, ate: filtros.vencimento_ate }}
+                onChange={({ de, ate }) => aplicarFiltros({ vencimento_de: de, vencimento_ate: ate })}
+                className="w-full"
+              />
               {temFiltros && <Button variant="outline" onClick={limparFiltros}>Limpar filtros</Button>}
             </div>
           </SheetContent>
@@ -184,7 +192,7 @@ export default function Parcelas() {
             <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] overflow-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-[var(--surface-raised)]">
+                  <TableRow className="bg-neutral-100">
                     <TableHead>Cliente</TableHead>
                     <TableHead>Seguradora</TableHead>
                     <TableHead>Valor</TableHead>
@@ -268,8 +276,7 @@ export default function Parcelas() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => { setCobrarParcela(null); setNovoBoletoFile(null) }}>Cancelar</Button>
-            <Button onClick={handleCobrar} disabled={processandoCobrar || (!cobrarParcela?.boleto_url && !novoBoletoFile)}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+            <Button variant="primary" onClick={handleCobrar} disabled={processandoCobrar || (!cobrarParcela?.boleto_url && !novoBoletoFile)}>
               {processandoCobrar ? 'Enviando…' : 'Enviar'}
             </Button>
           </DialogFooter>
@@ -285,7 +292,7 @@ export default function Parcelas() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRemarcarId(null)}>Cancelar</Button>
-            <Button onClick={handleRemarcar} disabled={!novaData} style={{ backgroundColor: 'var(--brand)', color: 'white' }}>Confirmar</Button>
+            <Button variant="primary" onClick={handleRemarcar} disabled={!novaData}>Confirmar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

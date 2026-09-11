@@ -41,14 +41,14 @@ export default function RedefinirSenha() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
 
         <div className="flex flex-col items-center gap-2">
           <div className="w-14 h-14 rounded-full bg-[var(--brand)] flex items-center justify-center">
             <span className="font-display font-bold text-2xl text-white">R</span>
           </div>
-          <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
+          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
           <p className="text-sm text-[var(--text-secondary)]">Redefinir senha</p>
         </div>
 
@@ -100,7 +100,7 @@ export default function RedefinirSenha() {
                   type="submit"
                   className="w-full mt-1"
                   disabled={salvando}
-                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+                  variant="primary"
                 >
                   {salvando ? 'Salvando…' : 'Salvar nova senha'}
                 </Button>

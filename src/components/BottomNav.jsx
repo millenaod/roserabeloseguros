@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ListChecks, PlusCircle, Briefcase, UserCircle, LogOut, KeyRound, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, ListChecks, PlusCircle, Briefcase, UserCircle, LogOut, KeyRound, HelpCircle, Gauge, BarChart2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -66,6 +66,25 @@ export default function BottomNav() {
           <Separator className="mb-4" />
 
           <div className="flex flex-col gap-1">
+            {perfil?.perfil === 'rose' && (
+              <>
+                <button
+                  onClick={() => { navigate('/dashboard-rose'); setPerfilAberto(false) }}
+                  className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"
+                >
+                  <Gauge className="w-4 h-4" />
+                  Visão Gerencial
+                </button>
+                <button
+                  onClick={() => { navigate('/relatorios'); setPerfilAberto(false) }}
+                  className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"
+                >
+                  <BarChart2 className="w-4 h-4" />
+                  Relatórios
+                </button>
+                <Separator className="my-1" />
+              </>
+            )}
             <button
               onClick={() => { navigate('/perfil'); setPerfilAberto(false) }}
               className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"

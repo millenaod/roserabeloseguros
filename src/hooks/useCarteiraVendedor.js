@@ -22,6 +22,7 @@ export function useCarteiraVendedor() {
         .order('data_vencimento', { ascending: false })
       return data ?? []
     },
+    refetchOnMount: 'always',
   })
 
   // Agrupa por cliente — inclui clientes sem nenhuma pendência (todos quitados).

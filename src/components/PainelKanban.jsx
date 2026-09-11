@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 // Kanban enxuto: 4 colunas que cobrem o ciclo real da cobrança.
 const COLUNAS = [
   { status: 'pendente',    label: 'A cobrar',    cor: 'var(--status-pending)' },
-  { status: 'em_cobranca', label: 'Em cobrança', cor: '#f97316' },
+  { status: 'em_cobranca', label: 'Em cobrança', cor: 'var(--status-sent)' },
   { status: 'pago',        label: 'Pago',        cor: 'var(--status-paid)' },
   { status: 'escalado',    label: 'Escalado',    cor: 'var(--status-escalated)' },
 ]

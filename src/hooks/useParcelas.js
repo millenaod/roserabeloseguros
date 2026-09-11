@@ -5,12 +5,13 @@ import { supabase } from '@/lib/supabase'
 
 export function useParcelas() {
   const queryClient = useQueryClient()
-  const [filtros, setFiltros] = useState({ status: '', seguradora_id: '', vencimento_ate: '' })
+  const [filtros, setFiltros] = useState({ status: '', seguradora_id: '', vencimento_de: '', vencimento_ate: '' })
   const [busca, setBusca] = useState('')
 
   const { data: parcelas = [], isLoading } = useQuery({
     queryKey: ['parcelas', filtros],
     queryFn: () => buscarParcelas(filtros).then(r => r.data ?? []),
+    refetchOnMount: 'always',
   })
 
   // Busca por nome do cliente — client-side, instantânea conforme digita.
@@ -53,7 +54,7 @@ export function useParcelas() {
   }
 
   function limparFiltros() {
-    setFiltros({ status: '', seguradora_id: '', vencimento_ate: '' })
+    setFiltros({ status: '', seguradora_id: '', vencimento_de: '', vencimento_ate: '' })
     setBusca('')
   }
 

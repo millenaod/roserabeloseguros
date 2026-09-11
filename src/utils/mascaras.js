@@ -70,6 +70,28 @@ export function cpfCnpjValido(valor) {
   return n === 11 || n === 14
 }
 
+// Exibe a data como DD/MM/AAAA enquanto digita.
+export function mascararData(valor) {
+  const d = soDigitos(valor).slice(0, 8)
+  if (d.length <= 2) return d
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`
+}
+
+// Converte DD/MM/AAAA → YYYY-MM-DD (para salvar no banco). Retorna '' se inválido.
+export function dataParaISO(valor) {
+  const d = soDigitos(valor)
+  if (d.length !== 8) return ''
+  return `${d.slice(4)}${d.slice(2, 4)}${d.slice(0, 2)}`.replace(/^(.{4})(.{2})(.{2})$/, '$1-$2-$3')
+}
+
+// Converte YYYY-MM-DD → DD/MM/AAAA (para exibir no input).
+export function isoParaData(valor) {
+  if (!valor || valor.length !== 10) return ''
+  const [y, m, d] = valor.split('-')
+  return `${d}/${m}/${y}`
+}
+
 function soDigitos(valor) {
   return String(valor ?? '').replace(/\D/g, '')
 }

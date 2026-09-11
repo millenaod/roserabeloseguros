@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listarSeguradoras } from '@/services/seguradoras'
 import { salvarParcelaComCliente } from '@/services/parcelas'
-import { telefoneCompleto, telefoneValido, moedaParaNumero, cpfCnpjValido } from '@/utils/mascaras'
+import { telefoneCompleto, telefoneValido, moedaParaNumero, cpfCnpjValido, dataParaISO } from '@/utils/mascaras'
 
 const camposVazios = {
   clienteNome: '',
@@ -50,7 +50,7 @@ export function useNovaParcela() {
     if (!form.seguradora_id)          e.seguradora_id   = 'Selecione a seguradora'
     if (!form.numero_parcela)         e.numero_parcela  = 'Informe o número da parcela'
     if (!form.valor)                  e.valor           = 'Informe o valor'
-    if (!form.data_vencimento)        e.data_vencimento = 'Informe a data de vencimento'
+    if (!form.data_vencimento)               e.data_vencimento = 'Informe a data de vencimento'
     if (!form.tipo_pagamento)         e.tipo_pagamento  = 'Selecione o tipo de pagamento'
     if (!form.boletoFile)             e.boletoFile      = 'Anexe o boleto'
     setErros(e)

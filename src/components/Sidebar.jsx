@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
+  Gauge,
   ListChecks,
   PlusCircle,
   BarChart2,
@@ -13,10 +14,11 @@ import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/useAuth'
 const navItems = [
+  { to: '/dashboard-rose', icon: Gauge,           label: 'Visão Gerencial', roseOnly: true },
   { to: '/',              icon: LayoutDashboard, label: 'Parcelas' },
   { to: '/tarefas',       icon: ListChecks,      label: 'Tarefas do dia' },
   { to: '/nova-parcela',  icon: PlusCircle,      label: 'Nova Parcela' },
-  { to: '/relatorios',    icon: BarChart2,        label: 'Relatórios' },
+  { to: '/relatorios',    icon: BarChart2,        label: 'Relatórios', roseOnly: true },
   { to: '/carteira',      icon: Briefcase,        label: 'Minha Carteira' },
 ]
 
@@ -27,7 +29,7 @@ export default function Sidebar() {
     ? navItems
     : perfil?.perfil === 'vendedor'
       ? navItems.filter(n => n.to === '/carteira')
-      : navItems.filter(n => !['rose'].includes(n.to))
+      : navItems.filter(n => !n.roseOnly)
 
   return (
     <aside className="hidden md:flex flex-col h-screen bg-neutral-900 border-r border-neutral-800 sticky top-0 md:w-16 lg:w-60 shrink-0 transition-all duration-200">

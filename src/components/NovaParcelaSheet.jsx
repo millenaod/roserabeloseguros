@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpfCnpj, cpfCnpjValido } from '@/utils/mascaras'
+import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpfCnpj, cpfCnpjValido, dataParaISO } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
-import { formatarData } from '@/utils/format'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Paperclip, AlertTriangle } from 'lucide-react'
 
 function LinhaRevisao({ label, valor }) {
@@ -15,7 +15,7 @@ function LinhaRevisao({ label, valor }) {
   return (
     <div className="flex justify-between items-start gap-4 py-1.5 border-b border-[var(--border)] last:border-0">
       <span className="text-sm text-[var(--text-secondary)] shrink-0">{label}</span>
-      <span className="text-sm font-medium text-[var(--text-primary)] text-right">{valor}</span>
+      <span className="text-sm font-medium text-[var(--text-primary)] text-right break-all min-w-0">{valor}</span>
     </div>
   )
 }
@@ -66,7 +66,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     if (!form.seguradora_id)         e.seguradora_id  = true
     if (!form.numero_parcela)        e.numero_parcela = true
     if (!form.valor)                 e.valor          = true
-    if (!form.data_vencimento)       e.data_vencimento= true
+    if (!form.data_vencimento)               e.data_vencimento= true
     if (!form.tipo_pagamento)        e.tipo_pagamento = true
     if (!form.boletoFile)            e.boletoFile     = true
     setErros(e)
@@ -101,6 +101,7 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
     setForm(vazio)
     setErros({})
     setConflito(null)
+    setRevisao(false)
     onFechar()
   }
 
@@ -110,12 +111,43 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
   }
 
   return (
-    <Sheet open={aberto} onOpenChange={v => { if (!v) { setForm(vazio); setErros({}); onFechar() } }}>
+    <Sheet open={aberto} onOpenChange={v => { if (!v) { setForm(vazio); setErros({}); setRevisao(false); onFechar() } }}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-4">
-          <SheetTitle className="font-display text-xl font-bold">Nova Parcela</SheetTitle>
+          <SheetTitle className="font-display text-xl font-bold">
+            {revisao ? 'Revise antes de enviar' : 'Nova Parcela'}
+          </SheetTitle>
         </SheetHeader>
 
+        {revisao ? (
+          <div className="flex flex-col">
+            <p className="text-sm text-[var(--text-secondary)] mb-3">
+              Confirme os dados abaixo antes de cadastrar a parcela.
+            </p>
+            <div className="py-1">
+              <LinhaRevisao label="Cliente"    valor={form.cliente_nome} />
+              <LinhaRevisao label="WhatsApp"   valor={form.telefone} />
+              <LinhaRevisao label="CPF/CNPJ"   valor={form.cpf} />
+              <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
+              <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
+              <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
+              <LinhaRevisao label="Vencimento" valor={form.data_vencimento || '—'} />
+              <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
+              <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
+            </div>
+            <div className="sticky bottom-0 pt-4 pb-2 bg-[hsl(var(--background))] mt-4 flex flex-col gap-2">
+              <Button variant="primary" className="w-full" disabled={salvando}
+                onClick={() => enviar(undefined)}>
+                {salvando ? 'Salvando…' : 'Confirmar e salvar'}
+              </Button>
+              <Button variant="ghost" className="w-full" disabled={salvando}
+                onClick={() => setRevisao(false)}>
+                Voltar e editar
+              </Button>
+            </div>
+          </div>
+        ) : (
+        <>
         <div className="flex flex-col gap-3">
           <Campo label="Nome do cliente" erro={erros.cliente_nome}>
             <Input placeholder="Nome completo" value={form.cliente_nome}
@@ -161,8 +193,10 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
               </div>
             </Campo>
             <Campo label="Vencimento" erro={erros.data_vencimento}>
-              <Input type="date" value={form.data_vencimento}
-                onChange={e => set('data_vencimento', e.target.value)} />
+              <DatePicker
+                value={form.data_vencimento}
+                onChange={v => set('data_vencimento', v)}
+              />
             </Campo>
           </div>
 
@@ -190,40 +224,15 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
         </div>
 
         {/* Botão fixo no rodapé */}
-        <div className="sticky bottom-0 pt-4 pb-2 bg-[var(--surface)] mt-4">
+        <div className="sticky bottom-0 pt-4 pb-2 bg-[hsl(var(--background))] mt-4">
           <Button variant="primary" className="w-full" disabled={salvando}
             onClick={handleSalvar}>
             {salvando ? 'Salvando…' : 'Salvar Parcela'}
           </Button>
         </div>
+        </>
+        )}
       </SheetContent>
-
-      {/* Revisão antes de salvar */}
-      <Dialog open={revisao} onOpenChange={v => { if (!v) setRevisao(false) }}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-display">Revise antes de enviar</DialogTitle>
-            <DialogDescription>Confirme os dados abaixo antes de cadastrar a parcela.</DialogDescription>
-          </DialogHeader>
-          <div className="py-1">
-            <LinhaRevisao label="Cliente"    valor={form.cliente_nome} />
-            <LinhaRevisao label="WhatsApp"   valor={form.telefone} />
-            <LinhaRevisao label="CPF/CNPJ"   valor={form.cpf} />
-            <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
-            <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
-            <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
-            <LinhaRevisao label="Vencimento" valor={formatarData(form.data_vencimento)} />
-            <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
-            <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
-          </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={() => setRevisao(false)}>Voltar e editar</Button>
-            <Button variant="primary" onClick={() => { setRevisao(false); enviar(undefined) }} disabled={salvando}>
-              {salvando ? 'Salvando…' : 'Confirmar e salvar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Aviso de CPF já cadastrado com nome/telefone diferente */}
       <Dialog open={!!conflito} onOpenChange={v => { if (!v) setConflito(null) }}>

@@ -35,12 +35,12 @@ export default function DashboardRose() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-8">
+    <div className="min-h-screen bg-background pb-8">
       <Toaster />
 
       {/* Cabeçalho */}
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Visão Gerencial</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Visão Gerencial</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">Resumo completo da carteira inadimplente</p>
       </div>
 

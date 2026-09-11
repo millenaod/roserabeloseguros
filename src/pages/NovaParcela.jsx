@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useNovaParcela } from '@/hooks/useNovaParcela'
 import { useToast } from '@/hooks/use-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -12,9 +13,10 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { formatarMoeda, formatarData } from '@/utils/format'
+import { formatarMoeda } from '@/utils/format'
 import { mascararTelefone, mascararMoeda, mascararCpfCnpj } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Paperclip, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
 
 function LinhaRevisao({ label, valor }) {
@@ -42,6 +44,7 @@ function exibirTelefone(valor) {
 export default function NovaParcela() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const { form, erros, salvando, seguradoras, atualizar, validar, salvar } = useNovaParcela()
   const [conflito, setConflito] = useState(null)
@@ -68,6 +71,7 @@ export default function NovaParcela() {
       toast({ title: 'Parcela cadastrada!', description: 'A parcela foi salva com sucesso.' })
       queryClient.invalidateQueries({ queryKey: ['parcelas-hoje'] })
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
+      navigate('/')
     } else if (resultado.motivo === 'conflito') {
       // Mesmo CPF com nome/telefone diferentes: abre o aviso pra operadora decidir.
       setConflito(resultado.conflito)
@@ -89,12 +93,12 @@ export default function NovaParcela() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-8">
+    <div className="min-h-screen bg-background pb-24 md:pb-8">
       <Toaster />
 
       {/* Cabeçalho */}
       <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]">
-        <h1 className="font-display font-semibold text-2xl text-[var(--text-primary)]">Nova Parcela</h1>
+        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Nova Parcela</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">Cadastre uma parcela vencida para cobrança</p>
       </div>
 
@@ -170,7 +174,10 @@ export default function NovaParcela() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Vencimento</Label>
-              <Input type="date" value={form.data_vencimento} onChange={e => atualizar('data_vencimento', e.target.value)} />
+              <DatePicker
+                value={form.data_vencimento}
+                onChange={v => atualizar('data_vencimento', v)}
+              />
               <CampoErro mensagem={erros.data_vencimento} />
             </div>
           </div>
@@ -225,7 +232,7 @@ export default function NovaParcela() {
           {/* Botão desktop */}
           <Button
             className="hidden md:flex w-full mt-2"
-            style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+            variant="primary"
             onClick={abrirRevisao}
             disabled={salvando}
           >
@@ -276,7 +283,7 @@ export default function NovaParcela() {
       <div className="md:hidden fixed bottom-16 left-0 right-0 p-4 bg-[var(--surface)] border-t border-[var(--border)]">
         <Button
           className="w-full"
-          style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+          variant="primary"
           onClick={abrirRevisao}
           disabled={salvando}
         >
@@ -298,7 +305,7 @@ export default function NovaParcela() {
             <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
             <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
             <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
-            <LinhaRevisao label="Vencimento" valor={formatarData(form.data_vencimento)} />
+            <LinhaRevisao label="Vencimento" valor={form.data_vencimento || '—'} />
             <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
             <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
             <LinhaRevisao label="Observação" valor={form.observacao || null} />
@@ -306,7 +313,7 @@ export default function NovaParcela() {
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setRevisao(false)}>Voltar e editar</Button>
             <Button onClick={() => { setRevisao(false); handleSalvar() }} disabled={salvando}
-              style={{ backgroundColor: 'var(--brand)', color: 'white' }}>
+              variant="primary">
               {salvando ? 'Salvando…' : 'Confirmar e salvar'}
             </Button>
           </DialogFooter>

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Fluxo de desenvolvimento (LER ANTES DE CODAR)
+
+Antes de implementar ou corrigir qualquer feature, siga a skill **`desenvolvimento`** (`.claude/skills/desenvolvimento/SKILL.md`). Regras não-negociáveis dela: **paridade mobile** (toda navegação vive em `Sidebar.jsx` E `BottomNav.jsx`), **teste sempre** (feature nova → teste novo; bug → teste que reproduz; tela alterada → `.spec.ts` atualizado) e **nunca tocar produção** (dev roda no projeto Supabase `cobranca-seguros-dev`). Para telas/interações, seguir também a skill `ux-guidelines`.
+
 ## Comandos
 
 ```bash
@@ -45,6 +49,30 @@ Modelo: `clientes → apolices → parcelas`.
 A view `v_parcelas_ui` desnormaliza tudo — é o que todas as queries de listagem e detalhe usam. Campos principais: `parcela_id`, `cliente_id`, `cliente_nome`, `cliente_telefone`, `cliente_cpf`, `seguradora_nome`, `valor`, `status`, `dias_atraso`, `cobertura_em_risco`.
 
 Boletos são armazenados no bucket `boletos` do Supabase Storage. Upload via `uploadBoleto()` em `services/parcelas.js` — só sobe depois de garantir o cliente para não criar arquivo órfão.
+
+Projeto Supabase: `wjbcbiwfmlsfbgbxlief` (ref `cobranca-seguros`, região `sa-east-1`). Tabelas: `clientes`, `apolices`, `parcelas`, `contatos`, `seguradoras`, `usuarios`, `configuracoes`, `kanban_colunas`.
+
+Views (todas `security_invoker = true` — respeitam o RLS de quem consulta, não do criador):
+- `v_parcelas_ui` — desnormaliza tudo para listagem/detalhe (ver campos acima).
+- `v_parcelas_acao` — parcelas que precisam de ação.
+
+### Segurança / RLS (Supabase)
+
+Convenção de acesso, **respeitar sempre**:
+- `authenticated` → `SELECT USING (true)` em todas as tabelas de dados (+ UPDATE onde o app edita). O app **sempre** opera com sessão autenticada; nunca com a chave anon.
+- `service_role` → acesso total, ignora RLS. É o que o **n8n** usa para gravar de volta.
+- `anon` → **nenhum acesso a tabela de dados.** A chave anon vai no bundle do front (é pública); qualquer política `anon USING(true)` vaza a base inteira. Não recriar políticas `anon_*`.
+- `usuarios` → cada usuário só vê o próprio perfil (`auth.uid() = id`).
+
+Ao criar/alterar tabela ou view, rodar o advisor de segurança do Supabase depois (pega RLS faltando, view `SECURITY DEFINER`, função exposta ao anon).
+
+### n8n (automação de mensagens)
+
+Trigger `trg_parcela_nova_n8n` (`AFTER INSERT ON parcelas`) chama `notify_n8n_parcela_nova()`, que dispara o webhook n8n `https://millenaod.app.n8n.cloud/webhook/parcela-nova`. A função é `SECURITY DEFINER` mas **sem EXECUTE para anon/authenticated** — só roda pelo trigger, nunca via `/rest/v1/rpc`.
+
+O n8n envia o WhatsApp e **grava o resultado de volta** em `contatos` (timeline) usando a **service_role key**. Por isso o front não precisa gravar esses contatos, e o anon não precisa de acesso.
+
+Parâmetros de automação ficam na tabela `configuracoes` (par chave/valor): `dias_antes_vencimento`, `dias_followup`, `max_tentativas`, `horario_inicio_envio`, `horario_fim_envio`, `dias_uteis_apenas`, `validade_boleto_dias`.
 
 ### Autenticação e perfis
 
