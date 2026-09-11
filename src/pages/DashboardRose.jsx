@@ -119,7 +119,7 @@ export default function DashboardRose() {
 
         {/* R6 — Listagem completa */}
         <div>
-          <h2 className="font-semibold text-base text-[var(--text-primary)] mb-3">Todas as parcelas</h2>
+          <h2 className="font-semibold text-base text-[var(--text-primary)] mb-3">Parcelas em aberto</h2>
           <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
             <Table>
               <TableHeader>

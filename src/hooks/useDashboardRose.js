@@ -47,7 +47,7 @@ export function useDashboardRose() {
   })
 
   return {
-    isLoading, parcelas,
+    isLoading, parcelas: emAberto,
     kpis: { valorAberto, taxaRecuperacao, atrasadas30: atrasadas30.length, valorPago },
     porSeguradora, evolucaoMensal, escaladas,
   }

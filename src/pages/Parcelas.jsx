@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useParcelas } from '@/hooks/useParcelas'
@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { solicitarNovaCobranca, atualizarBoleto } from '@/services/parcelas'
-import { Paperclip } from 'lucide-react'
+import { Paperclip, ChevronLeft, ChevronRight } from 'lucide-react'
 import ParcelaRow from '@/components/ParcelaRow'
 import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
@@ -22,6 +22,8 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import PainelKanban from '@/components/PainelKanban'
 import { ClipboardList, PlusCircle, SlidersHorizontal, LayoutList, Kanban, Search } from 'lucide-react'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
+
+const PAGE_SIZE = 25
 
 const STATUS_OPCOES = [
   { value: 'pendente',       label: 'A cobrar' },
@@ -46,6 +48,12 @@ export default function Parcelas() {
 
   const { parcelas, isLoading, filtros, busca, setBusca, executando, aplicarFiltros, limparFiltros, salvar, pagar, escalar, remarcar, moverKanban } = useParcelas()
   const { data: seguradoras = [] } = useQuery({ queryKey: ['seguradoras'], queryFn: () => listarSeguradoras().then(r => r.data ?? []) })
+
+  const [pagina, setPagina] = useState(1)
+  useEffect(() => { setPagina(1) }, [filtros, busca])
+
+  const totalPaginas = Math.ceil(parcelas.length / PAGE_SIZE)
+  const parcelasPagina = parcelas.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE)
 
   async function handleSalvar(dados) {
     const res = await salvar(dados)
@@ -146,7 +154,11 @@ export default function Parcelas() {
       </div>
 
       {/* Filtros mobile */}
-      <div className="md:hidden flex px-4 py-2 border-b border-[var(--border)] justify-end">
+      <div className="md:hidden flex items-center gap-2 px-4 py-2 border-b border-[var(--border)]">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+          <Input className="pl-9" placeholder="Buscar cliente…" value={busca} onChange={e => setBusca(e.target.value)} />
+        </div>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm"><SlidersHorizontal className="w-4 h-4 mr-2" /> Filtros</Button>
@@ -216,7 +228,7 @@ export default function Parcelas() {
                       </td>
                     </TableRow>
                   ) : (
-                    parcelas.map(p => (
+                    parcelasPagina.map(p => (
                       <ParcelaRow
                         key={p.parcela_id}
                         parcela={p}
@@ -231,6 +243,32 @@ export default function Parcelas() {
                   )}
                 </TableBody>
               </Table>
+              {totalPaginas > 1 && (
+                <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--border)]">
+                  <span className="text-xs text-[var(--text-muted)]">
+                    {(pagina - 1) * PAGE_SIZE + 1}–{Math.min(pagina * PAGE_SIZE, parcelas.length)} de {parcelas.length}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={pagina === 1} onClick={() => setPagina(p => p - 1)}>
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                      .filter(n => n === 1 || n === totalPaginas || Math.abs(n - pagina) <= 1)
+                      .reduce((acc, n, i, arr) => { if (i > 0 && n - arr[i - 1] > 1) acc.push('…'); acc.push(n); return acc }, [])
+                      .map((item, i) => item === '…'
+                        ? <span key={`e${i}`} className="px-1 text-xs text-[var(--text-muted)]">…</span>
+                        : <button key={item} onClick={() => setPagina(item)}
+                            className={`h-7 w-7 text-xs rounded-md transition-colors ${pagina === item ? 'bg-[var(--brand)] text-white font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'}`}>
+                            {item}
+                          </button>
+                      )
+                    }
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={pagina === totalPaginas} onClick={() => setPagina(p => p + 1)}>
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )
         ) : (
