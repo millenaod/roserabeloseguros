@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { solicitarNovaCobranca, atualizarBoleto } from '@/services/parcelas'
-import { Paperclip, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Paperclip, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react'
 import ParcelaRow from '@/components/ParcelaRow'
 import NovaParcelaSheet from '@/components/NovaParcelaSheet'
 import EmptyState from '@/components/EmptyState'
@@ -52,8 +52,34 @@ export default function Parcelas() {
   const [pagina, setPagina] = useState(1)
   useEffect(() => { setPagina(1) }, [filtros, busca])
 
-  const totalPaginas = Math.ceil(parcelas.length / PAGE_SIZE)
-  const parcelasPagina = parcelas.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE)
+  const [ordenacao, setOrdenacao] = useState({ campo: 'data_vencimento', direcao: 'asc' })
+
+  function alternarOrdem(campo) {
+    setOrdenacao(prev =>
+      prev.campo === campo
+        ? { campo, direcao: prev.direcao === 'asc' ? 'desc' : 'asc' }
+        : { campo, direcao: 'asc' }
+    )
+    setPagina(1)
+  }
+
+  function IconeOrdem({ campo }) {
+    if (ordenacao.campo !== campo) return <ChevronsUpDown className="w-3.5 h-3.5 ml-1 opacity-40" />
+    return ordenacao.direcao === 'asc'
+      ? <ChevronUp className="w-3.5 h-3.5 ml-1 text-[var(--brand)]" />
+      : <ChevronDown className="w-3.5 h-3.5 ml-1 text-[var(--brand)]" />
+  }
+
+  const parcelasOrdenadas = [...parcelas].sort((a, b) => {
+    const dir = ordenacao.direcao === 'asc' ? 1 : -1
+    if (ordenacao.campo === 'cliente_nome') return dir * (a.cliente_nome ?? '').localeCompare(b.cliente_nome ?? '', 'pt-BR')
+    if (ordenacao.campo === 'data_vencimento') return dir * ((a.data_vencimento ?? '') < (b.data_vencimento ?? '') ? -1 : 1)
+    if (ordenacao.campo === 'valor') return dir * ((a.valor ?? 0) - (b.valor ?? 0))
+    return 0
+  })
+
+  const totalPaginas = Math.ceil(parcelasOrdenadas.length / PAGE_SIZE)
+  const parcelasPagina = parcelasOrdenadas.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE)
 
   async function handleSalvar(dados) {
     const res = await salvar(dados)
@@ -205,10 +231,16 @@ export default function Parcelas() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-neutral-100">
-                    <TableHead>Cliente</TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => alternarOrdem('cliente_nome')}>
+                      <span className="inline-flex items-center">Cliente <IconeOrdem campo="cliente_nome" /></span>
+                    </TableHead>
                     <TableHead>Seguradora</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Vencimento</TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => alternarOrdem('valor')}>
+                      <span className="inline-flex items-center">Valor <IconeOrdem campo="valor" /></span>
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => alternarOrdem('data_vencimento')}>
+                      <span className="inline-flex items-center">Vencimento <IconeOrdem campo="data_vencimento" /></span>
+                    </TableHead>
                     <TableHead className="text-center">Contatos</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>

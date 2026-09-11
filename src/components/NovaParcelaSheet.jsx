@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { mascararTelefone, mascararMoeda, telefoneCompleto, telefoneValido, moedaParaNumero, mascararCpfCnpj, cpfCnpjValido, dataParaISO } from '@/utils/mascaras'
 import { TIPOS_PAGAMENTO } from '@/utils/pagamento'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Paperclip, AlertTriangle } from 'lucide-react'
+import { Paperclip, AlertTriangle, User, Building2, FileText, MessageCircle } from 'lucide-react'
+import { formatarMoeda, formatarData } from '@/utils/format'
 
 function LinhaRevisao({ label, valor }) {
   if (!valor) return null
@@ -119,34 +120,71 @@ export default function NovaParcelaSheet({ aberto, onFechar, seguradoras, onSalv
           </SheetTitle>
         </SheetHeader>
 
-        {revisao ? (
-          <div className="flex flex-col">
-            <p className="text-sm text-[var(--text-secondary)] mb-3">
-              Confirme os dados abaixo antes de cadastrar a parcela.
-            </p>
-            <div className="py-1">
-              <LinhaRevisao label="Cliente"    valor={form.cliente_nome} />
-              <LinhaRevisao label="WhatsApp"   valor={form.telefone} />
-              <LinhaRevisao label="CPF/CNPJ"   valor={form.cpf} />
-              <LinhaRevisao label="Seguradora" valor={seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome} />
-              <LinhaRevisao label="Parcela"    valor={form.numero_parcela ? `Nº ${form.numero_parcela}` : null} />
-              <LinhaRevisao label="Valor"      valor={form.valor ? `R$ ${form.valor}` : null} />
-              <LinhaRevisao label="Vencimento" valor={form.data_vencimento || '—'} />
-              <LinhaRevisao label="Pagamento"  valor={TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label} />
-              <LinhaRevisao label="Boleto"     valor={form.boletoFile?.name} />
+        {revisao ? (() => {
+          const seguradora = seguradoras.find(s => String(s.id) === form.seguradora_id)?.nome
+          const tipoPag = TIPOS_PAGAMENTO.find(t => t.value === form.tipo_pagamento)?.label
+          const valorNum = moedaParaNumero(form.valor)
+          return (
+            <div className="flex flex-col gap-3">
+              {/* Cliente */}
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Cliente</span>
+                </div>
+                <p className="font-display font-bold text-lg text-[var(--text-primary)] leading-tight">{form.cliente_nome}</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-0.5">{form.telefone} · {form.cpf}</p>
+              </div>
+
+              {/* Parcela */}
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Parcela</span>
+                </div>
+                <div className="flex items-end justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm text-[var(--text-secondary)] truncate">{seguradora} · Parcela Nº {form.numero_parcela}</p>
+                    <p className="font-display font-bold text-2xl text-[var(--text-primary)]">{formatarMoeda(valorNum)}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-[var(--text-muted)]">Vencimento</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">{formatarData(form.data_vencimento)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cobrança */}
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Cobrança</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <LinhaRevisao label="Tipo de pagamento" valor={tipoPag} />
+                  <div className="flex justify-between items-center gap-4 py-1.5">
+                    <span className="text-sm text-[var(--text-secondary)] shrink-0">Boleto</span>
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-[var(--text-primary)] text-right min-w-0">
+                      <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+                      <span className="truncate">{form.boletoFile?.name}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="sticky bottom-0 pt-3 pb-2 bg-[hsl(var(--background))] flex flex-col gap-2">
+                <Button variant="primary" className="w-full" disabled={salvando}
+                  onClick={() => enviar(undefined)}>
+                  {salvando ? 'Salvando…' : 'Confirmar e enviar'}
+                </Button>
+                <Button variant="ghost" className="w-full" disabled={salvando}
+                  onClick={() => setRevisao(false)}>
+                  Voltar e editar
+                </Button>
+              </div>
             </div>
-            <div className="sticky bottom-0 pt-4 pb-2 bg-[hsl(var(--background))] mt-4 flex flex-col gap-2">
-              <Button variant="primary" className="w-full" disabled={salvando}
-                onClick={() => enviar(undefined)}>
-                {salvando ? 'Salvando…' : 'Confirmar e salvar'}
-              </Button>
-              <Button variant="ghost" className="w-full" disabled={salvando}
-                onClick={() => setRevisao(false)}>
-                Voltar e editar
-              </Button>
-            </div>
-          </div>
-        ) : (
+          )
+        })() : (
         <>
         <div className="flex flex-col gap-3">
           <Campo label="Nome do cliente" erro={erros.cliente_nome}>
