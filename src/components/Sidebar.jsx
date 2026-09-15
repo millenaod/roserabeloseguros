@@ -36,11 +36,11 @@ export default function Sidebar() {
 
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 h-16">
-        <div className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center shrink-0">
-          <span className="text-white font-display font-bold text-sm leading-none">R</span>
+        <div className="w-8 h-8 rounded-xl bg-brand-primary flex items-center justify-center shrink-0">
+          <span className="text-white font-bold text-sm leading-none">C</span>
         </div>
         <span className="hidden lg:block font-display font-bold text-white text-lg leading-tight truncate">
-          Rose Rabelo
+          {perfil?.organizacoes?.nome ?? 'CobraAI'}
         </span>
       </div>
 

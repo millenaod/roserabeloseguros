@@ -6,11 +6,8 @@ import { test, expect } from '@playwright/test'
 test('redefinir-senha: estado inicial aguardando link mostra design CobraAI', async ({ page }) => {
   await page.goto('/redefinir-senha')
 
-  // Logo CobraAI presente (wordmark é um span com texto "CobraAI")
-  await expect(page.getByText('CobraAI').first()).toBeVisible()
-
-  // Subtítulo correto
-  await expect(page.getByText('Redefinir senha')).toBeVisible()
+  // Heading dentro do card
+  await expect(page.getByRole('heading', { name: 'Redefinir senha' })).toBeVisible()
 
   // Estado "aguardando link" (sem evento PASSWORD_RECOVERY)
   await expect(page.getByText('Aguardando verificação do link…')).toBeVisible()

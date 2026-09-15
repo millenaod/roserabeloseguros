@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import CobraLogo from '@/components/CobraLogo'
+import AuthSplitLayout from '@/components/AuthSplitLayout'
 import { Eye, EyeOff, MailCheck } from 'lucide-react'
 
 const emailValido = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
@@ -77,14 +77,7 @@ export default function CriarConta() {
   }
 
   return (
-    <div className="cobra-theme min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm flex flex-col items-center gap-8">
-
-        <div className="flex flex-col items-center gap-3">
-          <CobraLogo size={44} wordmark />
-          <p className="text-sm text-cobra-muted">Cobrança inteligente por WhatsApp</p>
-        </div>
-
+    <AuthSplitLayout>
         <Card className="w-full border-cobra-border shadow-sm">
           <CardContent className="p-6">
             {enviado ? (
@@ -184,7 +177,7 @@ export default function CriarConta() {
           </CardContent>
         </Card>
 
-        <p className="text-sm text-cobra-muted">
+        <p className="text-sm text-cobra-muted text-center">
           {enviado ? (
             <Link to="/login" className="font-semibold text-cobra hover:text-cobra-hover transition-colors">
               Voltar ao login
@@ -198,7 +191,6 @@ export default function CriarConta() {
             </>
           )}
         </p>
-      </div>
-    </div>
+    </AuthSplitLayout>
   )
 }

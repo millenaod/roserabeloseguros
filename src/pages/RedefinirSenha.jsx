@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import CobraLogo from '@/components/CobraLogo'
+import AuthSplitLayout from '@/components/AuthSplitLayout'
 
 const inputCobra = 'border-cobra-border focus-visible:border-cobra focus-visible:shadow-focus-cobra'
 
@@ -52,14 +52,7 @@ export default function RedefinirSenha() {
   }
 
   return (
-    <div className="cobra-theme min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm flex flex-col items-center gap-8">
-
-        <div className="flex flex-col items-center gap-3">
-          <CobraLogo size={44} wordmark />
-          <p className="text-sm text-cobra-muted">Redefinir senha</p>
-        </div>
-
+    <AuthSplitLayout>
         <Card className="w-full border-cobra-border shadow-sm">
           <CardContent className="p-6">
 
@@ -70,6 +63,7 @@ export default function RedefinirSenha() {
               </div>
             ) : !pronto ? (
               <div className="flex flex-col gap-3 text-center py-2">
+                <h1 className="text-xl font-bold text-cobra-ink">Redefinir senha</h1>
                 <p className="text-sm text-cobra-muted">Aguardando verificação do link…</p>
                 <p className="text-xs text-cobra-faint">
                   Se nada acontecer, o link pode ter expirado. Solicite um novo.
@@ -84,6 +78,10 @@ export default function RedefinirSenha() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1 mb-1">
+                  <h1 className="text-xl font-bold text-cobra-ink">Redefinir senha</h1>
+                  <p className="text-sm text-cobra-muted">Crie uma nova senha para sua conta.</p>
+                </div>
                 <div className="flex flex-col gap-1.5">
                   <CampoLabel>Nova senha</CampoLabel>
                   <Input
@@ -121,8 +119,6 @@ export default function RedefinirSenha() {
 
           </CardContent>
         </Card>
-
-      </div>
-    </div>
+    </AuthSplitLayout>
   )
 }

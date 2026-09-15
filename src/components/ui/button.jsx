@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Design System Rose Rabelo
+        // Design System CobraAI
         default: "bg-brand-primary text-white hover:bg-brand-hover",
         primary: "bg-brand-primary text-white hover:bg-brand-hover",
         secondary:
