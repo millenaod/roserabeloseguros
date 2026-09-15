@@ -14,7 +14,7 @@
     --popover:            0 0% 100%;
     --popover-foreground: 20 10% 10%;
 
-    --primary:            6 100% 40%;    /* #CC1500 — brand-primary */
+    --primary:            215 100% 50%;  /* #2563EB — brand-primary */
     --primary-foreground: 0 0% 100%;
 
     --secondary:          36 20% 88%;    /* #E8E2D9 — borda suave */
@@ -23,27 +23,27 @@
     --muted:              42 20% 96%;
     --muted-foreground:   20 5% 45%;     /* #78716C */
 
-    --accent:             8 100% 97%;    /* #FFEAE6 — brand tint claro */
-    --accent-foreground:  6 100% 40%;    /* #CC1500 */
+    --accent:             214 100% 97%;  /* azul tint claro */
+    --accent-foreground:  215 100% 50%; /* #2563EB */
 
     --destructive:        0 72% 51%;     /* #DC2626 */
     --destructive-foreground: 0 0% 100%;
 
     --border:             36 20% 88%;    /* #E8E2D9 */
     --input:              36 20% 88%;
-    --ring:               6 100% 40%;     /* #CC1500 — brand-primary */
+    --ring:               215 100% 50%;  /* #2563EB — brand-primary */
 
     --radius: 0.5rem;
 
     /* --- Tokens de design do projeto --- */
     --surface:        #FFFFFF;
-    --surface-raised: #FDFAF6;
+    --surface-raised: #F8FAFC;
     --text-primary:   #1C1917;
     --text-secondary: #78716C;
     --text-muted:     #A8A29E;
-    --brand:          #CC1500;
-    --brand-hover:    #A11000;
-    --brand-light:    #FFEAE6;
+    --brand:          #2563EB;
+    --brand-hover:    #1D4ED8;
+    --brand-light:    rgba(37, 99, 235, 0.08);
 
     /* Status semânticos */
     --status-pending:       #D97706;
@@ -68,10 +68,10 @@
     --radius-md: 8px;
     --radius-lg: 12px;
 
-    /* --- Design System Rose Rabelo (T01) --- */
-    --brand-primary: #CC1500;
-    --brand-hover:   #A11000;
-    --brand-tint:    rgba(204, 21, 0, 0.09);
+    /* --- Design System CobraAI (T01) --- */
+    --brand-primary: #2563EB;
+    --brand-hover:   #1D4ED8;
+    --brand-tint:    rgba(37, 99, 235, 0.08);
 
     --semantic-success: #1A7A4A;
     --semantic-warning: #D97706;
@@ -86,7 +86,7 @@
     --neutral-100: #F2F2F2;
     --neutral-50:  #FFFFFF;
 
-    --shadow-focus: 0 0 0 3px rgba(204, 21, 0, 0.25);
+    --shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
 
     --font-display: 'Barlow Condensed', sans-serif;
     --font-body:    'Inter', sans-serif;
