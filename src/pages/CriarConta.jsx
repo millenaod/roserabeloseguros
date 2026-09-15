@@ -58,10 +58,13 @@ export default function CriarConta() {
 
     if (error) {
       setCarregando(false)
+      const msg = error.message ?? ''
       setErroGeral(
-        error.message?.includes('already')
+        msg.includes('already') || msg.includes('registered')
           ? 'Já existe uma conta com esse e-mail. Tente entrar.'
-          : 'Não foi possível criar a conta. Verifique os dados e tente novamente.'
+          : msg.includes('rate limit') || msg.includes('over_email')
+            ? 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.'
+            : 'Não foi possível criar a conta. Verifique os dados e tente novamente.'
       )
       return
     }
