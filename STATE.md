@@ -95,7 +95,7 @@ A plataforma vira **CobraAI**. Novo visual (inspirado em Osko/Replo: light, azul
 - Testes: `tests/admin.spec.ts` (4, passam) — super-admin vê lista; não-admin barrado; edge function nega não-super-admin (403) e valida corpo.
 - **Caveat e-mail:** o convite depende do e-mail do Supabase — dev tem rate limit baixo (testes não disparam e-mail real) e **produção vai precisar de SMTP próprio** configurado.
 
-**⚠️ Pendência de correção (multi-tenancy):** a edge function pré-existente **`admin-usuarios`** (deploy em dev E prod) insere `usuarios` **sem `org_id`** → quebra com `org_id NOT NULL`, e o GET dela lista usuários de **todas** as orgs (vazamento cross-org). **Não está wired no front atual** (nenhum `functions.invoke` em `src`), então não há incidente ativo — mas precisa ser corrigida (setar `org_id` do gerente + filtrar GET por org) antes de ser usada.
+**✅ Corrigido (multi-tenancy) — `admin-usuarios` (dev E prod, v2):** a edge function pré-existente inseria `usuarios` **sem `org_id`** (quebrava com `org_id NOT NULL`) e o GET vazava usuários de **todas** as orgs. Agora insere com o `org_id` do gerente e filtra o GET pela org dele. Fontes versionados em `supabase/functions/`. Testes: `tests/admin-usuarios.spec.ts` (org_id correto no POST; GET sem vazamento cross-org).
 
 - **Pendente geral:** Rollout de prod (trigger `handle_new_user` + `plano` + `super_admin` + RPCs `is_super_admin`/`admin_list_orgs` + deploy edge `admin-org-create` + SMTP + deploy front). Branch `cobraai` gera preview na Vercel (usa env de PROD — só revisão visual).
 
