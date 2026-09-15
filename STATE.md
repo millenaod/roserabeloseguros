@@ -97,7 +97,13 @@ A plataforma vira **CobraAI**. Novo visual (inspirado em Osko/Replo: light, azul
 
 **✅ Corrigido (multi-tenancy) — `admin-usuarios` (dev E prod, v2):** a edge function pré-existente inseria `usuarios` **sem `org_id`** (quebrava com `org_id NOT NULL`) e o GET vazava usuários de **todas** as orgs. Agora insere com o `org_id` do gerente e filtra o GET pela org dele. Fontes versionados em `supabase/functions/`. Testes: `tests/admin-usuarios.spec.ts` (org_id correto no POST; GET sem vazamento cross-org).
 
-- **Pendente geral:** Rollout de prod (trigger `handle_new_user` + `plano` + `super_admin` + RPCs `is_super_admin`/`admin_list_orgs` + deploy edge `admin-org-create` + SMTP + deploy front). Branch `cobraai` gera preview na Vercel (usa env de PROD — só revisão visual).
+**✅ Rollout de prod concluído (2026-09-15):** migrations `cobraai_signup_handle_new_user` e `cobraai_super_admin` aplicadas em `wjbcbiwfmlsfbgbxlief`; edge function `admin-org-create` deployada (v1). Histórico sincronizado com 3 migrations no-op (`fase3b`, `fase3c`, `fase1b`) que já estavam efetivamente aplicadas via `fase3_rls`/`fase1_schema`. Prod tem: coluna `plano` em `organizacoes`, coluna `super_admin` em `usuarios`, funções `handle_new_user`/`is_super_admin`/`admin_list_orgs`, trigger `trg_handle_new_user` em `auth.users`.
+
+- **Pendente geral:**
+  - **Deploy do front:** fazer merge/PR de `cobraai` → `main` para a Vercel deployar o novo visual (login CobraAI, `/criar-conta`, `/admin`). Branch já gera preview na Vercel com env de prod.
+  - **SMTP:** configurar provedor SMTP próprio no painel Supabase (prod) para que o convite por e-mail (`inviteUserByEmail`) em `admin-org-create` funcione em volume. Sem SMTP customizado, os convites saem pelo relay do Supabase com rate limit baixo.
+  - **Marcar super_admin em prod:** `UPDATE usuarios SET super_admin = true WHERE id = '<uid-da-millena>';` — nenhum usuário de prod tem essa flag ainda.
+  - **Criar 2ª empresa em prod** (quando quiser): já é possível via painel `/admin` após os dois pontos acima.
 
 ## Ambientes
 
