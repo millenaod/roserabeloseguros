@@ -86,7 +86,15 @@ A plataforma vira **CobraAI**. Novo visual (inspirado em Osko/Replo: light, azul
 - **Backend (dev):** trigger `handle_new_user` no `auth.users` cria org + usuário dono (`perfil 'rose'`) a partir do metadata; coluna `plano` em `organizacoes`. Só age no signup self-service (guard por `nome_empresa`), não interfere em usuários criados por admin/testes.
 - **Confirmação de e-mail LIGADA** (decisão): após criar conta, mostra tela "Confirme seu e-mail" (não entra direto). O provisionamento acontece no `signUp` independente da confirmação. Obs.: GoTrue valida domínio do e-mail (rejeita `teste.local`/`example.com`).
 - **Testes:** `tests/signup.spec.ts` (3, passam) — provisionamento via admin API, validação client-side, e tela de confirmação (resposta do signup stubbada, sem e-mail real).
-- **Pendente:** Fase C (painel super-admin: flag `super_admin`, edge functions `admin-*`, rota `/admin`). Rollout de prod (trigger + `plano` + deploy front). Em prod a confirmação de e-mail também estará ligada.
+
+**Painel super-admin (Fase C — listagem pronta no dev):**
+- Flag `super_admin` (booleano) em `usuarios`; helper `is_super_admin()` + RPC `admin_list_orgs()` (SECURITY DEFINER, checa super_admin antes de retornar cross-org). Usuária de teste do dev marcada super_admin.
+- `buscarPerfil()` traz `super_admin`. `RotaProtegida apenasSuperAdmin` gateia `/admin`.
+- Front: `AdminLayout` (sidebar clara CobraAI, responsivo) + `pages/admin/Empresas.jsx` (lista via RPC, empty state, contadores). `services/admin.js`.
+- Testes: `tests/admin.spec.ts` (super-admin vê lista; não-admin barrado) — passam.
+- **Falta na Fase C:** criar empresa+usuário dono (botão "Nova empresa" hoje desabilitado) — precisa de edge function `admin-org-create` (service_role + auth admin API). Infra nova; confirmar antes.
+
+- **Pendente geral:** Rollout de prod (trigger `handle_new_user` + `plano` + `super_admin` + RPCs + deploy front). Branch `cobraai` gera preview na Vercel (usa env de PROD — só revisão visual).
 
 ## Ambientes
 

@@ -55,7 +55,7 @@ export async function logout() {
 export async function buscarPerfil(userId) {
   const { data, error } = await supabase
     .from('usuarios')
-    .select('id, nome, perfil, org_id, organizacoes(nome)')
+    .select('id, nome, perfil, super_admin, org_id, organizacoes(nome)')
     .eq('id', userId)
     .single()
 
