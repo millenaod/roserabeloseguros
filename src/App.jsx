@@ -1,10 +1,12 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/AppLayout'
+import AdminLayout from '@/components/AdminLayout'
 import RotaProtegida from '@/components/RotaProtegida'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const Login            = lazy(() => import('@/pages/Login'))
+const CriarConta       = lazy(() => import('@/pages/CriarConta'))
 const RedefinirSenha   = lazy(() => import('@/pages/RedefinirSenha'))
 const Dashboard        = lazy(() => import('@/pages/Parcelas'))
 const Tarefas          = lazy(() => import('@/pages/Tarefas'))
@@ -15,6 +17,7 @@ const Relatorios       = lazy(() => import('@/pages/Relatorios'))
 const CarteiraVendedor = lazy(() => import('@/pages/CarteiraVendedor'))
 const Perfil           = lazy(() => import('@/pages/Perfil'))
 const Ajuda            = lazy(() => import('@/pages/Ajuda'))
+const AdminEmpresas    = lazy(() => import('@/pages/admin/Empresas'))
 
 function PageLoader() {
   return (
@@ -32,9 +35,17 @@ export default function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/criar-conta" element={<CriarConta />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
           <Route element={<RotaProtegida />}>
+            {/* Painel super-admin CobraAI — layout próprio, fora do app Rose */}
+            <Route element={<RotaProtegida apenasSuperAdmin />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin" element={<AdminEmpresas />} />
+              </Route>
+            </Route>
+
             <Route element={<AppLayout />}>
               <Route path="/"             element={<Dashboard />} />
               <Route path="/tarefas"      element={<Tarefas />} />

@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function RotaProtegida({ perfisPermitidos }) {
+export default function RotaProtegida({ perfisPermitidos, apenasSuperAdmin }) {
   const { usuario, perfil, carregando } = useAuth()
 
   if (carregando) {
@@ -18,6 +18,11 @@ export default function RotaProtegida({ perfisPermitidos }) {
   }
 
   if (!usuario) return <Navigate to="/login" replace />
+
+  // Painel super-admin: só quem tem a flag super_admin.
+  if (apenasSuperAdmin && perfil && !perfil.super_admin) {
+    return <Navigate to="/" replace />
+  }
 
   if (perfisPermitidos && perfil && !perfisPermitidos.includes(perfil.perfil)) {
     const destinos = { rose: '/dashboard-rose', thaina: '/', vendedor: '/carteira' }

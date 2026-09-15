@@ -18,6 +18,10 @@ const buttonVariants = cva(
         danger: "bg-neutral-800 text-white hover:bg-neutral-900",
         destructive:
           "bg-semantic-danger text-white hover:bg-brand-hover",
+        // Design System CobraAI (telas de auth/cadastro + admin)
+        cobra: "bg-cobra text-white hover:bg-cobra-hover focus-visible:shadow-focus-cobra",
+        "cobra-ghost":
+          "text-cobra-muted hover:bg-cobra-tint hover:text-cobra focus-visible:shadow-focus-cobra",
         outline:
           "border border-input bg-background hover:bg-brand-tint hover:text-brand-primary",
         link: "text-brand-primary underline-offset-4 hover:underline",

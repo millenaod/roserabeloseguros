@@ -1,16 +1,26 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { login, buscarPerfil, resetarSenha } from '@/services/auth'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import CobraLogo from '@/components/CobraLogo'
 import { Eye, EyeOff } from 'lucide-react'
 
 const DESTINO_POR_PERFIL = {
   rose:     '/dashboard-rose',
   thaina:   '/',
   vendedor: '/carteira',
+}
+
+// Label padrão do projeto (uppercase, muted) — em tom CobraAI.
+function CampoLabel({ children }) {
+  return (
+    <Label className="text-xs font-semibold uppercase tracking-wide text-cobra-muted">
+      {children}
+    </Label>
+  )
 }
 
 export default function Login() {
@@ -62,39 +72,39 @@ export default function Login() {
     setErro('')
   }
 
+  const inputCobra = 'border-cobra-border focus-visible:border-cobra focus-visible:shadow-focus-cobra'
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="cobra-theme min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
 
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-full bg-[var(--brand)] flex items-center justify-center">
-            <span className="font-display font-bold text-2xl text-white">R</span>
-          </div>
-          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
-          <p className="text-sm text-[var(--text-secondary)]">Sistema de Cobrança</p>
+        {/* Marca */}
+        <div className="flex flex-col items-center gap-3">
+          <CobraLogo size={44} wordmark />
+          <p className="text-sm text-cobra-muted">Cobrança inteligente por WhatsApp</p>
         </div>
 
-        <Card className="w-full border-[var(--border)]">
+        <Card className="w-full border-cobra-border shadow-sm">
           <CardContent className="p-6">
 
             {/* Tela de login */}
             {tela === 'login' && (
               <form onSubmit={handleLogin} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">E-mail</Label>
+                  <CampoLabel>E-mail</CampoLabel>
                   <Input
                     type="email"
                     placeholder="seu@email.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={inputCobra}
                     autoFocus
                     autoComplete="email"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Senha</Label>
+                  <CampoLabel>Senha</CampoLabel>
                   <div className="relative">
                     <Input
                       type={verSenha ? 'text' : 'password'}
@@ -102,12 +112,12 @@ export default function Login() {
                       value={senha}
                       onChange={e => setSenha(e.target.value)}
                       autoComplete="current-password"
-                      className="pr-10"
+                      className={`pr-10 ${inputCobra}`}
                     />
                     <button
                       type="button"
                       onClick={() => setVerSenha(v => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-cobra-faint hover:text-cobra-ink transition-colors"
                       tabIndex={-1}
                     >
                       {verSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -121,19 +131,14 @@ export default function Login() {
                   </p>
                 )}
 
-                <Button
-                  type="submit"
-                  className="w-full mt-1"
-                  disabled={carregando}
-                  variant="primary"
-                >
+                <Button type="submit" variant="cobra" className="w-full mt-1" disabled={carregando}>
                   {carregando ? 'Entrando…' : 'Entrar'}
                 </Button>
 
                 <button
                   type="button"
                   onClick={() => { setTela('esqueci'); setErro('') }}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--brand)] text-center transition-colors"
+                  className="text-xs text-cobra-muted hover:text-cobra text-center transition-colors"
                 >
                   Esqueci minha senha
                 </button>
@@ -144,19 +149,20 @@ export default function Login() {
             {tela === 'esqueci' && (
               <form onSubmit={handleEsqueciSenha} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1 mb-1">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">Redefinir senha</p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-sm font-medium text-cobra-ink">Redefinir senha</p>
+                  <p className="text-xs text-cobra-muted">
                     Informe seu e-mail e enviaremos um link para criar uma nova senha.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">E-mail</Label>
+                  <CampoLabel>E-mail</CampoLabel>
                   <Input
                     type="email"
                     placeholder="seu@email.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={inputCobra}
                     autoFocus
                     autoComplete="email"
                   />
@@ -168,19 +174,14 @@ export default function Login() {
                   </p>
                 )}
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={carregando}
-                  variant="primary"
-                >
+                <Button type="submit" variant="cobra" className="w-full" disabled={carregando}>
                   {carregando ? 'Enviando…' : 'Enviar link de redefinição'}
                 </Button>
 
                 <button
                   type="button"
                   onClick={voltarParaLogin}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--brand)] text-center transition-colors"
+                  className="text-xs text-cobra-muted hover:text-cobra text-center transition-colors"
                 >
                   Voltar ao login
                 </button>
@@ -191,8 +192,8 @@ export default function Login() {
             {tela === 'enviado' && (
               <div className="flex flex-col gap-4 text-center py-1">
                 <div className="flex flex-col gap-1.5">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">E-mail enviado!</p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-sm font-medium text-cobra-ink">E-mail enviado!</p>
+                  <p className="text-xs text-cobra-muted">
                     Verifique a caixa de entrada de <span className="font-medium">{email}</span> e clique no link para redefinir sua senha.
                   </p>
                 </div>
@@ -200,7 +201,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={voltarParaLogin}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--brand)] transition-colors"
+                  className="text-xs text-cobra-muted hover:text-cobra transition-colors"
                 >
                   Voltar ao login
                 </button>
@@ -209,6 +210,15 @@ export default function Login() {
 
           </CardContent>
         </Card>
+
+        {tela === 'login' && (
+          <p className="text-sm text-cobra-muted">
+            Não tem conta?{' '}
+            <Link to="/criar-conta" className="font-semibold text-cobra hover:text-cobra-hover transition-colors">
+              Criar conta
+            </Link>
+          </p>
+        )}
 
       </div>
     </div>

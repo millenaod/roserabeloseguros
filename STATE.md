@@ -1,6 +1,6 @@
 # STATE — Rose Rabelo Seguros
 
-_Atualizado: 2026-07-07_
+_Atualizado: 2026-09-15_
 
 ## Status atual
 
@@ -46,6 +46,7 @@ Branch principal: `main` · Deploy automático via Vercel
 | 2026-07-07 | Erros do WhatsApp decodificados na timeline |
 | 2026-07-07 | Order by em contatos corrigido (`data_contato` → `enviado_em`) |
 | 2026-07-07 | Fix excluir parcela/cliente + testes e2e |
+| 2026-09-14 | Dashboard "Inadimplência por seguradora" agrupava por `p.seguradora` (campo inexistente na view) → tudo caía em "Outros". Corrigido para `p.seguradora_nome`. Teste de regressão DR5 em `dashboard.spec.ts`. |
 
 ## Segurança (RLS / Supabase)
 
@@ -53,6 +54,56 @@ Branch principal: `main` · Deploy automático via Vercel
 - `notify_n8n_parcela_nova()` sem EXECUTE para public/anon/authenticated — só dispara via trigger `AFTER INSERT ON parcelas`.
 - Removidas TODAS as políticas `anon` de leitura/escrita nas tabelas de dados (clientes, parcelas, apólices, contatos, seguradoras, configuracoes). App usa sempre sessão autenticada; n8n usa service_role.
 - **Pendente (painel Supabase, não dá por SQL):** ligar "Leaked Password Protection" em Auth.
+
+## Multi-tenancy (aplicado no DEV **e em PRODUÇÃO** — 2026-09-15)
+
+Transformação do app single-tenant (feito p/ Rose) em produto para vários corretores. Modelo: **banco compartilhado + `org_id` por linha + RLS por empresa**; cada usuário pertence a **uma** empresa.
+
+Aplicado em `cobranca-seguros-dev` **e replicado em produção `cobranca-seguros`** (migrations `multitenancy_fase*`; em prod também foi dropada a policy `auth_update_kanban` que era `USING(true)`). Produção: 510 parcelas backfill-adas na org Rose, 0 órfãos, advisor limpo (só o WARN intencional de `auth_org_id`). Migrations `multitenancy_fase*`:
+- Tabela `organizacoes` (`nome`, `slug`, `ativo`). `org_id` (NOT NULL) em `usuarios`, `clientes`, `apolices`, `parcelas`, `contatos`, `configuracoes`, `kanban_colunas`. `seguradoras` continua **global**.
+- Função `auth_org_id()` (`SECURITY DEFINER`, EXECUTE só p/ `authenticated`+`service_role`; revogado de `anon`). Usada pela RLS.
+- **Triggers `BEFORE INSERT`** preenchem `org_id` em cascata (`clientes`←auth; `apolices`←cliente; `parcelas`←apólice; `contatos`←parcela/cliente) — por isso os inserts do front **não mudaram** e o caminho do n8n (service_role) também grava certo. Funções de trigger sem EXECUTE p/ anon/authenticated.
+- RLS reescrita: `authenticated` usa `org_id = auth_org_id()` (USING + WITH CHECK) em todas as tabelas de dados; `service_role` total; `usuarios` = próprio perfil.
+- Views `v_parcelas_ui`/`v_parcelas_acao`/`v_resumo_inadimplencia` recriadas com coluna `org_id` (seguem `security_invoker` → filtram sozinhas).
+- **Unicidades agora por org:** `clientes (org_id, cpf_cnpj)` e `apolices (org_id, seguradora_id, numero_apolice)` — antes eram globais e bloqueariam CPF/apólice repetidos entre corretoras.
+- `configuracoes`: PK passou a `(org_id, chave)`.
+- Front: `buscarPerfil()` passou a trazer `org_id` + nome da org. `RotaProtegida` inalterada.
+- Backfill: todos os dados e usuários do dev vinculados à org **"Rose Rabelo Seguros"** (`slug=rose-rabelo`).
+- Teste de isolamento `tests/multitenancy.spec.ts` (nível API/RLS): usuário da org B não vê parcelas da org A e vice-versa; insert nasce com `org_id` correto via trigger. **Passa.**
+
+**Pendente:**
+- Criar a 2ª empresa + usuário quando quiser (base já pronta em prod). Provisionamento: inserir org em `organizacoes`, criar user no Supabase Auth, inserir linha em `usuarios` com o `org_id` da nova org e `perfil` (`rose`=dono / `vendedor`).
+- **Deploy do front**: `buscarPerfil()` agora seleciona `org_id`+`organizacoes(nome)` — está no working tree, ainda não commitado/deployado. O app deployado atual segue funcionando (Rose/Thainá na org Rose veem tudo via RLS; triggers preenchem `org_id`), então o deploy não é urgente.
+- Ajustar o n8n para incluir/filtrar `org_id` (webhook `parcela-nova` e leitura de `configuracoes` por org).
+- UI de admin p/ provisionar empresas fica p/ depois.
+
+## CobraAI — rebranding + signup self-service (dev, 2026-09-15)
+
+A plataforma vira **CobraAI**. Novo visual (inspirado em Osko/Replo: light, azul `#2563EB`, Inter, card central) aplicado **só nas telas de auth/cadastro** por ora — o resto do app segue rosa Rose Rabelo.
+
+- **Design system CobraAI (escopo isolado):** paleta `cobra` no `tailwind.config.js`, variante `cobra`/`cobra-ghost` no `Button`, classe `.cobra-theme` em `index.css` (sobrescreve `--background` p/ branco só nesse escopo), componente `CobraLogo`.
+- **Signup self-service (nova corretora):** página `/criar-conta` (`src/pages/CriarConta.jsx`) + `criarConta()` em `services/auth.js` (`supabase.auth.signUp` com metadata `nome_empresa`/`nome_usuario`). Login rebrandado + link "Criar conta".
+- **Backend (dev):** trigger `handle_new_user` no `auth.users` cria org + usuário dono (`perfil 'rose'`) a partir do metadata; coluna `plano` em `organizacoes`. Só age no signup self-service (guard por `nome_empresa`), não interfere em usuários criados por admin/testes.
+- **Confirmação de e-mail LIGADA** (decisão): após criar conta, mostra tela "Confirme seu e-mail" (não entra direto). O provisionamento acontece no `signUp` independente da confirmação. Obs.: GoTrue valida domínio do e-mail (rejeita `teste.local`/`example.com`).
+- **Testes:** `tests/signup.spec.ts` (3, passam) — provisionamento via admin API, validação client-side, e tela de confirmação (resposta do signup stubbada, sem e-mail real).
+
+**Painel super-admin (Fase C — listagem pronta no dev):**
+- Flag `super_admin` (booleano) em `usuarios`; helper `is_super_admin()` + RPC `admin_list_orgs()` (SECURITY DEFINER, checa super_admin antes de retornar cross-org). Usuária de teste do dev marcada super_admin.
+- `buscarPerfil()` traz `super_admin`. `RotaProtegida apenasSuperAdmin` gateia `/admin`.
+- Front: `AdminLayout` (sidebar clara CobraAI, responsivo) + `pages/admin/Empresas.jsx` (lista via RPC, empty state, contadores). `services/admin.js`.
+- **Criar empresa:** edge function `admin-org-create` (dev) — valida `super_admin`, cria a org e **convida o dono por e-mail** (`inviteUserByEmail`, define senha pelo link), vincula como `perfil 'rose'`. Front: dialog "Nova empresa" (`services/admin.js criarEmpresa`, `supabase.functions.invoke`). Rollback da org se o convite falhar.
+- Testes: `tests/admin.spec.ts` (4, passam) — super-admin vê lista; não-admin barrado; edge function nega não-super-admin (403) e valida corpo.
+- **Caveat e-mail:** o convite depende do e-mail do Supabase — dev tem rate limit baixo (testes não disparam e-mail real) e **produção vai precisar de SMTP próprio** configurado.
+
+**✅ Corrigido (multi-tenancy) — `admin-usuarios` (dev E prod, v2):** a edge function pré-existente inseria `usuarios` **sem `org_id`** (quebrava com `org_id NOT NULL`) e o GET vazava usuários de **todas** as orgs. Agora insere com o `org_id` do gerente e filtra o GET pela org dele. Fontes versionados em `supabase/functions/`. Testes: `tests/admin-usuarios.spec.ts` (org_id correto no POST; GET sem vazamento cross-org).
+
+**✅ Rollout de prod concluído (2026-09-15):** migrations `cobraai_signup_handle_new_user` e `cobraai_super_admin` aplicadas em `wjbcbiwfmlsfbgbxlief`; edge function `admin-org-create` deployada (v1). Histórico sincronizado com 3 migrations no-op (`fase3b`, `fase3c`, `fase1b`) que já estavam efetivamente aplicadas via `fase3_rls`/`fase1_schema`. Prod tem: coluna `plano` em `organizacoes`, coluna `super_admin` em `usuarios`, funções `handle_new_user`/`is_super_admin`/`admin_list_orgs`, trigger `trg_handle_new_user` em `auth.users`.
+
+- **Pendente geral:**
+  - **Deploy do front:** fazer merge/PR de `cobraai` → `main` para a Vercel deployar o novo visual (login CobraAI, `/criar-conta`, `/admin`). Branch já gera preview na Vercel com env de prod.
+  - **SMTP:** configurar provedor SMTP próprio no painel Supabase (prod) para que o convite por e-mail (`inviteUserByEmail`) em `admin-org-create` funcione em volume. Sem SMTP customizado, os convites saem pelo relay do Supabase com rate limit baixo.
+  - **Marcar super_admin em prod:** `UPDATE usuarios SET super_admin = true WHERE id = '<uid-da-millena>';` — nenhum usuário de prod tem essa flag ainda.
+  - **Criar 2ª empresa em prod** (quando quiser): já é possível via painel `/admin` após os dois pontos acima.
 
 ## Ambientes
 
@@ -73,7 +124,9 @@ Storage do projeto dev: bucket `boletos` + policies (upload/update/delete `authe
 
 ## Pendências conhecidas
 
-- **`.env.test`:** colar a `service_role` real do projeto dev (Settings → API) no lugar do placeholder — único passo que falta para `npm test` rodar.
+- ✅ **`.env.test`:** já tem a `service_role` real do projeto dev (confirmado 2026-09-14, claim `role=service_role`); `npm test` semeia e roda.
+- **Testes RE3 e RE5 (`dashboard.spec.ts`, página Relatórios) falham (pré-existente)** — provável débito do redesign: RE3 espera o EmptyState "Defina os filtros e clique em Consultar" que não aparece mais no estado inicial. Não relacionado ao fix de seguradora; revisar o comportamento inicial de `/relatorios` e atualizar os specs.
+- **Testes C1 e C3 (`carteira.spec.ts`) falham (pré-existente, débito do redesign do Sheet)** — `strict mode violation`: o Sheet ganhou os títulos "Parcelas em aberto" e "Histórico de contatos", então `getByRole('heading')` casa 3 elementos. A ação funciona (toast "Cliente atualizado com sucesso" aparece); é só o seletor do spec que precisa ficar específico (ex.: `heading` de nível/`name`). Não relacionado ao multi-tenancy.
 
 Usuária de teste no dev: `millena.dutra@teste.local` / `teste1234` (nome "Millena Dutra", perfil `rose`). O helper `tests/helpers/setup.ts` agora lê email/senha de `TEST_EMAIL`/`TEST_PASSWORD` (antes o email era hardcoded).
 - Ligar proteção de senha vazada no painel (Auth → Policies) da produção

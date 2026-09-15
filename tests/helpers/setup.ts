@@ -47,16 +47,28 @@ export async function limparParcelas() {
   await supabase.from('clientes').delete().in('id', clienteIds)
 }
 
-export async function criarClienteTeste() {
+// org_id agora é NOT NULL. Inserts via service_role (como este helper) NÃO passam
+// pelo trigger de auth (não há auth.uid()), então precisam informar o org_id.
+export async function getOrgId(slug = 'rose-rabelo') {
+  const { data } = await supabase
+    .from('organizacoes')
+    .select('id')
+    .eq('slug', slug)
+    .single()
+  return data!.id as string
+}
+
+export async function criarClienteTeste(orgId?: string) {
+  const org = orgId ?? (await getOrgId())
   const { data: cliente } = await supabase
     .from('clientes')
-    .insert({ nome: 'João da Silva Teste', telefone: '5511999990001', cpf_cnpj: '529.982.247-25' })
+    .insert({ nome: 'João da Silva Teste', telefone: '5511999990001', cpf_cnpj: '529.982.247-25', org_id: org })
     .select('id')
     .single()
 
   const { data: seg } = await supabase
     .from('seguradoras')
-    .select('id')
+    .select('id, nome')
     .order('nome')
     .limit(1)
     .single()
@@ -79,5 +91,5 @@ export async function criarClienteTeste() {
     .select('id')
     .single()
 
-  return { clienteId: cliente!.id, parcelaId: parcela!.id }
+  return { clienteId: cliente!.id, parcelaId: parcela!.id, seguradoraNome: seg!.nome as string }
 }

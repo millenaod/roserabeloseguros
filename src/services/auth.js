@@ -6,6 +6,18 @@ export async function login(email, senha) {
   return { data, error }
 }
 
+// Signup self-service (nova corretora). O metadata nome_empresa/nome_usuario é lido
+// pelo trigger handle_new_user, que cria a organização + o usuário dono (perfil 'rose').
+export async function criarConta({ email, senha, nomeEmpresa, nomeUsuario }) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: senha,
+    options: { data: { nome_empresa: nomeEmpresa, nome_usuario: nomeUsuario } },
+  })
+  if (error) console.error('criarConta:', error)
+  return { data, error }
+}
+
 export async function resetarSenha(email) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/redefinir-senha`,
@@ -43,7 +55,7 @@ export async function logout() {
 export async function buscarPerfil(userId) {
   const { data, error } = await supabase
     .from('usuarios')
-    .select('id, nome, perfil')
+    .select('id, nome, perfil, super_admin, org_id, organizacoes(nome)')
     .eq('id', userId)
     .single()
 

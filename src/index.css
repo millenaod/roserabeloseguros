@@ -94,6 +94,28 @@
 
 }
 
+/* --- Design System CobraAI ---
+   Escopo isolado: aplicado só nas telas de auth/cadastro e no painel admin
+   (via <div class="cobra-theme">). Não altera o app Rose Rabelo. */
+.cobra-theme {
+  --cobra-primary:       #2563EB;
+  --cobra-primary-hover: #1D4ED8;
+  --cobra-ink:           #0F172A;
+  --cobra-muted:         #64748B;
+  --cobra-faint:         #94A3B8;
+  --cobra-surface:       #F8FAFC;
+  --cobra-border:        #E2E8F0;
+
+  /* Neutraliza o off-white quente do tema Rose: inputs (bg-background) e
+     placeholders ficam brancos/frios dentro do CobraAI. */
+  --background:          0 0% 100%;
+  --muted-foreground:    215 16% 47%;  /* #64748B — placeholders */
+
+  background-color: #FFFFFF;
+  color: var(--cobra-ink);
+  font-family: 'Inter', sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
