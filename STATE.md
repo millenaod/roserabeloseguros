@@ -91,10 +91,13 @@ A plataforma vira **CobraAI**. Novo visual (inspirado em Osko/Replo: light, azul
 - Flag `super_admin` (booleano) em `usuarios`; helper `is_super_admin()` + RPC `admin_list_orgs()` (SECURITY DEFINER, checa super_admin antes de retornar cross-org). Usuária de teste do dev marcada super_admin.
 - `buscarPerfil()` traz `super_admin`. `RotaProtegida apenasSuperAdmin` gateia `/admin`.
 - Front: `AdminLayout` (sidebar clara CobraAI, responsivo) + `pages/admin/Empresas.jsx` (lista via RPC, empty state, contadores). `services/admin.js`.
-- Testes: `tests/admin.spec.ts` (super-admin vê lista; não-admin barrado) — passam.
-- **Falta na Fase C:** criar empresa+usuário dono (botão "Nova empresa" hoje desabilitado) — precisa de edge function `admin-org-create` (service_role + auth admin API). Infra nova; confirmar antes.
+- **Criar empresa:** edge function `admin-org-create` (dev) — valida `super_admin`, cria a org e **convida o dono por e-mail** (`inviteUserByEmail`, define senha pelo link), vincula como `perfil 'rose'`. Front: dialog "Nova empresa" (`services/admin.js criarEmpresa`, `supabase.functions.invoke`). Rollback da org se o convite falhar.
+- Testes: `tests/admin.spec.ts` (4, passam) — super-admin vê lista; não-admin barrado; edge function nega não-super-admin (403) e valida corpo.
+- **Caveat e-mail:** o convite depende do e-mail do Supabase — dev tem rate limit baixo (testes não disparam e-mail real) e **produção vai precisar de SMTP próprio** configurado.
 
-- **Pendente geral:** Rollout de prod (trigger `handle_new_user` + `plano` + `super_admin` + RPCs + deploy front). Branch `cobraai` gera preview na Vercel (usa env de PROD — só revisão visual).
+**⚠️ Pendência de correção (multi-tenancy):** a edge function pré-existente **`admin-usuarios`** (deploy em dev E prod) insere `usuarios` **sem `org_id`** → quebra com `org_id NOT NULL`, e o GET dela lista usuários de **todas** as orgs (vazamento cross-org). **Não está wired no front atual** (nenhum `functions.invoke` em `src`), então não há incidente ativo — mas precisa ser corrigida (setar `org_id` do gerente + filtrar GET por org) antes de ser usada.
+
+- **Pendente geral:** Rollout de prod (trigger `handle_new_user` + `plano` + `super_admin` + RPCs `is_super_admin`/`admin_list_orgs` + deploy edge `admin-org-create` + SMTP + deploy front). Branch `cobraai` gera preview na Vercel (usa env de PROD — só revisão visual).
 
 ## Ambientes
 

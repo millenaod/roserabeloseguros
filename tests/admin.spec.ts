@@ -5,7 +5,9 @@ import { createClient } from '@supabase/supabase-js'
 // Painel super-admin: só quem tem a flag super_admin acessa /admin. A usuária de
 // teste do dev (millena.dutra@teste.local) está marcada como super_admin.
 
-const admin = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, {
+const url = process.env.VITE_SUPABASE_URL!
+const anonKey = process.env.VITE_SUPABASE_ANON_KEY!
+const admin = createClient(url, process.env.SUPABASE_SERVICE_KEY!, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
@@ -40,4 +42,37 @@ test('usuário sem super_admin é barrado no /admin', async ({ page }) => {
     await admin.from('usuarios').delete().eq('id', uid)
     await admin.auth.admin.deleteUser(uid)
   }
+})
+
+// --- Autorização da edge function admin-org-create (nível API, sem enviar e-mail) ---
+test('edge admin-org-create nega quem não é super-admin', async () => {
+  const email = `naoadmin.api.${Date.now()}@gmail.com`
+  const { data: rose } = await admin.from('organizacoes').select('id').eq('slug', 'rose-rabelo').single()
+  const { data: created } = await admin.auth.admin.createUser({ email, password: 'SenhaTeste123!', email_confirm: true })
+  const uid = created!.user!.id
+  await admin.from('usuarios').insert({ id: uid, nome: 'Não Admin API', perfil: 'vendedor', org_id: rose!.id })
+
+  try {
+    const cli = createClient(url, anonKey, { auth: { persistSession: false } })
+    await cli.auth.signInWithPassword({ email, password: 'SenhaTeste123!' })
+    const { error } = await cli.functions.invoke('admin-org-create', {
+      body: { nomeEmpresa: 'Não Deveria', emailDono: 'x@gmail.com' },
+    })
+    expect(error).toBeTruthy() // 403
+  } finally {
+    await admin.from('usuarios').delete().eq('id', uid)
+    await admin.auth.admin.deleteUser(uid)
+  }
+})
+
+test('edge admin-org-create: super-admin passa da autorização e valida o corpo', async () => {
+  const cli = createClient(url, anonKey, { auth: { persistSession: false } })
+  await cli.auth.signInWithPassword({ email: process.env.TEST_EMAIL!, password: process.env.TEST_PASSWORD! })
+  // Corpo inválido: passou da autorização (não é 403) e cai na validação.
+  const { error } = await cli.functions.invoke('admin-org-create', {
+    body: { nomeEmpresa: '', emailDono: 'invalido' },
+  })
+  expect(error).toBeTruthy()
+  const corpo = await (error as any).context.json()
+  expect(corpo.error).toMatch(/empresa|e-mail/i)
 })
