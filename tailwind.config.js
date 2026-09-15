@@ -54,6 +54,17 @@ export default {
           hover: '#A11000',
           tint: 'rgba(204, 21, 0, 0.09)',
         },
+        /* --- Design System CobraAI (escopo: telas de auth/cadastro + admin) --- */
+        cobra: {
+          DEFAULT: '#2563EB',
+          hover:   '#1D4ED8',
+          tint:    'rgba(37, 99, 235, 0.08)',
+          ink:     '#0F172A',
+          surface: '#F8FAFC',
+          border:  '#E2E8F0',
+          muted:   '#64748B',
+          faint:   '#94A3B8',
+        },
         semantic: {
           success: '#1A7A4A',
           warning: '#D97706',
@@ -79,6 +90,7 @@ export default {
       },
       boxShadow: {
         focus: '0 0 0 3px rgba(204, 21, 0, 0.25)',
+        'focus-cobra': '0 0 0 3px rgba(37, 99, 235, 0.25)',
       },
       fontFamily: {
         display: ['Barlow Condensed', 'sans-serif'],
