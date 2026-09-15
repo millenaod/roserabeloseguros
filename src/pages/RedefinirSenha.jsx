@@ -6,6 +6,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import CobraLogo from '@/components/CobraLogo'
+
+const inputCobra = 'border-cobra-border focus-visible:border-cobra focus-visible:shadow-focus-cobra'
+
+function CampoLabel({ children }) {
+  return (
+    <Label className="text-xs font-semibold uppercase tracking-wide text-cobra-muted">
+      {children}
+    </Label>
+  )
+}
 
 export default function RedefinirSenha() {
   const navigate = useNavigate()
@@ -41,52 +52,58 @@ export default function RedefinirSenha() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="cobra-theme min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
 
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-full bg-[var(--brand)] flex items-center justify-center">
-            <span className="font-display font-bold text-2xl text-white">R</span>
-          </div>
-          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)]">Rose Rabelo</h1>
-          <p className="text-sm text-[var(--text-secondary)]">Redefinir senha</p>
+        <div className="flex flex-col items-center gap-3">
+          <CobraLogo size={44} wordmark />
+          <p className="text-sm text-cobra-muted">Redefinir senha</p>
         </div>
 
-        <Card className="w-full border-[var(--border)]">
+        <Card className="w-full border-cobra-border shadow-sm">
           <CardContent className="p-6">
+
             {sucesso ? (
               <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <p className="text-sm font-medium text-[var(--status-paid)]">Senha redefinida com sucesso!</p>
-                <p className="text-xs text-[var(--text-secondary)]">Você será redirecionado para o login…</p>
+                <p className="text-sm font-medium text-cobra-ink">Senha redefinida com sucesso!</p>
+                <p className="text-xs text-cobra-muted">Você será redirecionado para o login…</p>
               </div>
             ) : !pronto ? (
               <div className="flex flex-col gap-3 text-center py-2">
-                <p className="text-sm text-[var(--text-secondary)]">Aguardando verificação do link…</p>
-                <p className="text-xs text-[var(--text-muted)]">Se nada acontecer, o link pode ter expirado. Solicite um novo.</p>
-                <Button variant="link" className="text-[var(--brand)]" onClick={() => navigate('/login')}>
+                <p className="text-sm text-cobra-muted">Aguardando verificação do link…</p>
+                <p className="text-xs text-cobra-faint">
+                  Se nada acontecer, o link pode ter expirado. Solicite um novo.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="text-xs text-cobra-muted hover:text-cobra transition-colors"
+                >
                   Voltar ao login
-                </Button>
+                </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Nova senha</Label>
+                  <CampoLabel>Nova senha</CampoLabel>
                   <Input
                     type="password"
                     placeholder="Mínimo 6 caracteres"
                     value={senha}
                     onChange={e => setSenha(e.target.value)}
+                    className={inputCobra}
                     autoFocus
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Confirmar senha</Label>
+                  <CampoLabel>Confirmar senha</CampoLabel>
                   <Input
                     type="password"
                     placeholder="Repita a nova senha"
                     value={confirmar}
                     onChange={e => setConfirmar(e.target.value)}
+                    className={inputCobra}
                   />
                 </div>
 
@@ -96,16 +113,12 @@ export default function RedefinirSenha() {
                   </p>
                 )}
 
-                <Button
-                  type="submit"
-                  className="w-full mt-1"
-                  disabled={salvando}
-                  variant="primary"
-                >
+                <Button type="submit" variant="cobra" className="w-full mt-1" disabled={salvando}>
                   {salvando ? 'Salvando…' : 'Salvar nova senha'}
                 </Button>
               </form>
             )}
+
           </CardContent>
         </Card>
 
