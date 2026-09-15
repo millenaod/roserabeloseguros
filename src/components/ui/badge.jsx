@@ -13,7 +13,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-semantic-danger text-white",
         outline: "text-foreground",
-        // Design System Rose Rabelo — status
+        // Design System CobraAI — status
         success: "border-transparent bg-semantic-success/10 text-semantic-success",
         warning: "border-transparent bg-semantic-warning/10 text-semantic-warning",
         danger: "border-transparent bg-semantic-danger/10 text-semantic-danger",
