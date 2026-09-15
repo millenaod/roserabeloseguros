@@ -20,7 +20,7 @@ export function useDashboardRose() {
   // Gráfico de barras: inadimplência por seguradora
   const porSeguradora = Object.values(
     emAberto.reduce((acc, p) => {
-      const nome = p.seguradora || 'Outros'
+      const nome = p.seguradora_nome || 'Outros'
       if (!acc[nome]) acc[nome] = { seguradora: nome, valor: 0, quantidade: 0 }
       acc[nome].valor      += p.valor || 0
       acc[nome].quantidade += 1

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { login } from './helpers/setup'
+import { login, criarClienteTeste, limparParcelas } from './helpers/setup'
 
 test.beforeEach(async ({ page }) => {
   await login(page)
@@ -22,6 +22,28 @@ test('DR2 — Dashboard exibe os três cards de KPI', async ({ page }) => {
 test('DR3 — Dashboard exibe a seção de inadimplência por seguradora', async ({ page }) => {
   await page.goto('/dashboard-rose')
   await expect(page.getByText('Inadimplência por seguradora')).toBeVisible()
+})
+
+test('DR5 — inadimplência agrupa pelo nome real da seguradora, não em "Outros"', async ({ page }) => {
+  // Regressão: o hook agrupava por p.seguradora (campo inexistente na view),
+  // então toda parcela caía no bucket "Outros". A view expõe seguradora_nome.
+  await limparParcelas()
+  const { seguradoraNome } = await criarClienteTeste()
+
+  try {
+    await page.goto('/dashboard-rose')
+    await expect(page.getByRole('heading', { name: 'Inadimplência por seguradora' })).toBeVisible()
+
+    // O eixo X do gráfico (tick SVG do Recharts) deve trazer o nome real da
+    // seguradora semeada. Antes do fix tudo caía no bucket genérico "Outros",
+    // então este tick não existiria.
+    await page.waitForSelector('.recharts-cartesian-axis-tick-value')
+    await expect(
+      page.locator('.recharts-cartesian-axis-tick-value', { hasText: seguradoraNome })
+    ).toBeVisible()
+  } finally {
+    await limparParcelas()
+  }
 })
 
 test('DR4 — clicar em uma parcela na lista navega para o detalhe', async ({ page }) => {
