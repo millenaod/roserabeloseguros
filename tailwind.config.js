@@ -48,11 +48,11 @@ export default {
           foreground: 'hsl(var(--card-foreground))',
         },
 
-        /* --- Design System Rose Rabelo --- */
+        /* --- Design System CobraAI --- */
         brand: {
-          primary: '#CC1500',
-          hover: '#A11000',
-          tint: 'rgba(204, 21, 0, 0.09)',
+          primary: '#2563EB',
+          hover:   '#1D4ED8',
+          tint:    'rgba(37, 99, 235, 0.08)',
         },
         /* --- Design System CobraAI (escopo: telas de auth/cadastro + admin) --- */
         cobra: {
@@ -89,7 +89,7 @@ export default {
         card: '12px',
       },
       boxShadow: {
-        focus: '0 0 0 3px rgba(204, 21, 0, 0.25)',
+        focus: '0 0 0 3px rgba(37, 99, 235, 0.25)',
         'focus-cobra': '0 0 0 3px rgba(37, 99, 235, 0.25)',
       },
       fontFamily: {
