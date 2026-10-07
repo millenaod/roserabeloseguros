@@ -2,6 +2,7 @@ import { TableRow, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import StatusBadge from '@/components/StatusBadge'
+import AlertaFalhaEntrega from '@/components/AlertaFalhaEntrega'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { linkWhatsApp } from '@/utils/whatsapp'
 import { CheckCircle, CalendarClock, ArrowUpCircle, Eye, MessageCircle, Send } from 'lucide-react'
@@ -24,7 +25,12 @@ export default function ParcelaRow({ parcela, onPagar, onRemarcar, onEscalar, on
         <TableCell money className={status === 'pago' ? 'text-semantic-success' : status === 'erro' ? 'text-brand-primary' : ''}>{formatarMoeda(valor)}</TableCell>
         <TableCell className="text-[var(--text-secondary)]">{formatarData(data_vencimento)}</TableCell>
         <TableCell className="text-[var(--text-secondary)] text-center">{total_contatos ?? 0}</TableCell>
-        <TableCell><StatusBadge status={status} /></TableCell>
+        <TableCell>
+          <div className="flex flex-wrap items-center gap-1">
+            <StatusBadge status={status} />
+            <AlertaFalhaEntrega parcela={parcela} />
+          </div>
+        </TableCell>
         <TableCell>
           <div className="flex items-center gap-0.5">
             {onCobrar && (

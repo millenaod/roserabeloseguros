@@ -1,6 +1,7 @@
 import { formatarData } from '@/utils/format'
 import { cn } from '@/lib/utils'
-import { MessageCircle, ArrowUpCircle, FileText, AlertCircle } from 'lucide-react'
+import { entregaWhatsApp } from '@/utils/whatsapp'
+import { MessageCircle, ArrowUpCircle, FileText, AlertCircle, Check, CheckCheck } from 'lucide-react'
 
 const icones = {
   mensagem:   MessageCircle,
@@ -45,6 +46,32 @@ function parsearContato(contato) {
   return { tipo: contato.tipo, titulo: msg || contato.tipo, detalhe: null }
 }
 
+// Selo de entrega no estilo do WhatsApp: ✓ enviada, ✓✓ entregue, ✓✓ azul lida.
+const selosEntrega = {
+  enviado:  { Icone: Check,       classe: 'text-[var(--text-muted)]' },
+  entregue: { Icone: CheckCheck,  classe: 'text-[var(--text-secondary)]' },
+  lido:     { Icone: CheckCheck,  classe: 'text-[var(--status-sent)]' },
+  falhou:   { Icone: AlertCircle, classe: 'text-[var(--status-error)]' },
+}
+
+function SeloEntrega({ entrega }) {
+  const { Icone, classe } = selosEntrega[entrega.status]
+  return (
+    <div className="mt-1" data-testid="selo-entrega" data-status={entrega.status}>
+      <p className={cn('inline-flex items-center gap-1 text-xs font-medium', classe)}>
+        <Icone className="w-3.5 h-3.5" aria-hidden />
+        {entrega.rotulo}
+        {entrega.atualizadoEm && entrega.status !== 'enviado' && (
+          <span className="font-normal text-[var(--text-muted)]"> às {formatarHora(entrega.atualizadoEm)}</span>
+        )}
+      </p>
+      {entrega.motivo && (
+        <p className="text-xs text-[var(--status-error)] mt-0.5 break-words">{entrega.motivo}</p>
+      )}
+    </div>
+  )
+}
+
 function formatarHora(dataHora) {
   if (!dataHora) return null
   const d = typeof dataHora === 'string' ? new Date(dataHora) : dataHora
@@ -64,6 +91,7 @@ export default function TimelineContatos({ contatos = [] }) {
     <ol className="flex flex-col gap-0">
       {contatos.map((contato, i) => {
         const { tipo, titulo, detalhe } = parsearContato(contato)
+        const entrega = entregaWhatsApp(contato)
         const Icone = icones[tipo] ?? MessageCircle
         const corClasse = cores[tipo] ?? cores.observacao
         const isUltimo = i === contatos.length - 1
@@ -93,6 +121,7 @@ export default function TimelineContatos({ contatos = [] }) {
                 {formatarData(contato.enviado_em)}
                 {contato.enviado_em && <> às {formatarHora(contato.enviado_em)}</>}
               </p>
+              {entrega && <SeloEntrega entrega={entrega} />}
               {contato.respondido && (
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
                   {contato.respondido_em
