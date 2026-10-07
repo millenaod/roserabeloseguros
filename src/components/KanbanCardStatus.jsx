@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useNavigate } from 'react-router-dom'
 import { formatarMoeda, formatarDataCurta } from '@/utils/format'
 import { cn } from '@/lib/utils'
+import AlertaFalhaEntrega from '@/components/AlertaFalhaEntrega'
 import { Send } from 'lucide-react'
 
 export default function KanbanCardStatus({ parcela, onCobrar }) {
@@ -46,6 +47,7 @@ export default function KanbanCardStatus({ parcela, onCobrar }) {
           {parcela.dias_atraso}d em atraso
         </span>
       )}
+      <AlertaFalhaEntrega parcela={parcela} className="self-start" />
       {onCobrar && (
         <button
           onPointerDown={e => e.stopPropagation()}

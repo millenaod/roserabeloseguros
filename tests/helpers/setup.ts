@@ -58,11 +58,15 @@ export async function getOrgId(slug = 'rose-rabelo') {
   return data!.id as string
 }
 
-export async function criarClienteTeste(orgId?: string) {
+export async function criarClienteTeste(
+  orgId?: string,
+  dados: { nome?: string; telefone?: string; cpf_cnpj?: string; numero_apolice?: string } = {},
+) {
   const org = orgId ?? (await getOrgId())
+  const { numero_apolice = 'TEST-AUTO-001', ...dadosCliente } = dados
   const { data: cliente } = await supabase
     .from('clientes')
-    .insert({ nome: 'João da Silva Teste', telefone: '5511999990001', cpf_cnpj: '529.982.247-25', org_id: org })
+    .insert({ nome: 'João da Silva Teste', telefone: '5511999990001', cpf_cnpj: '529.982.247-25', ...dadosCliente, org_id: org })
     .select('id')
     .single()
 
@@ -75,7 +79,7 @@ export async function criarClienteTeste(orgId?: string) {
 
   const { data: apolice } = await supabase
     .from('apolices')
-    .insert({ cliente_id: cliente!.id, seguradora_id: seg!.id, numero_apolice: 'TEST-AUTO-001' })
+    .insert({ cliente_id: cliente!.id, seguradora_id: seg!.id, numero_apolice })
     .select('id')
     .single()
 
@@ -92,4 +96,26 @@ export async function criarClienteTeste(orgId?: string) {
     .single()
 
   return { clienteId: cliente!.id, parcelaId: parcela!.id, seguradoraNome: seg!.nome as string }
+}
+
+// Simula um envio de WhatsApp gravado pelo n8n, já com o status que o webhook
+// de entrega da Meta teria registrado (enviado/entregue/lido/falhou).
+export async function registrarEnvioWhatsAppTeste(
+  parcelaId: string,
+  clienteId: string,
+  campos: { status_envio: string; erro_entrega?: string; enviado_em?: string; status_atualizado_em?: string },
+) {
+  const org = await getOrgId()
+  const { error } = await supabase.from('contatos').insert({
+    parcela_id: parcelaId,
+    cliente_id: clienteId,
+    org_id: org,
+    canal: 'whatsapp',
+    tipo: 'whatsapp',
+    mensagem_enviada: 'Cobrança de boleto',
+    wa_message_id: `wamid.TESTE-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    enviado_em: campos.enviado_em ?? new Date().toISOString(),
+    ...campos,
+  })
+  if (error) throw error
 }
