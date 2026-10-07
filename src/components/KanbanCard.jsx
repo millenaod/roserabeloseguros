@@ -5,6 +5,7 @@ import { ShieldAlert, Crown, MessageCircle } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import TimelineContatos from '@/components/TimelineContatos'
+import AlertaFalhaEntrega from '@/components/AlertaFalhaEntrega'
 import { formatarMoeda, formatarData } from '@/utils/format'
 import { cn } from '@/lib/utils'
 
@@ -79,6 +80,8 @@ export default function KanbanCard({ parcela, onBuscarContatos }) {
             {parcela.dias_atraso ?? 0}d
           </span>
         </div>
+
+        <AlertaFalhaEntrega parcela={parcela} className="self-start" />
 
         {/* Linha 4: contatos + botão histórico */}
         <div className="flex items-center justify-between pt-0.5 border-t border-[var(--border)]">

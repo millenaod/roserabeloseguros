@@ -22,6 +22,8 @@ export function useDetalheParcela(id) {
       return data ?? []
     },
     enabled: !!id,
+    // O status de entrega (entregue/lida/falhou) chega da Meta segundos depois do envio.
+    refetchInterval: 30_000,
   })
 
   const { mutateAsync: executarAcao, isPending: executando } = useMutation({

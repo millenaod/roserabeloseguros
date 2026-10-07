@@ -1,6 +1,6 @@
 # STATE — Rose Rabelo Seguros
 
-_Atualizado: 2026-09-15_
+_Atualizado: 2026-10-06_
 
 ## Status atual
 
@@ -47,6 +47,22 @@ Branch principal: `main` · Deploy automático via Vercel
 | 2026-07-07 | Order by em contatos corrigido (`data_contato` → `enviado_em`) |
 | 2026-07-07 | Fix excluir parcela/cliente + testes e2e |
 | 2026-09-14 | Dashboard "Inadimplência por seguradora" agrupava por `p.seguradora` (campo inexistente na view) → tudo caía em "Outros". Corrigido para `p.seguradora_nome`. Teste de regressão DR5 em `dashboard.spec.ts`. |
+
+## Tarefas do dia — busca e filtros (2026-10-07)
+
+- Campo de busca (nome sem acento, CPF, telefone, seguradora) + filtros rápidos com contagem: Todas · Cobertura em risco · Nunca contatadas · Não entregue. Estado na URL (`?q=`, `?filtro=`). Lógica em `hooks/useFiltroTarefas.js`.
+- Card mostra alerta "Não entregue" quando a última mensagem falhou.
+- Testes TA10–TA15 em `tarefas.spec.ts` + M9 no mobile. `criarClienteTeste` aceita dados/numero_apolice para criar mais de um cliente.
+- Obs.: `carteira.spec.ts` C1–C3 já falhavam antes (strict mode / seletores ambíguos) — pendente.
+
+## Rastreio de entrega do WhatsApp (2026-10-06 — aplicado no DEV)
+
+Motivo: cliente relatou não receber a cobrança. A Meta respondia `accepted`, mas ninguém capturava o status real.
+- Migration `supabase/migrations/20261006_contatos_status_entrega.sql`: `contatos.wa_message_id`, `erro_entrega`, `status_atualizado_em` + `v_parcelas_ui.ultimo_status_envio/ultimo_erro_entrega`.
+- Front: selo ✓ Enviada / ✓✓ Entregue / ✓✓ Lida / ⚠ Não entregue (com motivo traduzido) na timeline (`TimelineContatos`); alerta "Não entregue" na tabela e nos dois kanbans (`AlertaFalhaEntrega`). Códigos da Meta traduzidos em `utils/whatsapp.js` (`motivoFalhaEntrega`).
+- Testes: `tests/entrega.spec.ts` (E1–E5) + `M8` em `mobile.spec.ts`.
+- **Produção (2026-10-07):** migration aplicada na Rose; Fluxo 1 grava `wa_message_id` (backup do fluxo antigo no scratchpad da sessão); fluxo n8n `rUEgVAaCfyNHr1W6` "Status de entrega WhatsApp (Meta)" ativo em `/webhook/whatsapp-status`; "Conferir Situacao GTchat" desativado.
+- **Pendente:** o webhook do número na Meta aponta para o GTchat (`api.gtchat.com.br`). Os status só chegam quando ele for apontado para o n8n (override no número). Isso corta o GTchat, então depende de decisão.
 
 ## Segurança (RLS / Supabase)
 

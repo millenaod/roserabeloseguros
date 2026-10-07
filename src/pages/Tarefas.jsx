@@ -5,14 +5,18 @@ import { parcelasParaRevisar, solicitarNovaCobranca, atualizarStatus, atualizarB
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import StatusBadge from '@/components/StatusBadge'
 import EmptyState from '@/components/EmptyState'
+import AlertaFalhaEntrega from '@/components/AlertaFalhaEntrega'
+import { useFiltroTarefas, FILTROS_TAREFAS } from '@/hooks/useFiltroTarefas'
+import { cn } from '@/lib/utils'
 import { formatarMoeda } from '@/utils/format'
 import { linkWhatsApp } from '@/utils/whatsapp'
-import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle, Archive, Paperclip } from 'lucide-react'
+import { Send, Check, ArrowUpRight, AlertTriangle, CheckCircle2, MessageCircle, Archive, Paperclip, Search, X, SearchX } from 'lucide-react'
 
 function tempoDesde(iso) {
   if (!iso) return 'nunca contatado'
@@ -34,6 +38,8 @@ export default function Tarefas() {
     queryKey: ['parcelas-revisar'],
     queryFn: () => parcelasParaRevisar().then(r => r.data),
   })
+
+  const { busca, setBusca, filtro, setFiltro, limpar, temFiltro, filtradas, contagens } = useFiltroTarefas(parcelas)
 
   function recarregar() {
     queryClient.invalidateQueries({ queryKey: ['parcelas-revisar'] })
@@ -82,12 +88,76 @@ export default function Tarefas() {
       </div>
 
       <div className="px-4 md:px-6 py-6 flex flex-col gap-3 max-w-3xl">
+        {!isLoading && parcelas.length > 0 && (
+          <div className="flex flex-col gap-2.5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
+              <Input
+                type="search"
+                className="pl-9 pr-9"
+                placeholder="Buscar por cliente, CPF, telefone ou seguradora…"
+                aria-label="Buscar nas tarefas"
+                value={busca}
+                onChange={e => setBusca(e.target.value)}
+              />
+              {busca && (
+                <button
+                  type="button"
+                  aria-label="Limpar busca"
+                  onClick={() => setBusca('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Filtros rápidos — rolam na horizontal no celular */}
+            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-0.5" role="group" aria-label="Filtros rápidos">
+              {FILTROS_TAREFAS.map(f => {
+                const ativo = filtro === f.value
+                return (
+                  <button
+                    key={f.value || 'todas'}
+                    type="button"
+                    aria-pressed={ativo}
+                    onClick={() => setFiltro(f.value)}
+                    className={cn(
+                      'shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full border text-xs font-medium transition-colors',
+                      ativo
+                        ? 'bg-[var(--brand)] border-[var(--brand)] text-white'
+                        : 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
+                    )}
+                  >
+                    {f.label}
+                    <span className={cn('tabular-nums', ativo ? 'text-white/80' : 'text-[var(--text-muted)]')}>{contagens[f.value]}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {temFiltro && (
+              <p className="text-xs text-[var(--text-muted)]" aria-live="polite">
+                {filtradas.length} de {parcelas.length} parcela{parcelas.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+        )}
+
         {isLoading ? (
           [...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
         ) : parcelas.length === 0 ? (
           <EmptyState icone={CheckCircle2} titulo="Tudo em dia! 🎉" descricao="Nenhuma parcela precisa de ação agora." />
+        ) : filtradas.length === 0 ? (
+          <EmptyState
+            icone={SearchX}
+            titulo="Nenhuma parcela encontrada"
+            descricao={busca ? `Nada corresponde a “${busca}” neste filtro.` : 'Nenhuma parcela neste filtro.'}
+            acaoLabel="Limpar busca e filtros"
+            onAcao={limpar}
+          />
         ) : (
-          parcelas.map(p => {
+          filtradas.map(p => {
             const ocupado = processando === p.parcela_id
             return (
               <Card key={p.parcela_id} className={`border-[var(--border)] ${p.cobertura_em_risco ? 'border-l-4 border-l-[var(--status-error)]' : ''}`}>
@@ -114,6 +184,7 @@ export default function Tarefas() {
                     )}
                     {(p.dias_atraso ?? 0) > 0 && <span className="text-[var(--text-secondary)]">{p.dias_atraso} dias de atraso</span>}
                     <span className="text-[var(--text-muted)]">· {p.total_contatos ?? 0} contato(s) · {tempoDesde(p.ultimo_contato_em)}</span>
+                    <AlertaFalhaEntrega parcela={p} />
                   </div>
 
                   <div className="flex gap-2 flex-wrap">
